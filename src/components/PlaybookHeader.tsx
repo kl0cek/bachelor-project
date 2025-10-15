@@ -3,7 +3,7 @@ import { Button } from './ui/Button';
 
 export const PlaybookHeader = () => {
   return (
-    <header className="border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm">
+    <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 shadow-sm">
       <div className="container mx-auto px-6 py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-8">
@@ -15,10 +15,10 @@ export const PlaybookHeader = () => {
                 <Satellite className="h-6 w-6 text-space-600 dark:text-space-400" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100">
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
                   ISS Mission Playbook
                 </h1>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
                   Analog Mission Communication Platform
                 </p>
               </div>

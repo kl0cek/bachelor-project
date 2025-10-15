@@ -13,7 +13,7 @@ export const ActivityModal = ({ activity, onClose }: ActivityModalProps) => {
   const priorityColors: Record<Priority, string> = {
     high: 'bg-orange-500 text-white shadow-orange',
     medium: 'bg-space-600 text-white shadow-space',
-    low: 'bg-neutral-400 text-white dark:bg-neutral-600',
+    low: 'bg-slate-400 text-white dark:bg-slate-600',
   };
 
   const typeLabels: Record<ActivityType, string> = {
@@ -31,11 +31,11 @@ export const ActivityModal = ({ activity, onClose }: ActivityModalProps) => {
         <DialogHeader>
           <div className="flex items-start justify-between gap-6">
             <div className="flex-1">
-              <DialogTitle className="text-3xl font-bold mb-3 text-neutral-900 dark:text-neutral-100">
+              <DialogTitle className="text-3xl font-bold mb-3 text-slate-900 dark:text-slate-100">
                 {activity.name}
               </DialogTitle>
               {activity.mission && (
-                <p className="text-base text-neutral-600 dark:text-neutral-400 font-medium">
+                <p className="text-base text-slate-600 dark:text-slate-400 font-medium">
                   {activity.mission}
                 </p>
               )}
@@ -53,8 +53,8 @@ export const ActivityModal = ({ activity, onClose }: ActivityModalProps) => {
         <div className="space-y-8 pt-6">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-3 text-base">
-              <Clock className="h-5 w-5 text-neutral-500 dark:text-neutral-400" />
-              <span className="text-neutral-900 dark:text-neutral-100 font-semibold">
+              <Clock className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+              <span className="text-slate-900 dark:text-slate-100 font-semibold">
                 {startTime} - {endTime} GMT
               </span>
             </div>
@@ -66,12 +66,12 @@ export const ActivityModal = ({ activity, onClose }: ActivityModalProps) => {
           {activity.description && (
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <AlertCircle className="h-5 w-5 text-neutral-500 dark:text-neutral-400" />
-                <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                <AlertCircle className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                   Description
                 </h3>
               </div>
-              <p className="text-base text-neutral-700 dark:text-neutral-300 leading-relaxed pl-8">
+              <p className="text-base text-slate-700 dark:text-slate-300 leading-relaxed pl-8">
                 {activity.description}
               </p>
             </div>
@@ -80,8 +80,8 @@ export const ActivityModal = ({ activity, onClose }: ActivityModalProps) => {
           {activity.equipment && activity.equipment.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <Wrench className="h-5 w-5 text-neutral-500 dark:text-neutral-400" />
-                <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+                <Wrench className="h-5 w-5 text-slate-500 dark:text-slate-400" />
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                   Equipment Required
                 </h3>
               </div>
@@ -95,17 +95,15 @@ export const ActivityModal = ({ activity, onClose }: ActivityModalProps) => {
             </div>
           )}
 
-          <div className="pt-6 border-t border-neutral-200 dark:border-neutral-800">
+          <div className="pt-6 border-t border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-neutral-600 dark:text-neutral-400">
+              <p className="text-sm text-slate-600 dark:text-slate-400">
                 Duration:{' '}
-                <span className="text-neutral-900 dark:text-neutral-100 font-semibold">
+                <span className="text-slate-900 dark:text-slate-100 font-semibold">
                   {activity.duration} hours
                 </span>
               </p>
-              <div className="text-xs text-neutral-500 dark:text-neutral-500">
-                ID: {activity.id}
-              </div>
+              <div className="text-xs text-slate-500 dark:text-slate-500">ID: {activity.id}</div>
             </div>
           </div>
         </div>

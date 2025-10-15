@@ -4,9 +4,9 @@ import { ActivityLegend } from './components/ActivityLegend';
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-space-950">
+    <div className="min-h-screen bg-slate-800">
       <PlaybookHeader />
-      <main className="container mx-auto px-6 py-8 bg-slate-600">
+      <main className="container mx-auto px-6 py-8">
         <TimelineView />
         <ActivityLegend />
       </main>

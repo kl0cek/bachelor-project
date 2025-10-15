@@ -10,9 +10,9 @@ export function Button({
   const variants = {
     default: 'bg-space-600 text-white hover:bg-space-700 shadow-space focus:ring-space-500',
     ghost:
-      'bg-transparent hover:bg-neutral-100 text-neutral-700 dark:hover:bg-neutral-800 dark:text-neutral-300',
+      'bg-transparent hover:bg-slate-100 text-slate-700 dark:hover:bg-slate-800 dark:text-slate-300',
     outline:
-      'border border-neutral-300 bg-transparent hover:bg-neutral-50 text-neutral-700 dark:border-neutral-700 dark:hover:bg-neutral-900 dark:text-neutral-300',
+      'border border-slate-300 bg-transparent hover:bg-slate-50 text-slate-700 dark:border-slate-700 dark:hover:bg-slate-900 dark:text-slate-300',
   };
 
   const sizes = {

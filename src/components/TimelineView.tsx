@@ -9,12 +9,12 @@ const hours = Array.from({ length: 8 }, (_, i) => i + 6);
 
 const activityColors: Record<ActivityType, string> = {
   exercise: 'bg-space-600 text-white shadow-space border-space-700',
-  meal: 'bg-neutral-400 text-white dark:bg-neutral-600 border-neutral-500',
-  sleep: 'bg-neutral-400 text-white dark:bg-neutral-600 border-neutral-500',
+  meal: 'bg-slate-400 text-white dark:bg-slate-600 border-slate-500',
+  sleep: 'bg-slate-400 text-white dark:bg-slate-600 border-slate-500',
   work: 'bg-space-600 text-white shadow-space border-space-700',
   eva: 'bg-orange-500 text-white shadow-orange border-orange-600',
   optional:
-    'bg-neutral-200 text-neutral-800 border-neutral-300 dark:bg-neutral-800 dark:text-neutral-200 dark:border-neutral-700',
+    'bg-slate-200 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700',
 };
 
 export const TimelineView = () => {
@@ -25,9 +25,9 @@ export const TimelineView = () => {
       <Card className="overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <div className="min-w-[900px] lg:min-w-0">
-            <div className="flex border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900/50">
+            <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
               <div className="w-32 md:w-40 shrink-0 px-6 py-6">
-                <p className="text-sm font-bold text-neutral-700 dark:text-neutral-300 uppercase tracking-wide">
+                <p className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
                   Crew Member
                 </p>
               </div>
@@ -35,12 +35,12 @@ export const TimelineView = () => {
                 {hours.map((hour) => (
                   <div
                     key={hour}
-                    className="flex-1 border-l border-neutral-200 dark:border-neutral-800 px-4 py-6 text-center"
+                    className="flex-1 border-l border-slate-200 dark:border-slate-800 px-4 py-6 text-center"
                   >
-                    <p className="text-sm font-bold text-neutral-900 dark:text-neutral-100">
+                    <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
                       {hour.toString().padStart(2, '0')}:00
                     </p>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">GMT</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">GMT</p>
                   </div>
                 ))}
               </div>
@@ -50,18 +50,16 @@ export const TimelineView = () => {
               <div
                 key={member.id}
                 className={cn(
-                  'flex border-b border-neutral-200 dark:border-neutral-800 transition-colors hover:bg-neutral-25 dark:hover:bg-neutral-900/30',
-                  idx % 2 === 0
-                    ? 'bg-white dark:bg-neutral-900'
-                    : 'bg-neutral-25 dark:bg-neutral-900/20'
+                  'flex border-b border-slate-200 dark:border-slate-800 transition-colors hover:bg-slate-25 dark:hover:bg-slate-900/30',
+                  idx % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-25 dark:bg-slate-900/20'
                 )}
               >
                 <div className="w-32 md:w-40 shrink-0 px-6 py-10 flex items-center">
                   <div>
-                    <p className="text-sm font-bold text-neutral-900 dark:text-neutral-100">
+                    <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
                       {member.name}
                     </p>
-                    <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                       Flight Engineer
                     </p>
                   </div>
@@ -70,7 +68,7 @@ export const TimelineView = () => {
                   {hours.map((hour) => (
                     <div
                       key={hour}
-                      className="flex-1 border-l border-neutral-200 dark:border-neutral-800"
+                      className="flex-1 border-l border-slate-200 dark:border-slate-800"
                     />
                   ))}
                   {member.activities.map((activity) => {

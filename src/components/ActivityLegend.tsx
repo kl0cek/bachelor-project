@@ -7,21 +7,19 @@ export const ActivityLegend = () => {
     { name: 'Work / Research', color: 'bg-space-600' },
     {
       name: 'Optional',
-      color: 'bg-neutral-200 border border-neutral-300 dark:bg-neutral-800 dark:border-neutral-700',
+      color: 'bg-slate-200 border border-slate-300 dark:bg-slate-800 dark:border-slate-700',
     },
-    { name: 'Sleep / Meal', color: 'bg-neutral-400 dark:bg-neutral-600' },
+    { name: 'Sleep / Meal', color: 'bg-slate-400 dark:bg-slate-600' },
   ];
 
   return (
-    <div className="mt-8 p-6 rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-lg">
+    <div className="mt-8 p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-lg">
       <div className="flex flex-wrap items-center gap-6">
-        <p className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">
-          Activity Types:
-        </p>
+        <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Activity Types:</p>
         {categories.map((category) => (
           <div key={category.name} className="flex items-center gap-3">
             <div className={`h-4 w-4 rounded-full shadow-sm ${category.color}`} />
-            <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">
+            <span className="text-sm font-medium text-slate-800 dark:text-slate-200">
               {category.name}
             </span>
           </div>
