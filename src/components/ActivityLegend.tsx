@@ -1,12 +1,15 @@
-import type { ActivityCategory } from "../types/types";
+import type { ActivityCategory } from '../types/types';
 
 export const ActivityLegend = () => {
   const categories: ActivityCategory[] = [
-    { name: "Exercise", color: "bg-space-600" },
-    { name: "EVA / Spacewalk", color: "bg-orange-500" },
-    { name: "Work / Research", color: "bg-space-600" },
-    { name: "Optional", color: "bg-neutral-200 border border-neutral-300 dark:bg-neutral-800 dark:border-neutral-700" },
-    { name: "Sleep / Meal", color: "bg-neutral-400 dark:bg-neutral-600" },
+    { name: 'Exercise', color: 'bg-space-600' },
+    { name: 'EVA / Spacewalk', color: 'bg-orange-500' },
+    { name: 'Work / Research', color: 'bg-space-600' },
+    {
+      name: 'Optional',
+      color: 'bg-neutral-200 border border-neutral-300 dark:bg-neutral-800 dark:border-neutral-700',
+    },
+    { name: 'Sleep / Meal', color: 'bg-neutral-400 dark:bg-neutral-600' },
   ];
 
   return (

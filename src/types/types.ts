@@ -3,11 +3,11 @@ export interface Activity {
   name: string;
   start: number;
   duration: number;
-  type: "exercise" | "meal" | "sleep" | "work" | "eva" | "optional";
+  type: 'exercise' | 'meal' | 'sleep' | 'work' | 'eva' | 'optional';
   mission?: string;
   description?: string;
   equipment?: string[];
-  priority?: "high" | "medium" | "low";
+  priority?: 'high' | 'medium' | 'low';
 }
 
 export interface CrewMember {
@@ -22,7 +22,7 @@ export interface ActivityCategory {
 }
 
 export type ActivityType = Activity['type'];
-export type Priority = Activity["priority"];
+export type Priority = Activity['priority'];
 
 export interface ActivityModalProps {
   activity: Activity | null;

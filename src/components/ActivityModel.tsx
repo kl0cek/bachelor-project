@@ -1,8 +1,8 @@
-import { Clock, AlertCircle, Wrench } from "lucide-react";
-import { Badge } from "./ui/Badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/Dialog";
-import { cn, formatTime } from "../utils";
-import type { ActivityModalProps, Priority, ActivityType } from "../types/types";
+import { Clock, AlertCircle, Wrench } from 'lucide-react';
+import { Badge } from './ui/Badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/Dialog';
+import { cn, formatTime } from '../utils';
+import type { ActivityModalProps, Priority, ActivityType } from '../types/types';
 
 export const ActivityModal = ({ activity, onClose }: ActivityModalProps) => {
   if (!activity) return null;
@@ -11,18 +11,18 @@ export const ActivityModal = ({ activity, onClose }: ActivityModalProps) => {
   const endTime = formatTime(activity.start + activity.duration);
 
   const priorityColors: Record<Priority, string> = {
-    high: "bg-orange-500 text-white shadow-orange",
-    medium: "bg-space-600 text-white shadow-space",
-    low: "bg-neutral-400 text-white dark:bg-neutral-600",
+    high: 'bg-orange-500 text-white shadow-orange',
+    medium: 'bg-space-600 text-white shadow-space',
+    low: 'bg-neutral-400 text-white dark:bg-neutral-600',
   };
 
   const typeLabels: Record<ActivityType, string> = {
-    exercise: "Exercise",
-    meal: "Meal",
-    sleep: "Sleep",
-    work: "Work",
-    eva: "EVA",
-    optional: "Optional",
+    exercise: 'Exercise',
+    meal: 'Meal',
+    sleep: 'Sleep',
+    work: 'Work',
+    eva: 'EVA',
+    optional: 'Optional',
   };
 
   return (
@@ -41,7 +41,9 @@ export const ActivityModal = ({ activity, onClose }: ActivityModalProps) => {
               )}
             </div>
             {activity.priority && (
-              <Badge className={cn("shrink-0 text-sm px-4 py-2", priorityColors[activity.priority])}>
+              <Badge
+                className={cn('shrink-0 text-sm px-4 py-2', priorityColors[activity.priority])}
+              >
                 {activity.priority.toUpperCase()}
               </Badge>
             )}
@@ -96,7 +98,7 @@ export const ActivityModal = ({ activity, onClose }: ActivityModalProps) => {
           <div className="pt-6 border-t border-neutral-200 dark:border-neutral-800">
             <div className="flex items-center justify-between">
               <p className="text-sm text-neutral-600 dark:text-neutral-400">
-                Duration:{" "}
+                Duration:{' '}
                 <span className="text-neutral-900 dark:text-neutral-100 font-semibold">
                   {activity.duration} hours
                 </span>

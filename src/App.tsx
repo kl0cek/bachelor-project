@@ -1,6 +1,6 @@
-import { PlaybookHeader } from "./components/PlaybookHeader";
-import { TimelineView } from "./components/TimelineView";
-import { ActivityLegend } from "./components/ActivityLegend";
+import { PlaybookHeader } from './components/PlaybookHeader';
+import { TimelineView } from './components/TimelineView';
+import { ActivityLegend } from './components/ActivityLegend';
 
 export default function App() {
   return (
