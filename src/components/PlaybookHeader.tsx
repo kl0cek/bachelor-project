@@ -1,5 +1,6 @@
-import { Menu, Satellite } from 'lucide-react';
-import { Button } from './ui/Button';
+import { Menu, Satellite } from "lucide-react";
+import { Button } from "./ui/Button";
+import { ISSStatus } from "./ISSStatus";
 
 export const PlaybookHeader = () => {
   return (
@@ -25,7 +26,21 @@ export const PlaybookHeader = () => {
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800">
+            <div className="hidden lg:block">
+              <ISSStatus />
+            </div>
+            <div className="hidden md:flex lg:hidden items-center gap-2 px-4 py-2 rounded-xl bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800">
+              <div className="h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
+              <span className="text-sm font-medium text-orange-700 dark:text-orange-300">
+                Mission Active
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="lg:hidden mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <ISSStatus />
+            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800">
               <div className="h-2 w-2 rounded-full bg-orange-500 animate-pulse" />
               <span className="text-sm font-medium text-orange-700 dark:text-orange-300">
                 Mission Active

@@ -1,7 +1,7 @@
 import { Clock, AlertCircle, Wrench } from 'lucide-react';
 import { Badge } from './ui/Badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/Dialog';
-import { cn, formatTime } from '../utils';
+import { cn, formatTime } from '../utils/utils';
 import type { ActivityModalProps, Priority, ActivityType } from '../types/types';
 
 export const ActivityModal = ({ activity, onClose }: ActivityModalProps) => {

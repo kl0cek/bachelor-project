@@ -1,4 +1,4 @@
-import { cn } from '../../utils';
+import { cn } from '../../utils/utils';
 import type { CardProps } from '../../types/types';
 
 export function Card({ className, children, ...props }: CardProps) {

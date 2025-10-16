@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Card } from './ui/Card';
-import { cn, calculateActivityPosition } from '../utils';
+import { cn, calculateActivityPosition } from '../utils/utils';
 import { ActivityModal } from './ActivityModel';
 import type { Activity, ActivityType } from '../types/types';
 import { crewMembers } from '../mock/data';
