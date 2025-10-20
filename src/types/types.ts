@@ -49,6 +49,7 @@ export type Priority = Activity['priority'];
 export interface ActivityModalProps {
   activity: Activity | null;
   onClose: () => void;
+  onEdit: (activity: Activity) => void;
 }
 
 export interface BadgeProps {

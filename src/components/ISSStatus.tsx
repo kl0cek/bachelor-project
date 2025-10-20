@@ -1,7 +1,6 @@
-import { Satellite, Clock, AlertCircle } from "lucide-react";
-import { useISS } from "../hooks/useISS";
-import { getDayOfYear, formatDate, getVisibilityIcon, getVisibilityText } from "../utils/date";
-import { cn } from "../utils/utils";
+import { Satellite, Clock, AlertCircle } from 'lucide-react';
+import { useISS } from '../hooks/useISS';
+import { getDayOfYear, formatDate, getVisibilityIcon, getVisibilityText, cn } from '../utils/utils';
 
 export const ISSStatus = () => {
   const { data, loading, error } = useISS(30000);
@@ -35,9 +34,10 @@ export const ISSStatus = () => {
     );
   }
 
-  const visibilityColor = data?.visibility === 'daylight' 
-    ? 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300'
-    : 'bg-purple-50 dark:bg-purple-950 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300';
+  const visibilityColor =
+    data?.visibility === 'daylight'
+      ? 'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300'
+      : 'bg-purple-50 dark:bg-purple-950 border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300';
 
   return (
     <div className="flex items-center gap-4">
@@ -52,23 +52,16 @@ export const ISSStatus = () => {
           </span>
         </div>
       </div>
-      
+
       {data && (
-        <div className={cn(
-          "flex items-center gap-3 px-4 py-2 rounded-xl border",
-          visibilityColor
-        )}>
+        <div className={cn('flex items-center gap-3 px-4 py-2 rounded-xl border', visibilityColor)}>
           <div className="flex items-center gap-2">
             <span className="text-sm">{getVisibilityIcon(data.visibility)}</span>
             <Satellite className="h-4 w-4" />
           </div>
           <div className="flex flex-col">
-            <span className="text-xs font-medium">
-              ISS {getVisibilityText(data.visibility)}
-            </span>
-            <span className="text-xs opacity-80">
-              Alt: {Math.round(data.altitude)}km
-            </span>
+            <span className="text-xs font-medium">ISS {getVisibilityText(data.visibility)}</span>
+            <span className="text-xs opacity-80">Alt: {Math.round(data.altitude)}km</span>
           </div>
         </div>
       )}

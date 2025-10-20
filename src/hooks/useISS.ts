@@ -1,26 +1,5 @@
 import { useState, useEffect } from 'react';
-
-export interface ISSData {
-  name: string;
-  id: number;
-  latitude: number;
-  longitude: number;
-  altitude: number;
-  velocity: number;
-  visibility: string;
-  footprint: number;
-  timestamp: number;
-  daynum: number;
-  solar_lat: number;
-  solar_lon: number;
-  units: string;
-}
-
-export interface ISSState {
-  data: ISSData | null;
-  loading: boolean;
-  error: string | null;
-}
+import type { ISSData, ISSState } from '../types/types';
 
 export const useISS = (refreshInterval: number = 10000) => {
   const [state, setState] = useState<ISSState>({
@@ -31,16 +10,16 @@ export const useISS = (refreshInterval: number = 10000) => {
 
   const fetchISSData = async () => {
     try {
-      setState(prev => ({ ...prev, loading: true, error: null }));
-      
+      setState((prev) => ({ ...prev, loading: true, error: null }));
+
       const response = await fetch('https://api.wheretheiss.at/v1/satellites/25544');
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data: ISSData = await response.json();
-      
+
       setState({
         data,
         loading: false,
@@ -57,9 +36,9 @@ export const useISS = (refreshInterval: number = 10000) => {
 
   useEffect(() => {
     fetchISSData();
-    
+
     const interval = setInterval(fetchISSData, refreshInterval);
-    
+
     return () => clearInterval(interval);
   }, [refreshInterval]);
 

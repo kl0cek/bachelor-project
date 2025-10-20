@@ -1,10 +1,17 @@
-import { Clock, AlertCircle, Wrench } from 'lucide-react';
+import { Clock, AlertCircle, Wrench, Edit3 } from 'lucide-react';
 import { Badge } from './ui/Badge';
+import { Button } from './ui/Button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/Dialog';
 import { cn, formatTime } from '../utils/utils';
-import type { ActivityModalProps, Priority, ActivityType } from '../types/types';
+import type { Activity, Priority, ActivityType } from '../types/types';
 
-export const ActivityModal = ({ activity, onClose }: ActivityModalProps) => {
+interface ActivityModalProps {
+  activity: Activity | null;
+  onClose: () => void;
+  onEdit: (activity: Activity) => void;
+}
+
+export const ActivityModal = ({ activity, onClose, onEdit }: ActivityModalProps) => {
   if (!activity) return null;
 
   const startTime = formatTime(activity.start);
@@ -25,6 +32,10 @@ export const ActivityModal = ({ activity, onClose }: ActivityModalProps) => {
     optional: 'Optional',
   };
 
+  const handleEdit = () => {
+    onEdit(activity);
+  };
+
   return (
     <Dialog open={!!activity} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
@@ -40,13 +51,24 @@ export const ActivityModal = ({ activity, onClose }: ActivityModalProps) => {
                 </p>
               )}
             </div>
-            {activity.priority && (
-              <Badge
-                className={cn('shrink-0 text-sm px-4 py-2', priorityColors[activity.priority])}
+            <div className="flex items-center gap-3">
+              {activity.priority && (
+                <Badge
+                  className={cn('shrink-0 text-sm px-4 py-2', priorityColors[activity.priority])}
+                >
+                  {activity.priority.toUpperCase()}
+                </Badge>
+              )}
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleEdit}
+                className="shrink-0"
+                title="Edit task"
               >
-                {activity.priority.toUpperCase()}
-              </Badge>
-            )}
+                <Edit3 className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </DialogHeader>
 

@@ -1,9 +1,13 @@
 import { useState } from 'react';
+import { Plus } from 'lucide-react';
 import { Card } from './ui/Card';
+import { Button } from './ui/Button';
 import { cn, calculateActivityPosition } from '../utils/utils';
 import { ActivityModal } from './ActivityModel';
+import { TaskForm } from './TaskForm';
+import { QuickActions } from './QuickActions';
+import { useTaskContext } from '../context/TaskContext';
 import type { Activity, ActivityType } from '../types/types';
-import { crewMembers } from '../mock/data';
 
 const hours = Array.from({ length: 8 }, (_, i) => i + 6);
 
@@ -18,7 +22,66 @@ const activityColors: Record<ActivityType, string> = {
 };
 
 export const TimelineView = () => {
+  const { state, addTask, updateTask, deleteTask, getTaskById } = useTaskContext();
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+  const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Activity | null>(null);
+  const [selectedCrewMemberId, setSelectedCrewMemberId] = useState<string>('');
+  const [newTaskStartTime, setNewTaskStartTime] = useState<number>(6);
+
+  const handleActivityClick = (activity: Activity) => {
+    setSelectedActivity(activity);
+  };
+
+  const handleEditClick = (activity: Activity) => {
+    const taskData = getTaskById(activity.id);
+    if (taskData) {
+      setEditingTask(activity);
+      setSelectedCrewMemberId(taskData.crewMemberId);
+      setIsTaskFormOpen(true);
+    }
+    setSelectedActivity(null);
+  };
+
+  const handleCreateTask = (crewMemberId: string, startTime?: number) => {
+    setSelectedCrewMemberId(crewMemberId);
+    setNewTaskStartTime(startTime || 6);
+    setEditingTask(null);
+    setIsTaskFormOpen(true);
+  };
+
+  const handleTaskSubmit = (task: Activity) => {
+    if (editingTask) {
+      updateTask(selectedCrewMemberId, task);
+    } else {
+      addTask(selectedCrewMemberId, task);
+    }
+    setIsTaskFormOpen(false);
+    setEditingTask(null);
+  };
+
+  const handleTaskDelete = (taskId: string) => {
+    const taskData = getTaskById(taskId);
+    if (taskData) {
+      deleteTask(taskData.crewMemberId, taskId);
+    }
+    setIsTaskFormOpen(false);
+    setEditingTask(null);
+  };
+
+  const handleTimeSlotClick = (crewMemberId: string, hour: number) => {
+    const member = state.crewMembers.find((m) => m.id === crewMemberId);
+    if (!member) return;
+
+    const conflictingActivity = member.activities.find((activity) => {
+      const activityEnd = activity.start + activity.duration;
+      return hour >= activity.start && hour < activityEnd;
+    });
+
+    if (!conflictingActivity) {
+      handleCreateTask(crewMemberId, hour);
+    }
+  };
 
   return (
     <>
@@ -46,15 +109,15 @@ export const TimelineView = () => {
               </div>
             </div>
 
-            {crewMembers.map((member, idx) => (
+            {state.crewMembers.map((member, idx) => (
               <div
                 key={member.id}
                 className={cn(
-                  'flex border-b border-slate-200 dark:border-slate-800 transition-colors hover:bg-slate-25 dark:hover:bg-slate-900/30',
+                  'flex border-b border-slate-200 dark:border-slate-800 transition-colors',
                   idx % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-25 dark:bg-slate-900/20'
                 )}
               >
-                <div className="w-32 md:w-40 shrink-0 px-6 py-10 flex items-center">
+                <div className="w-32 md:w-40 shrink-0 px-6 py-10 flex items-center justify-between">
                   <div>
                     <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
                       {member.name}
@@ -63,13 +126,28 @@ export const TimelineView = () => {
                       Flight Engineer
                     </p>
                   </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleCreateTask(member.id)}
+                    className="h-8 w-8 text-slate-500 hover:text-space-600 hover:bg-space-50 dark:hover:bg-space-950"
+                    title="Add new task"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
                 </div>
-                <div className="relative flex flex-1">
+                <div className="relative flex flex-1 group">
                   {hours.map((hour) => (
                     <div
                       key={hour}
-                      className="flex-1 border-l border-slate-200 dark:border-slate-800"
-                    />
+                      className="flex-1 border-l border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer group/timeslot"
+                      onClick={() => handleTimeSlotClick(member.id, hour)}
+                      title={`Add task at ${hour}:00`}
+                    >
+                      <div className="opacity-0 group-hover/timeslot:opacity-100 transition-opacity flex items-center justify-center h-full">
+                        <Plus className="h-4 w-4 text-slate-400" />
+                      </div>
+                    </div>
                   ))}
                   {member.activities.map((activity) => {
                     const { left, width } = calculateActivityPosition(
@@ -79,7 +157,7 @@ export const TimelineView = () => {
                     return (
                       <button
                         key={activity.id}
-                        onClick={() => setSelectedActivity(activity)}
+                        onClick={() => handleActivityClick(activity)}
                         className={cn(
                           'absolute top-6 bottom-6 rounded-xl px-4 py-3 transition-all duration-200 hover:scale-105 hover:shadow-xl cursor-pointer border-2 group',
                           activityColors[activity.type]
@@ -109,7 +187,26 @@ export const TimelineView = () => {
         </div>
       </Card>
 
-      <ActivityModal activity={selectedActivity} onClose={() => setSelectedActivity(null)} />
+      <ActivityModal
+        activity={selectedActivity}
+        onClose={() => setSelectedActivity(null)}
+        onEdit={handleEditClick}
+      />
+
+      <TaskForm
+        isOpen={isTaskFormOpen}
+        onClose={() => {
+          setIsTaskFormOpen(false);
+          setEditingTask(null);
+        }}
+        onSubmit={handleTaskSubmit}
+        onDelete={handleTaskDelete}
+        task={editingTask}
+        crewMemberId={selectedCrewMemberId}
+        defaultStartTime={newTaskStartTime}
+      />
+
+      <QuickActions onCreateTask={handleCreateTask} />
     </>
   );
 };

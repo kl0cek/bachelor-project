@@ -1,6 +1,6 @@
-import { Menu, Satellite } from "lucide-react";
-import { Button } from "./ui/Button";
-import { ISSStatus } from "./ISSStatus";
+import { Menu, Satellite } from 'lucide-react';
+import { Button } from './ui/Button';
+import { ISSStatus } from './ISSStatus';
 
 export const PlaybookHeader = () => {
   return (
