@@ -21,6 +21,25 @@ export interface ActivityCategory {
   color: string;
 }
 
+export interface Mission {
+  id: string;
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  status: 'planning' | 'active' | 'completed' | 'cancelled';
+  crewMembers: CrewMember[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MissionFormData {
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+}
+
 export interface ISSData {
   name: string;
   id: number;
@@ -45,6 +64,7 @@ export interface ISSState {
 
 export type ActivityType = Activity['type'];
 export type Priority = Activity['priority'];
+export type MissionStatus = Mission['status'];
 
 export interface ActivityModalProps {
   activity: Activity | null;
