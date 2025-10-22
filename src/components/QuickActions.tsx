@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Plus, Calendar, Users } from 'lucide-react';
-import { Button } from './ui/Button';
+import { Button } from './ui/index';
 import { cn } from '../utils/utils';
 import { useTaskContext } from '../context/TaskContext';
 

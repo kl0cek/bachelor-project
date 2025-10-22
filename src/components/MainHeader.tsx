@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router';
 import { Satellite, User, LogIn, Menu, Home } from 'lucide-react';
-import { Button } from './ui/Button';
-import { LoginModel } from './LoginModel';
+import { Button } from './ui/index';
+import { LoginModel } from './index';
 
 export const MainHeader = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -26,7 +26,7 @@ export const MainHeader = () => {
 
   return (
     <>
-      <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 shadow-sm">
+      <header className="border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 shadow-sm">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">

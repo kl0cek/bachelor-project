@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { Lock, User, Eye, EyeOff } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/Dialog';
-import { Button } from './ui/Button';
-
+import { Dialog, DialogContent, DialogHeader, DialogTitle, Button } from './ui/index';
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;

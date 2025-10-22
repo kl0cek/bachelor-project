@@ -1,8 +1,6 @@
 import { Link } from 'react-router';
 import { Plus, Calendar, Users, Clock, ArrowRight, Activity } from 'lucide-react';
-import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
-import { Badge } from '../components/ui/Badge';
+import { Card, Button, Badge } from '../components/ui/index';
 import { cn } from '../utils/utils';
 import { missions } from '../mock/mission';
 import type { MissionStatus } from '../types/types';

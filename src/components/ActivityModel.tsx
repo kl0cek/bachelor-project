@@ -1,7 +1,5 @@
 import { Clock, AlertCircle, Wrench, Edit3 } from 'lucide-react';
-import { Badge } from './ui/Badge';
-import { Button } from './ui/Button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/Dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, Button, Badge } from './ui/index';
 import { cn, formatTime } from '../utils/utils';
 import type { Activity, Priority, ActivityType } from '../types/types';
 

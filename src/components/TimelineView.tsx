@@ -1,11 +1,8 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
-import { Card } from './ui/Card';
-import { Button } from './ui/Button';
+import { Card, Button } from './ui/index';
 import { cn, calculateActivityPosition } from '../utils/utils';
-import { ActivityModal } from './ActivityModel';
-import { TaskForm } from './TaskForm';
-import { QuickActions } from './QuickActions';
+import { ActivityModal, TaskForm, QuickActions } from './index';
 import { useTaskContext } from '../context/TaskContext';
 import type { Activity, ActivityType } from '../types/types';
 

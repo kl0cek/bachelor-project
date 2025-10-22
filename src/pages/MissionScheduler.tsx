@@ -1,10 +1,8 @@
 import { useParams, Link } from 'react-router';
 import { ArrowLeft, Calendar, Users, Settings } from 'lucide-react';
 import { TaskProvider } from '../context/TaskContext';
-import { TimelineView } from '../components/TimelineView';
-import { ActivityLegend } from '../components/ActivityLegend';
-import { ISSStatus } from '../components/ISSStatus';
-import { Button } from '../components/ui/Button';
+import { TimelineView, ActivityLegend, ISSStatus } from '../components/index';
+import { Button } from '../components/ui/index';
 import { getMissionById } from '../mock/mission';
 
 export const MissionScheduler = () => {

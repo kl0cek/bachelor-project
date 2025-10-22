@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Plus, Trash2 } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/Dialog';
-import { Button } from './ui/Button';
-import { Badge } from './ui/Badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, Button, Badge } from './ui/index';
 import { cn } from '../utils/utils';
 import type { Activity, ActivityType, Priority } from '../types/types';
 

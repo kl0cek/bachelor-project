@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router';
 import { ArrowLeft, Calendar, FileText, Rocket, Save } from 'lucide-react';
-import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
+import { Card, Button } from '../components/ui/index';
 import type { MissionFormData } from '../types/types';
 
 export const CreateMission = () => {
