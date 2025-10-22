@@ -17,8 +17,13 @@ export const CreateMission = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.name.trim() || !formData.description.trim() || !formData.startDate || !formData.endDate) {
+
+    if (
+      !formData.name.trim() ||
+      !formData.description.trim() ||
+      !formData.startDate ||
+      !formData.endDate
+    ) {
       return;
     }
 
@@ -27,37 +32,38 @@ export const CreateMission = () => {
     setTimeout(() => {
       const newMissionId = `mission-${Date.now()}`;
       console.log('Creating mission:', { ...formData, id: newMissionId });
-      
+
       navigate(`/mission/${newMissionId}/scheduler`);
     }, 1500);
   };
 
   const handleInputChange = (field: keyof MissionFormData, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
-  const isFormValid = formData.name.trim() && 
-                      formData.description.trim() && 
-                      formData.startDate && 
-                      formData.endDate &&
-                      new Date(formData.startDate) < new Date(formData.endDate);
+  const isFormValid =
+    formData.name.trim() &&
+    formData.description.trim() &&
+    formData.startDate &&
+    formData.endDate &&
+    new Date(formData.startDate) < new Date(formData.endDate);
 
   const today = new Date().toISOString().split('T')[0];
 
   return (
     <div className="container mx-auto px-6 py-8 max-w-4xl">
       <div className="mb-8">
-        <Link 
-          to="/" 
+        <Link
+          to="/"
           className="inline-flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 mb-4"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Mission Control
         </Link>
-        
+
         <div className="flex items-center gap-4 mb-4">
           <div className="p-3 rounded-xl bg-space-100 dark:bg-space-900">
             <Rocket className="h-8 w-8 text-space-600 dark:text-space-400" />
@@ -145,11 +151,7 @@ export const CreateMission = () => {
                     Cancel
                   </Button>
                 </Link>
-                <Button 
-                  type="submit" 
-                  disabled={!isFormValid || isSubmitting}
-                  size="lg"
-                >
+                <Button type="submit" disabled={!isFormValid || isSubmitting} size="lg">
                   {isSubmitting ? (
                     <>
                       <div className="animate-spin h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
@@ -175,31 +177,45 @@ export const CreateMission = () => {
             <div className="space-y-4 text-sm">
               <div className="flex gap-3">
                 <div className="w-6 h-6 rounded-full bg-space-100 dark:bg-space-900 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-semibold text-space-600 dark:text-space-400">1</span>
+                  <span className="text-xs font-semibold text-space-600 dark:text-space-400">
+                    1
+                  </span>
                 </div>
                 <div>
-                  <p className="font-medium text-slate-900 dark:text-slate-100">Basic Information</p>
-                  <p className="text-slate-600 dark:text-slate-400">Provide mission name and detailed description</p>
+                  <p className="font-medium text-slate-900 dark:text-slate-100">
+                    Basic Information
+                  </p>
+                  <p className="text-slate-600 dark:text-slate-400">
+                    Provide mission name and detailed description
+                  </p>
                 </div>
               </div>
-              
+
               <div className="flex gap-3">
                 <div className="w-6 h-6 rounded-full bg-space-100 dark:bg-space-900 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-semibold text-space-600 dark:text-space-400">2</span>
+                  <span className="text-xs font-semibold text-space-600 dark:text-space-400">
+                    2
+                  </span>
                 </div>
                 <div>
                   <p className="font-medium text-slate-900 dark:text-slate-100">Timeline</p>
-                  <p className="text-slate-600 dark:text-slate-400">Set mission start and end dates</p>
+                  <p className="text-slate-600 dark:text-slate-400">
+                    Set mission start and end dates
+                  </p>
                 </div>
               </div>
-              
+
               <div className="flex gap-3">
                 <div className="w-6 h-6 rounded-full bg-space-100 dark:bg-space-900 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-semibold text-space-600 dark:text-space-400">3</span>
+                  <span className="text-xs font-semibold text-space-600 dark:text-space-400">
+                    3
+                  </span>
                 </div>
                 <div>
                   <p className="font-medium text-slate-900 dark:text-slate-100">Scheduler Setup</p>
-                  <p className="text-slate-600 dark:text-slate-400">Add crew members and create activity schedules</p>
+                  <p className="text-slate-600 dark:text-slate-400">
+                    Add crew members and create activity schedules
+                  </p>
                 </div>
               </div>
             </div>
@@ -212,15 +228,21 @@ export const CreateMission = () => {
             <div className="space-y-3 text-sm">
               <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800">
                 <p className="font-medium text-slate-900 dark:text-slate-100">ISS Analog</p>
-                <p className="text-slate-600 dark:text-slate-400">International Space Station operations simulation</p>
+                <p className="text-slate-600 dark:text-slate-400">
+                  International Space Station operations simulation
+                </p>
               </div>
               <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800">
                 <p className="font-medium text-slate-900 dark:text-slate-100">Mars Simulation</p>
-                <p className="text-slate-600 dark:text-slate-400">Long-duration Mars surface operations</p>
+                <p className="text-slate-600 dark:text-slate-400">
+                  Long-duration Mars surface operations
+                </p>
               </div>
               <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800">
                 <p className="font-medium text-slate-900 dark:text-slate-100">Lunar Gateway</p>
-                <p className="text-slate-600 dark:text-slate-400">Lunar orbital platform missions</p>
+                <p className="text-slate-600 dark:text-slate-400">
+                  Lunar orbital platform missions
+                </p>
               </div>
             </div>
           </Card>

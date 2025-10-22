@@ -17,11 +17,11 @@ export const LoginModel = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!username.trim() || !password.trim()) return;
-    
+
     setIsLoading(true);
-    
+
     setTimeout(() => {
       onLogin(username.trim(), password);
       setUsername('');
@@ -96,24 +96,20 @@ export const LoginModel = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
           <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4">
             <p className="text-xs text-slate-600 dark:text-slate-400 mb-2">Demo Credentials:</p>
             <div className="space-y-1 text-xs">
-              <p className="text-slate-700 dark:text-slate-300">Username: <span className="font-mono">mission.commander</span></p>
-              <p className="text-slate-700 dark:text-slate-300">Password: <span className="font-mono">space2024</span></p>
+              <p className="text-slate-700 dark:text-slate-300">
+                Username: <span className="font-mono">mission.commander</span>
+              </p>
+              <p className="text-slate-700 dark:text-slate-300">
+                Password: <span className="font-mono">space2024</span>
+              </p>
             </div>
           </div>
 
           <div className="flex justify-end gap-3">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={handleClose}
-              disabled={isLoading}
-            >
+            <Button type="button" variant="ghost" onClick={handleClose} disabled={isLoading}>
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={!username.trim() || !password.trim() || isLoading}
-            >
+            <Button type="submit" disabled={!username.trim() || !password.trim() || isLoading}>
               {isLoading ? 'Logging in...' : 'Login'}
             </Button>
           </div>

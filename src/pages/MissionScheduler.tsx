@@ -44,14 +44,14 @@ export const MissionScheduler = () => {
           <div className="container mx-auto px-6 py-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-8">
-                <Link 
-                  to="/" 
+                <Link
+                  to="/"
                   className="inline-flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100"
                 >
                   <ArrowLeft className="h-5 w-5" />
                   <span className="hidden sm:inline">Back to Mission Control</span>
                 </Link>
-                
+
                 <div className="flex items-center gap-4">
                   <div className="p-3 rounded-xl bg-space-100 dark:bg-space-900">
                     <Calendar className="h-6 w-6 text-space-600 dark:text-space-400" />
@@ -66,25 +66,25 @@ export const MissionScheduler = () => {
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-4">
                 <div className="hidden lg:block">
                   <ISSStatus />
                 </div>
-                
+
                 <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800">
                   <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
                   <span className="text-sm font-medium text-green-700 dark:text-green-300">
                     Mission {mission.status === 'active' ? 'Active' : mission.status}
                   </span>
                 </div>
-                
+
                 <Button variant="outline" size="icon">
                   <Settings className="h-4 w-4" />
                 </Button>
               </div>
             </div>
-            
+
             <div className="lg:hidden mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <ISSStatus />
@@ -110,24 +110,22 @@ export const MissionScheduler = () => {
                   Manage crew activities and mission tasks
                 </p>
               </div>
-              
+
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                   <Users className="h-4 w-4" />
                   <span>{mission.crewMembers.length} crew members</span>
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-400">
-                  GMT Timeline
-                </div>
+                <div className="text-sm text-slate-600 dark:text-slate-400">GMT Timeline</div>
               </div>
             </div>
-            
+
             <div className="text-sm text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-lg p-4">
               <p className="font-medium mb-2">Mission Description:</p>
               <p>{mission.description}</p>
             </div>
           </div>
-          
+
           <TimelineView />
           <ActivityLegend />
         </main>

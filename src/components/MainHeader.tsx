@@ -33,7 +33,7 @@ export const MainHeader = () => {
               <Button variant="ghost" size="icon" className="lg:hidden">
                 <Menu className="h-5 w-5" />
               </Button>
-              
+
               <Link to="/" className="flex items-center gap-4">
                 <div className="p-3 rounded-xl bg-space-100 dark:bg-space-900">
                   <Satellite className="h-6 w-6 text-space-600 dark:text-space-400" />
@@ -69,20 +69,12 @@ export const MainHeader = () => {
                       {userName}
                     </span>
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleLogout}
-                  >
+                  <Button variant="outline" size="sm" onClick={handleLogout}>
                     Logout
                   </Button>
                 </div>
               ) : (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => setIsLoginModalOpen(true)}
-                >
+                <Button variant="default" size="sm" onClick={() => setIsLoginModalOpen(true)}>
                   <LogIn className="h-4 w-4 mr-2" />
                   Login
                 </Button>

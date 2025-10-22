@@ -38,8 +38,8 @@ export const HomePage = () => {
     return `${diffDays} days`;
   };
 
-  const activeMissions = missions.filter(m => m.status === 'active');
-  const otherMissions = missions.filter(m => m.status !== 'active');
+  const activeMissions = missions.filter((m) => m.status === 'active');
+  const otherMissions = missions.filter((m) => m.status !== 'active');
 
   return (
     <div className="container mx-auto px-6 py-8">
@@ -84,7 +84,7 @@ export const HomePage = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                {missions.filter(m => m.status === 'planning').length}
+                {missions.filter((m) => m.status === 'planning').length}
               </p>
               <p className="text-sm text-slate-600 dark:text-slate-400">In Planning</p>
             </div>
@@ -98,7 +98,7 @@ export const HomePage = () => {
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-                {missions.filter(m => m.status === 'completed').length}
+                {missions.filter((m) => m.status === 'completed').length}
               </p>
               <p className="text-sm text-slate-600 dark:text-slate-400">Completed</p>
             </div>
@@ -145,7 +145,9 @@ export const HomePage = () => {
                 <div className="space-y-2 mb-4">
                   <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                     <Calendar className="h-4 w-4" />
-                    <span>{formatDate(mission.startDate)} - {formatDate(mission.endDate)}</span>
+                    <span>
+                      {formatDate(mission.startDate)} - {formatDate(mission.endDate)}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                     <Clock className="h-4 w-4" />
@@ -192,7 +194,9 @@ export const HomePage = () => {
                   <div className="flex items-center gap-6 text-sm text-slate-600 dark:text-slate-400">
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
-                      <span>{formatDate(mission.startDate)} - {formatDate(mission.endDate)}</span>
+                      <span>
+                        {formatDate(mission.startDate)} - {formatDate(mission.endDate)}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4" />

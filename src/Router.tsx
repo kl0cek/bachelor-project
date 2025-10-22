@@ -6,7 +6,7 @@ import { RootLayout } from './layout/RootLayout';
 
 export const router = createBrowserRouter([
   {
-    path: '/',
+    path: '/*',
     element: <RootLayout />,
     children: [
       {
