@@ -1,13 +1,13 @@
+import { lazy } from 'react';
 import { createBrowserRouter } from 'react-router';
-import {
-  HomePage,
-  MissionScheduler,
-  CreateMission,
-  CrewSelection,
-  UserManagement,
-} from './pages/index';
+import { HomePage, LazyRoute } from './pages/index';
 import { RootLayout } from './layout/RootLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
+
+const CreateMission = lazy(() => import('./pages/CreateMission'));
+const CrewSelection = lazy(() => import('./pages/CrewSelection'));
+const MissionScheduler = lazy(() => import('./pages/MissionScheduler'));
+const UserManagement = lazy(() => import('./pages/UserManagement'));
 
 export const router = createBrowserRouter([
   {
@@ -21,33 +21,41 @@ export const router = createBrowserRouter([
       {
         path: 'create-mission',
         element: (
-          <ProtectedRoute requiredPermission="create_mission">
-            <CreateMission />
-          </ProtectedRoute>
+          <LazyRoute>
+            <ProtectedRoute requiredPermission="create_mission">
+              <CreateMission />
+            </ProtectedRoute>
+          </LazyRoute>
         ),
       },
       {
         path: 'mission/:id/crew',
         element: (
-          <ProtectedRoute requiredPermission="manage_crew">
-            <CrewSelection />
-          </ProtectedRoute>
+          <LazyRoute>
+            <ProtectedRoute requiredPermission="manage_crew">
+              <CrewSelection />
+            </ProtectedRoute>
+          </LazyRoute>
         ),
       },
       {
         path: 'mission/:id/scheduler',
         element: (
-          <ProtectedRoute requiredPermission="view_schedule">
-            <MissionScheduler />
-          </ProtectedRoute>
+          <LazyRoute>
+            <ProtectedRoute requiredPermission="view_schedule">
+              <MissionScheduler />
+            </ProtectedRoute>
+          </LazyRoute>
         ),
       },
       {
         path: 'admin/users',
         element: (
-          <ProtectedRoute requiredRole="admin">
-            <UserManagement />
-          </ProtectedRoute>
+          <LazyRoute>
+            <ProtectedRoute requiredRole="admin">
+              <UserManagement />
+            </ProtectedRoute>
+          </LazyRoute>
         ),
       },
     ],

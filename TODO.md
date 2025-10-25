@@ -2,8 +2,6 @@ thigs to add/change ideas
 
 TODO:
 
-LOGIN rodzaje konta Astronauta/ operator jako admin / viewer
-
 astrounauta moze dodac do taska tylko notakti
 viewer read only
 
@@ -15,3 +13,6 @@ lokalizacja taska np gym / kuchnia itd + ile ludzi w danym pomieszczeniu na dole
 w taksu variant name ktory task np first task (time)
 
 w bazie danych pdf z taskiem - pan dr ma dac pdf z 'przykladem'
+
+DONE: (but need API)
+LOGIN rodzaje konta Astronauta/ operator jako admin / viewer

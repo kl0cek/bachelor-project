@@ -250,3 +250,5 @@ export const CreateMission = () => {
     </div>
   );
 };
+
+export default CreateMission;

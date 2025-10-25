@@ -289,3 +289,5 @@ export const CrewSelection = () => {
     </div>
   );
 };
+
+export default CrewSelection;
