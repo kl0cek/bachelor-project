@@ -40,6 +40,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [missionDay, setMissionDay] = useState<number>(1);
   const [mockDailyActivities, setMockDailyActivities] = useState<Record<string, Activity[]>>({});
+  const [hiddenMockActivities, setHiddenMockActivities] = useState<Set<string>>(new Set());
 
   const missionStartDate = mission ? new Date(mission.startDate) : new Date();
   const missionEndDate = mission
@@ -72,30 +73,32 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   }, [mission]);
 
   const handlePreviousDay = () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(newDate.getDate() - 1);
+  const newDate = new Date(currentDate);
+  newDate.setDate(newDate.getDate() - 1);
 
-    if (newDate >= missionStartDate) {
-      const newDay = calculateMissionDay(newDate, missionStartDate);
-      setCurrentDate(newDate);
-      setMissionDay(newDay);
-      setMockDailyActivities(getMockActivitiesForDay(newDay));
-      console.log(`Switched to Day ${newDay}`);
-    }
-  };
+  if (newDate >= missionStartDate) {
+    const newDay = calculateMissionDay(newDate, missionStartDate);
+    setCurrentDate(newDate);
+    setMissionDay(newDay);
+    const newMockData = getMockActivitiesForDay(newDay);
+    setMockDailyActivities(newMockData);
+    console.log(`Switched to Day ${newDay}`, newMockData);
+  }
+};
 
-  const handleNextDay = () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(newDate.getDate() + 1);
+const handleNextDay = () => {
+  const newDate = new Date(currentDate);
+  newDate.setDate(newDate.getDate() + 1);
 
-    if (newDate <= missionEndDate) {
-      const newDay = calculateMissionDay(newDate, missionStartDate);
-      setCurrentDate(newDate);
-      setMissionDay(newDay);
-      setMockDailyActivities(getMockActivitiesForDay(newDay));
-      console.log(`Switched to Day ${newDay}`);
-    }
-  };
+  if (newDate <= missionEndDate) {
+    const newDay = calculateMissionDay(newDate, missionStartDate);
+    setCurrentDate(newDate);
+    setMissionDay(newDay);
+    const newMockData = getMockActivitiesForDay(newDay);
+    setMockDailyActivities(newMockData);
+    console.log(`Switched to Day ${newDay}`, newMockData);
+  }
+};
 
   const handleDateSelect = () => {
     console.log('Open date picker modal');
@@ -105,39 +108,54 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   const canGoNext = currentDate < missionEndDate;
 
   // Merge mock activities with user-added activities from context
-  const getCrewMemberActivities = (crewMemberId: string): Activity[] => {
-    const mockActivities = mockDailyActivities[crewMemberId] || [];
-    const contextMember = state.crewMembers.find((m) => m.id === crewMemberId);
-    const contextActivities = contextMember?.activities || [];
+const getCrewMemberActivities = (crewMemberId: string): Activity[] => {
+  const mockActivities = mockDailyActivities[crewMemberId] || [];
+  const contextMember = state.crewMembers.find((m) => m.id === crewMemberId);
+  const contextActivities = contextMember?.activities || [];
 
-    // Combine and sort by start time
-    return [...mockActivities, ...contextActivities].sort((a, b) => a.start - b.start);
-  };
+  const filteredMockActivities = mockActivities.filter(
+    activity => !hiddenMockActivities.has(activity.id)
+  );
 
-  const handleActivityClick = (activity: Activity) => {
-    setSelectedActivity(activity);
-  };
+  return [...filteredMockActivities, ...contextActivities].sort((a, b) => a.start - b.start);
+};
 
-  const handleEditClick = (activity: Activity) => {
-    // Check if it's a mock activity or a context activity
-    const mockActivities = mockDailyActivities[selectedCrewMemberId] || [];
-    const isMockActivity = mockActivities.some((a) => a.id === activity.id);
-
-    if (isMockActivity) {
-      // Don't allow editing mock activities (or implement differently)
-      console.log('Cannot edit pre-scheduled activities');
-      setSelectedActivity(null);
-      return;
+const handleActivityClick = (activity: Activity) => {
+  const mockActivities = Object.values(mockDailyActivities).flat();
+  const isMockActivity = mockActivities.some(a => a.id === activity.id);
+  
+  if (isMockActivity) {
+    const firstCrewMemberId = Object.keys(mockDailyActivities).find(crewId => 
+      mockDailyActivities[crewId]?.some(a => a.id === activity.id)
+    );
+    if (firstCrewMemberId) {
+      setSelectedCrewMemberId(firstCrewMemberId);
     }
+  }
+  
+  setSelectedActivity(activity);
+};
 
-    const taskData = getTaskById(activity.id);
-    if (taskData) {
-      setEditingTask(activity);
-      setSelectedCrewMemberId(taskData.crewMemberId);
-      setIsTaskFormOpen(true);
-    }
+const handleEditClick = (activity: Activity) => {
+  const mockActivities = mockDailyActivities[selectedCrewMemberId] || [];
+  const isMockActivity = mockActivities.some((a) => a.id === activity.id);
+
+  if (isMockActivity) {
+    setEditingTask(activity);
+    setSelectedCrewMemberId(selectedCrewMemberId || Object.keys(mockDailyActivities)[0]);
+    setIsTaskFormOpen(true);
     setSelectedActivity(null);
-  };
+    return;
+  }
+
+  const taskData = getTaskById(activity.id);
+  if (taskData) {
+    setEditingTask(activity);
+    setSelectedCrewMemberId(taskData.crewMemberId);
+    setIsTaskFormOpen(true);
+  }
+  setSelectedActivity(null);
+};
 
   const handleCreateTask = (crewMemberId: string, startTime?: number) => {
     setSelectedCrewMemberId(crewMemberId);
@@ -156,14 +174,22 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     setEditingTask(null);
   };
 
-  const handleTaskDelete = (taskId: string) => {
+const handleTaskDelete = (taskId: string) => {
+  const mockActivities = Object.values(mockDailyActivities).flat();
+  const isMockActivity = mockActivities.some(activity => activity.id === taskId);
+  
+  if (isMockActivity) {
+    setHiddenMockActivities(prev => new Set([...prev, taskId]));
+  } else {
     const taskData = getTaskById(taskId);
     if (taskData) {
       deleteTask(taskData.crewMemberId, taskId);
     }
-    setIsTaskFormOpen(false);
-    setEditingTask(null);
-  };
+  }
+  
+  setIsTaskFormOpen(false);
+  setEditingTask(null);
+};
 
   const handleTimeSlotClick = (crewMemberId: string, hour: number) => {
     const activities = getCrewMemberActivities(crewMemberId);

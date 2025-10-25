@@ -1,12 +1,11 @@
 import type { Activity } from '../types/types';
 
 export const getMockActivitiesForDay = (missionDay: number): Record<string, Activity[]> => {
-  // Day 1 activities
   if (missionDay === 1) {
     return {
       'fe-1': [
         {
-          id: '1',
+          id: 'mock-fe1-day1-1',
           name: 'Sleep',
           start: 0,
           duration: 6,
@@ -16,7 +15,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '2',
+          id: 'mock-fe1-day1-2',
           name: 'Post-sleep',
           start: 7,
           duration: 1,
@@ -26,17 +25,17 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'medium',
         },
         {
-          id: '3',
+          id: 'mock-fe1-day1-3',
           name: 'Exercise',
           start: 11,
-          duration: 8,
+          duration: 1.5,
           type: 'exercise',
           mission: 'Health & Fitness',
           description: 'Cardiovascular training',
           priority: 'high',
         },
         {
-          id: '4',
+          id: 'mock-fe1-day1-4',
           name: 'Lunch',
           start: 12.5,
           duration: 0.5,
@@ -46,7 +45,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'medium',
         },
         {
-          id: '5',
+          id: 'mock-fe1-day1-5',
           name: 'Science Work',
           start: 14,
           duration: 3,
@@ -56,7 +55,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '6',
+          id: 'mock-fe1-day1-6',
           name: 'Dinner',
           start: 18,
           duration: 1,
@@ -66,7 +65,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'medium',
         },
         {
-          id: '7',
+          id: 'mock-fe1-day1-7',
           name: 'Pre-sleep',
           start: 22,
           duration: 2,
@@ -78,7 +77,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
       ],
       'fe-2': [
         {
-          id: '8',
+          id: 'mock-fe2-day1-1',
           name: 'Sleep',
           start: 0,
           duration: 6,
@@ -88,7 +87,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '9',
+          id: 'mock-fe2-day1-2',
           name: 'Post-sleep',
           start: 6,
           duration: 1,
@@ -98,7 +97,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'medium',
         },
         {
-          id: '10',
+          id: 'mock-fe2-day1-3',
           name: 'Station Maintenance',
           start: 8,
           duration: 4,
@@ -108,7 +107,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '11',
+          id: 'mock-fe2-day1-4',
           name: 'Lunch',
           start: 12.5,
           duration: 0.5,
@@ -118,7 +117,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'medium',
         },
         {
-          id: '12',
+          id: 'mock-fe2-day1-5',
           name: 'Exercise',
           start: 15,
           duration: 1.5,
@@ -128,7 +127,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '13',
+          id: 'mock-fe2-day1-6',
           name: 'Pre-sleep',
           start: 22,
           duration: 2,
@@ -140,7 +139,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
       ],
       'fe-4': [
         {
-          id: '14',
+          id: 'mock-fe4-day1-1',
           name: 'Sleep',
           start: 0,
           duration: 6,
@@ -150,7 +149,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '15',
+          id: 'mock-fe4-day1-2',
           name: 'Post-sleep',
           start: 6,
           duration: 1,
@@ -160,7 +159,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'medium',
         },
         {
-          id: '16',
+          id: 'mock-fe4-day1-3',
           name: 'EVA Preparation',
           start: 8,
           duration: 2,
@@ -170,7 +169,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '17',
+          id: 'mock-fe4-day1-4',
           name: 'Medical Check',
           start: 10,
           duration: 0.5,
@@ -180,7 +179,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '18',
+          id: 'mock-fe4-day1-5',
           name: 'Exercise',
           start: 12,
           duration: 1,
@@ -190,7 +189,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '19',
+          id: 'mock-fe4-day1-6',
           name: 'Lunch',
           start: 13,
           duration: 0.5,
@@ -200,7 +199,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'medium',
         },
         {
-          id: '20',
+          id: 'mock-fe4-day1-7',
           name: 'Pre-sleep',
           start: 22,
           duration: 2,
@@ -212,7 +211,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
       ],
       'fe-5': [
         {
-          id: '21',
+          id: 'mock-fe5-day1-1',
           name: 'Sleep',
           start: 0,
           duration: 6,
@@ -222,7 +221,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '22',
+          id: 'mock-fe5-day1-2',
           name: 'Post-sleep',
           start: 6.5,
           duration: 0.5,
@@ -232,7 +231,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'medium',
         },
         {
-          id: '23',
+          id: 'mock-fe5-day1-3',
           name: 'EVA Preparation',
           start: 7,
           duration: 1.5,
@@ -242,7 +241,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '24',
+          id: 'mock-fe5-day1-4',
           name: 'Optional Research',
           start: 9,
           duration: 2,
@@ -252,7 +251,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'low',
         },
         {
-          id: '25',
+          id: 'mock-fe5-day1-5',
           name: 'P3 Maintenance',
           start: 13,
           duration: 3,
@@ -262,7 +261,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '26',
+          id: 'mock-fe5-day1-6',
           name: 'Dinner',
           start: 18,
           duration: 1,
@@ -272,7 +271,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'medium',
         },
         {
-          id: '27',
+          id: 'mock-fe5-day1-7',
           name: 'Pre-sleep',
           start: 22,
           duration: 2,
@@ -285,12 +284,11 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
     };
   }
 
-  // Day 2 activities
   if (missionDay === 2) {
     return {
       'fe-1': [
         {
-          id: '101',
+          id: 'mock-fe1-day2-1',
           name: 'Sleep',
           start: 0,
           duration: 6,
@@ -300,7 +298,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '102',
+          id: 'mock-fe1-day2-2',
           name: 'Post-sleep',
           start: 6,
           duration: 1,
@@ -310,7 +308,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'medium',
         },
         {
-          id: '103',
+          id: 'mock-fe1-day2-3',
           name: 'Breakfast',
           start: 7,
           duration: 0.5,
@@ -320,7 +318,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'medium',
         },
         {
-          id: '104',
+          id: 'mock-fe1-day2-4',
           name: 'Robotics Training',
           start: 8,
           duration: 3,
@@ -330,7 +328,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '105',
+          id: 'mock-fe1-day2-5',
           name: 'Exercise',
           start: 13,
           duration: 1.5,
@@ -340,7 +338,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '106',
+          id: 'mock-fe1-day2-6',
           name: 'Dinner',
           start: 19,
           duration: 1,
@@ -350,7 +348,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'medium',
         },
         {
-          id: '107',
+          id: 'mock-fe1-day2-7',
           name: 'Pre-sleep',
           start: 22,
           duration: 2,
@@ -362,7 +360,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
       ],
       'fe-2': [
         {
-          id: '108',
+          id: 'mock-fe2-day2-1',
           name: 'Sleep',
           start: 0,
           duration: 6,
@@ -372,7 +370,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '109',
+          id: 'mock-fe2-day2-2',
           name: 'Post-sleep',
           start: 6,
           duration: 1,
@@ -382,7 +380,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'medium',
         },
         {
-          id: '110',
+          id: 'mock-fe2-day2-3',
           name: 'EVA Support',
           start: 8,
           duration: 6,
@@ -392,7 +390,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '111',
+          id: 'mock-fe2-day2-4',
           name: 'Exercise',
           start: 16,
           duration: 1.5,
@@ -402,7 +400,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '112',
+          id: 'mock-fe2-day2-5',
           name: 'Pre-sleep',
           start: 22,
           duration: 2,
@@ -414,7 +412,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
       ],
       'fe-4': [
         {
-          id: '113',
+          id: 'mock-fe4-day2-1',
           name: 'Sleep',
           start: 0,
           duration: 5,
@@ -424,7 +422,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '114',
+          id: 'mock-fe4-day2-2',
           name: 'EVA Day',
           start: 5,
           duration: 8,
@@ -434,7 +432,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '115',
+          id: 'mock-fe4-day2-3',
           name: 'Post-EVA Recovery',
           start: 13,
           duration: 2,
@@ -444,7 +442,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '116',
+          id: 'mock-fe4-day2-4',
           name: 'Meal',
           start: 15,
           duration: 1,
@@ -454,7 +452,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'medium',
         },
         {
-          id: '117',
+          id: 'mock-fe4-day2-5',
           name: 'Pre-sleep',
           start: 21,
           duration: 3,
@@ -466,7 +464,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
       ],
       'fe-5': [
         {
-          id: '118',
+          id: 'mock-fe5-day2-1',
           name: 'Sleep',
           start: 0,
           duration: 5,
@@ -476,7 +474,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '119',
+          id: 'mock-fe5-day2-2',
           name: 'EVA Day',
           start: 5,
           duration: 8,
@@ -486,7 +484,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '120',
+          id: 'mock-fe5-day2-3',
           name: 'Post-EVA',
           start: 13,
           duration: 2,
@@ -496,7 +494,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'high',
         },
         {
-          id: '121',
+          id: 'mock-fe5-day2-4',
           name: 'Meal',
           start: 15,
           duration: 1,
@@ -506,7 +504,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
           priority: 'medium',
         },
         {
-          id: '122',
+          id: 'mock-fe5-day2-5',
           name: 'Pre-sleep',
           start: 21,
           duration: 3,
@@ -519,7 +517,6 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
     };
   }
 
-  // Day 3+ - empty schedule for testing
   return {
     'fe-1': [],
     'fe-2': [],
