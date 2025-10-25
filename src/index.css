@@ -1,7 +1,53 @@
 @import 'tailwindcss';
 
-html,
-body,
-#root {
-  height: 100%;
+:root {
+  --space-50: #f0f4ff;
+  --space-100: #e1eaff;
+  --space-200: #c7d6ff;
+  --space-300: #a5b7ff;
+  --space-400: #8191ff;
+  --space-500: #626eff;
+  --space-600: #4f46e5;
+  --space-700: #4338ca;
+  --space-800: #3730a3;
+  --space-900: #312e81;
+  --space-950: #1e1b4b;
+
+  --orange-50: #fff7ed;
+  --orange-100: #ffedd5;
+  --orange-200: #fed7aa;
+  --orange-300: #fdba74;
+  --orange-400: #fb923c;
+  --orange-500: #f97316;
+  --orange-600: #ea580c;
+  --orange-700: #c2410c;
+  --orange-800: #9a3412;
+  --orange-900: #7c2d12;
+  --orange-950: #431407;
+
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+  --slate-950: #020617;
+}
+
+.dark {
+  --space-50: #1e1b4b;
+  --space-100: #312e81;
+  --space-200: #3730a3;
+  --space-300: #4338ca;
+  --space-400: #4f46e5;
+  --space-500: #626eff;
+  --space-600: #8191ff;
+  --space-700: #a5b7ff;
+  --space-800: #c7d6ff;
+  --space-900: #e1eaff;
+  --space-950: #f0f4ff;
 }
