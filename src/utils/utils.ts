@@ -11,16 +11,18 @@ export function formatTime(hour: number): string {
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 }
 
-export function calculateActivityPosition(
+export const calculateActivityPosition = (
   start: number,
   duration: number,
-  totalHours: number = 8,
-  startHour: number = 6
-) {
-  const left = ((start - startHour) / totalHours) * 100;
+  minHour: number = 0,
+  maxHour: number = 24
+) => {
+  const totalHours = maxHour - minHour;
+  const left = ((start - minHour) / totalHours) * 100;
   const width = (duration / totalHours) * 100;
+
   return { left, width };
-}
+};
 
 export const getDayOfYear = (date: Date = new Date()): number => {
   const start = new Date(date.getFullYear(), 0, 1);

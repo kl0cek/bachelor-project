@@ -7,8 +7,8 @@ export const missions: Mission[] = [
     name: 'ISS Expedition 71',
     description:
       'Long-duration spaceflight mission to the International Space Station focusing on scientific research and station maintenance.',
-    startDate: '2024-10-15',
-    endDate: '2025-04-15',
+    startDate: '2025-10-15',
+    endDate: '2025-11-07',
     status: 'active',
     crewMembers: crewMembers,
     createdAt: '2024-09-01T08:00:00Z',
