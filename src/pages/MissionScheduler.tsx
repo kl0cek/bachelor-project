@@ -59,7 +59,9 @@ export const MissionScheduler = () => {
             </div>
           </div>
 
-          <TimelineView />
+          <TimelineView 
+            mission = {mission}
+          />
           <ActivityLegend />
         </main>
       </div>
