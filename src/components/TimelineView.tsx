@@ -39,7 +39,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [missionDay, setMissionDay] = useState<number>(1);
-  const [dailyActivities, setDailyActivities] = useState<Record<string, Activity[]>>({});
+  const [mockDailyActivities, setMockDailyActivities] = useState<Record<string, Activity[]>>({});
 
   const missionStartDate = mission 
     ? new Date(mission.startDate) 
@@ -59,16 +59,16 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
         setCurrentDate(today);
         const day = calculateMissionDay(today, start);
         setMissionDay(day);
-        setDailyActivities(getMockActivitiesForDay(day));
+        setMockDailyActivities(getMockActivitiesForDay(day));
       } else if (today < start) {
         setCurrentDate(start);
         setMissionDay(1);
-        setDailyActivities(getMockActivitiesForDay(1));
+        setMockDailyActivities(getMockActivitiesForDay(1));
       } else {
         setCurrentDate(end);
         const day = calculateMissionDay(end, start);
         setMissionDay(day);
-        setDailyActivities(getMockActivitiesForDay(day));
+        setMockDailyActivities(getMockActivitiesForDay(day));
       }
     }
   }, [mission]);
@@ -81,7 +81,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
       const newDay = calculateMissionDay(newDate, missionStartDate);
       setCurrentDate(newDate);
       setMissionDay(newDay);
-      setDailyActivities(getMockActivitiesForDay(newDay));
+      setMockDailyActivities(getMockActivitiesForDay(newDay));
       console.log(`Switched to Day ${newDay}`);
     }
   };
@@ -94,7 +94,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
       const newDay = calculateMissionDay(newDate, missionStartDate);
       setCurrentDate(newDate);
       setMissionDay(newDay);
-      setDailyActivities(getMockActivitiesForDay(newDay));
+      setMockDailyActivities(getMockActivitiesForDay(newDay));
       console.log(`Switched to Day ${newDay}`);
     }
   };
@@ -106,9 +106,14 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   const canGoPrevious = currentDate > missionStartDate;
   const canGoNext = currentDate < missionEndDate;
 
-  // Get activities for a specific crew member for the current day
+  // Merge mock activities with user-added activities from context
   const getCrewMemberActivities = (crewMemberId: string): Activity[] => {
-    return dailyActivities[crewMemberId] || [];
+    const mockActivities = mockDailyActivities[crewMemberId] || [];
+    const contextMember = state.crewMembers.find((m) => m.id === crewMemberId);
+    const contextActivities = contextMember?.activities || [];
+    
+    // Combine and sort by start time
+    return [...mockActivities, ...contextActivities].sort((a, b) => a.start - b.start);
   };
 
   const handleActivityClick = (activity: Activity) => {
@@ -116,6 +121,17 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   };
 
   const handleEditClick = (activity: Activity) => {
+    // Check if it's a mock activity or a context activity
+    const mockActivities = mockDailyActivities[selectedCrewMemberId] || [];
+    const isMockActivity = mockActivities.some((a) => a.id === activity.id);
+    
+    if (isMockActivity) {
+      // Don't allow editing mock activities (or implement differently)
+      console.log('Cannot edit pre-scheduled activities');
+      setSelectedActivity(null);
+      return;
+    }
+    
     const taskData = getTaskById(activity.id);
     if (taskData) {
       setEditingTask(activity);
@@ -166,6 +182,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   return (
     <>
       <Card className="overflow-hidden shadow-xl">
+
         <DayHeader
           currentDate={currentDate}
           missionDay={missionDay}
