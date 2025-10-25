@@ -1,6 +1,13 @@
 import { createBrowserRouter } from 'react-router';
-import { HomePage, MissionScheduler, CreateMission, CrewSelection } from './pages/index';
+import {
+  HomePage,
+  MissionScheduler,
+  CreateMission,
+  CrewSelection,
+  UserManagement,
+} from './pages/index';
 import { RootLayout } from './layout/RootLayout';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 export const router = createBrowserRouter([
   {
@@ -13,15 +20,35 @@ export const router = createBrowserRouter([
       },
       {
         path: 'create-mission',
-        element: <CreateMission />,
+        element: (
+          <ProtectedRoute requiredPermission="create_mission">
+            <CreateMission />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'mission/:id/crew',
-        element: <CrewSelection />,
+        element: (
+          <ProtectedRoute requiredPermission="manage_crew">
+            <CrewSelection />
+          </ProtectedRoute>
+        ),
       },
       {
         path: 'mission/:id/scheduler',
-        element: <MissionScheduler />,
+        element: (
+          <ProtectedRoute requiredPermission="view_schedule">
+            <MissionScheduler />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: 'admin/users',
+        element: (
+          <ProtectedRoute requiredRole="admin">
+            <UserManagement />
+          </ProtectedRoute>
+        ),
       },
     ],
   },

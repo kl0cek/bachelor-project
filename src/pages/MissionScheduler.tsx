@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router';
 import { ArrowLeft, Calendar, Users, Settings } from 'lucide-react';
-import { TaskProvider } from '../context/TaskContext';
+import { TaskProvider } from '../context/TaskProvider';
 import { TimelineView, ActivityLegend, ISSStatus } from '../components/index';
 import { Button } from '../components/ui/index';
 import { getMissionById } from '../mock/mission';

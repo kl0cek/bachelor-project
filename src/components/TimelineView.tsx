@@ -3,7 +3,7 @@ import { Plus } from 'lucide-react';
 import { Card, Button } from './ui/index';
 import { cn, calculateActivityPosition } from '../utils/utils';
 import { ActivityModal, TaskForm, QuickActions } from './index';
-import { useTaskContext } from '../context/TaskContext';
+import { useTaskContext } from '../hooks/useTaskContext';
 import type { Activity, ActivityType } from '../types/types';
 
 const hours = Array.from({ length: 8 }, (_, i) => i + 6);

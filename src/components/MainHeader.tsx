@@ -1,32 +1,57 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router';
-import { Satellite, User, LogIn, Menu, Home } from 'lucide-react';
+import { Satellite, User, LogIn, Menu, Home, Shield } from 'lucide-react';
 import { Button } from './ui/index';
-import { LoginModel } from './index';
+import { LoginModel } from './LoginModel';
+import type { User as UserType } from '../types/auth';
 
 export const MainHeader = () => {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userName, setUserName] = useState('');
+  const [user, setUser] = useState<UserType | null>(null);
   const location = useLocation();
 
-  const handleLogin = (username: string, password: string) => {
-    setUserName(username);
-    setIsLoggedIn(true);
+  // Load user from localStorage on mount
+  useEffect(() => {
+    const savedUser = localStorage.getItem('currentUser');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (error) {
+        console.error('Failed to parse saved user:', error);
+        localStorage.removeItem('currentUser');
+      }
+    }
+  }, []);
+
+  const handleLogin = (authenticatedUser: UserType) => {
+    setUser(authenticatedUser);
+    localStorage.setItem('currentUser', JSON.stringify(authenticatedUser));
     setIsLoginModalOpen(false);
   };
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
-    setUserName('');
+    setUser(null);
+    localStorage.removeItem('currentUser');
   };
 
   const isHomePage = location.pathname === '/';
-  const isMissionPage = location.pathname.includes('/mission/');
+
+  type Role = 'admin' | 'operator' | 'astronaut' | 'viewer';
+
+  const getRoleBadgeColor = (role: Role) => {
+    const colors: Record<Role, string> = {
+      admin: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
+      operator: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+      astronaut: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
+      viewer: 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300',
+    };
+
+    return colors[role];
+  };
 
   return (
     <>
-      <header className="border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-700 shadow-sm">
+      <header className="border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
@@ -61,14 +86,32 @@ export const MainHeader = () => {
                 </Button>
               )}
 
-              {isLoggedIn ? (
+              {user ? (
                 <div className="flex items-center gap-3">
-                  <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-700">
+                  <div className="hidden sm:flex items-center gap-3 px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-700">
                     <User className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-                    <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                      {userName}
-                    </span>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium text-slate-900 dark:text-slate-100">
+                        {user.fullName}
+                      </span>
+                      <span
+                        className={`text-xs px-2 py-0.5 rounded ${getRoleBadgeColor(user.role)}`}
+                      >
+                        {user.role.toUpperCase()}
+                      </span>
+                    </div>
                   </div>
+
+                  {/* Show Admin Panel button only for admins */}
+                  {user.role === 'admin' && (
+                    <Link to="/admin/users">
+                      <Button variant="outline" size="sm">
+                        <Shield className="h-4 w-4 mr-2" />
+                        Admin Panel
+                      </Button>
+                    </Link>
+                  )}
+
                   <Button variant="outline" size="sm" onClick={handleLogout}>
                     Logout
                   </Button>
