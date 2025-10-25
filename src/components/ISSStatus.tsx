@@ -61,7 +61,6 @@ export const ISSStatus = () => {
           </div>
           <div className="flex flex-col">
             <span className="text-xs font-medium">ISS {getVisibilityText(data.visibility)}</span>
-            <span className="text-xs opacity-80">Alt: {Math.round(data.altitude)}km</span>
           </div>
         </div>
       )}
