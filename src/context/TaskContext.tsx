@@ -1,23 +1,11 @@
-import { createContext, useContext, useReducer } from 'react';
-import type { Activity, CrewMember } from '../types/types';
+import { createContext, useReducer } from 'react';
+import type { TaskState, Activity, TaskContextType } from '../types/types';
 import { crewMembers as initialCrewMembers } from '../mock/data';
-
-interface TaskState {
-  crewMembers: CrewMember[];
-}
 
 type TaskAction =
   | { type: 'ADD_TASK'; payload: { crewMemberId: string; task: Activity } }
   | { type: 'UPDATE_TASK'; payload: { crewMemberId: string; task: Activity } }
   | { type: 'DELETE_TASK'; payload: { crewMemberId: string; taskId: string } };
-
-interface TaskContextType {
-  state: TaskState;
-  addTask: (crewMemberId: string, task: Activity) => void;
-  updateTask: (crewMemberId: string, task: Activity) => void;
-  deleteTask: (crewMemberId: string, taskId: string) => void;
-  getTaskById: (taskId: string) => { task: Activity; crewMemberId: string } | null;
-}
 
 interface TaskProviderProps {
   children: React.ReactNode;
@@ -119,12 +107,4 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
       {children}
     </TaskContext.Provider>
   );
-};
-
-export const useTaskContext = () => {
-  const context = useContext(TaskContext);
-  if (context === undefined) {
-    throw new Error('useTaskContext must be used within a TaskProvider');
-  }
-  return context;
 };

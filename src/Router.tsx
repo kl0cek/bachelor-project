@@ -17,7 +17,7 @@ export const router = createBrowserRouter([
       },
       {
         path: 'mission/:id/crew',
-        element: <CrewSelection />
+        element: <CrewSelection />,
       },
       {
         path: 'mission/:id/scheduler',

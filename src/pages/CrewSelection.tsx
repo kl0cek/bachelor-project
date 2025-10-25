@@ -12,9 +12,9 @@ interface CrewMemberForm {
 export const CrewSelection = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
-  
+
   const [crewMembers, setCrewMembers] = useState<CrewMemberForm[]>([
-    { id: 'crew-1', name: '', role: '' }
+    { id: 'crew-1', name: '', role: '' },
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -25,18 +25,19 @@ export const CrewSelection = () => {
 
   const removeCrewMember = (id: string) => {
     if (crewMembers.length > 1) {
-      setCrewMembers(crewMembers.filter(member => member.id !== id));
+      setCrewMembers(crewMembers.filter((member) => member.id !== id));
     }
   };
 
   const updateCrewMember = (id: string, field: 'name' | 'role', value: string) => {
-    setCrewMembers(crewMembers.map(member => 
-      member.id === id ? { ...member, [field]: value } : member
-    ));
+    setCrewMembers(
+      crewMembers.map((member) => (member.id === id ? { ...member, [field]: value } : member))
+    );
   };
 
-  const isFormValid = crewMembers.length > 0 && 
-    crewMembers.every(member => member.name.trim() && member.role.trim());
+  const isFormValid =
+    crewMembers.length > 0 &&
+    crewMembers.every((member) => member.name.trim() && member.role.trim());
 
   const handleSubmit = () => {
     if (!isFormValid) return;
@@ -57,7 +58,7 @@ export const CrewSelection = () => {
     'Mission Specialist',
     'Science Officer',
     'Medical Officer',
-    'Payload Specialist'
+    'Payload Specialist',
   ];
 
   return (
@@ -163,8 +164,10 @@ export const CrewSelection = () => {
                             className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-space-500 focus:border-transparent"
                           >
                             <option value="">Select a role</option>
-                            {roles.map(role => (
-                              <option key={role} value={role}>{role}</option>
+                            {roles.map((role) => (
+                              <option key={role} value={role}>
+                                {role}
+                              </option>
                             ))}
                           </select>
                         </div>
@@ -179,11 +182,7 @@ export const CrewSelection = () => {
                       Cancel
                     </Button>
                   </Link>
-                  <Button 
-                    onClick={handleSubmit}
-                    disabled={!isFormValid || isSubmitting}
-                    size="lg"
-                  >
+                  <Button onClick={handleSubmit} disabled={!isFormValid || isSubmitting} size="lg">
                     {isSubmitting ? (
                       <>
                         <div className="animate-spin h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
@@ -230,12 +229,8 @@ export const CrewSelection = () => {
                     </span>
                   </div>
                   <div>
-                    <p className="font-medium text-slate-900 dark:text-slate-100">
-                      Crew Selection
-                    </p>
-                    <p className="text-slate-600 dark:text-slate-400">
-                      Add mission crew members
-                    </p>
+                    <p className="font-medium text-slate-900 dark:text-slate-100">Crew Selection</p>
+                    <p className="text-slate-600 dark:text-slate-400">Add mission crew members</p>
                   </div>
                 </div>
 
@@ -249,9 +244,7 @@ export const CrewSelection = () => {
                     <p className="font-medium text-slate-900 dark:text-slate-100">
                       Schedule Activities
                     </p>
-                    <p className="text-slate-600 dark:text-slate-400">
-                      Create crew schedules
-                    </p>
+                    <p className="text-slate-600 dark:text-slate-400">Create crew schedules</p>
                   </div>
                 </div>
               </div>
@@ -276,9 +269,7 @@ export const CrewSelection = () => {
                 </div>
                 <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800">
                   <p className="font-medium text-slate-900 dark:text-slate-100">Science Officer</p>
-                  <p className="text-slate-600 dark:text-slate-400">
-                    Research and experiments
-                  </p>
+                  <p className="text-slate-600 dark:text-slate-400">Research and experiments</p>
                 </div>
               </div>
             </Card>
@@ -288,7 +279,8 @@ export const CrewSelection = () => {
                 Crew Size Recommendations
               </h3>
               <p className="text-sm text-blue-700 dark:text-blue-300">
-                Typical missions include 3-6 crew members for optimal task distribution and team dynamics. Ensure diverse skill sets across the crew.
+                Typical missions include 3-6 crew members for optimal task distribution and team
+                dynamics. Ensure diverse skill sets across the crew.
               </p>
             </Card>
           </div>

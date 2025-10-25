@@ -108,3 +108,15 @@ export interface DialogTitleProps {
   className?: string;
   children: React.ReactNode;
 }
+
+export interface TaskState {
+  crewMembers: CrewMember[];
+}
+
+export interface TaskContextType {
+  state: TaskState;
+  addTask: (crewMemberId: string, task: Activity) => void;
+  updateTask: (crewMemberId: string, task: Activity) => void;
+  deleteTask: (crewMemberId: string, taskId: string) => void;
+  getTaskById: (taskId: string) => { task: Activity; crewMemberId: string } | null;
+}
