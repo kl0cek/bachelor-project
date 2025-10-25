@@ -37,7 +37,7 @@ export const hasPermission = (user: User | null, permission: string): boolean =>
   return ROLE_PERMISSIONS[user.role]?.permissions.includes(permission) || false;
 };
 
-let users: User[] = [...DEFAULT_USERS];
+const users: User[] = [...DEFAULT_USERS];
 
 export const authenticateUser = (username: string, password: string): User | null => {
   const user = users.find((u) => u.username === username && u.password === password && u.isActive);

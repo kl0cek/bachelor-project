@@ -228,7 +228,7 @@ export const HomePage = () => {
       </div>
 
       {/* User Info Card - Show role-specific information */}
-      <Card className="p-6 mb-8 bg-gradient-to-r from-space-50 to-blue-50 dark:from-space-950 dark:to-blue-950 border-space-200 dark:border-space-800">
+      <Card className="p-6 mb-8 bg-linear-to-r from-space-50 to-blue-50 dark:from-space-950 dark:to-blue-950 border-space-200 dark:border-space-800">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">

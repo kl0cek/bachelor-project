@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Users, UserPlus, Edit, Trash2, Shield, Eye, User as UserIcon } from 'lucide-react';
+import { UserPlus, Edit, Trash2, Shield, Eye, User as UserIcon } from 'lucide-react';
 import { Card, Button } from '../components/ui/index';
-import { getAllUsers, createUser, updateUser, deleteUser, ROLE_PERMISSIONS } from '../utils/auth';
+import { getAllUsers, updateUser, deleteUser, ROLE_PERMISSIONS } from '../utils/auth';
 import type { User, UserRole } from '../types/auth';
 
 export const UserManagement = () => {
@@ -27,7 +27,7 @@ export const UserManagement = () => {
   };
 
   const handleCreateUser = () => {
-    const newUser = createUser(formData);
+    //const newUser = createUser(formData);
     loadUsers();
     resetForm();
     setIsCreating(false);

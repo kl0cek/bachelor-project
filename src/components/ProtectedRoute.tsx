@@ -37,17 +37,14 @@ export const ProtectedRoute = ({
     );
   }
 
-  // Check if user is logged in
   if (!user) {
     return <Navigate to="/" replace />;
   }
 
-  // Admin has access to everything
   if (user.role === 'admin') {
     return <>{children}</>;
   }
 
-  // Check required role
   if (requiredRole && user.role !== requiredRole) {
     return (
       <div className="container mx-auto px-6 py-16 text-center">
@@ -67,7 +64,6 @@ export const ProtectedRoute = ({
     );
   }
 
-  // Check required permission
   if (requiredPermission) {
     const userPermissions = ROLE_PERMISSIONS[user.role]?.permissions || [];
     const hasPermission = userPermissions.includes(requiredPermission);

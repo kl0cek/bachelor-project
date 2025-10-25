@@ -10,7 +10,6 @@ export const MainHeader = () => {
   const [user, setUser] = useState<UserType | null>(null);
   const location = useLocation();
 
-  // Load user from localStorage on mount
   useEffect(() => {
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
@@ -27,11 +26,15 @@ export const MainHeader = () => {
     setUser(authenticatedUser);
     localStorage.setItem('currentUser', JSON.stringify(authenticatedUser));
     setIsLoginModalOpen(false);
+
+    window.location.reload();
   };
 
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('currentUser');
+
+    window.location.reload();
   };
 
   const isHomePage = location.pathname === '/';
@@ -102,7 +105,6 @@ export const MainHeader = () => {
                     </div>
                   </div>
 
-                  {/* Show Admin Panel button only for admins */}
                   {user.role === 'admin' && (
                     <Link to="/admin/users">
                       <Button variant="outline" size="sm">
