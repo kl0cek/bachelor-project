@@ -51,3 +51,18 @@
   --space-900: #e1eaff;
   --space-950: #f0f4ff;
 }
+
+@keyframes loading {
+  0% {
+    width: 0%;
+    margin-left: 0%;
+  }
+  50% {
+    width: 50%;
+    margin-left: 25%;
+  }
+  100% {
+    width: 0%;
+    margin-left: 100%;
+  }
+}

@@ -131,3 +131,5 @@ export const MissionScheduler = () => {
     </TaskProvider>
   );
 };
+
+export default MissionScheduler;
