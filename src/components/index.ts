@@ -7,4 +7,4 @@ export { PlaybookHeader } from './PlaybookHeader';
 export { QuickActions } from './QuickActions';
 export { TaskForm } from './TaskForm';
 export { TimelineView } from './TimelineView';
-export { DayHeader } from './DayHeader'
+export { DayHeader } from './DayHeader';

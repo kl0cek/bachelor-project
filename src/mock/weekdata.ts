@@ -1,4 +1,4 @@
-import type { Activity } from "../types/types";
+import type { Activity } from '../types/types';
 
 export const getMockActivitiesForDay = (missionDay: number): Record<string, Activity[]> => {
   // Day 1 activities
@@ -284,7 +284,7 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
       ],
     };
   }
-  
+
   // Day 2 activities
   if (missionDay === 2) {
     return {
@@ -518,12 +518,12 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
       ],
     };
   }
-  
+
   // Day 3+ - empty schedule for testing
   return {
     'fe-1': [],
     'fe-2': [],
     'fe-4': [],
     'fe-5': [],
-};
+  };
 };

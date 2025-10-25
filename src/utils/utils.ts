@@ -20,7 +20,7 @@ export const calculateActivityPosition = (
   const totalHours = maxHour - minHour;
   const left = ((start - minHour) / totalHours) * 100;
   const width = (duration / totalHours) * 100;
-  
+
   return { left, width };
 };
 

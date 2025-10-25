@@ -5,7 +5,7 @@ import { cn, calculateActivityPosition } from '../utils/utils';
 import { ActivityModal, TaskForm, QuickActions, DayHeader } from './index';
 import { useTaskContext } from '../hooks/useTaskContext';
 import type { Activity, ActivityType, Mission } from '../types/types';
-import { getMockActivitiesForDay } from '../mock/weekdata'
+import { getMockActivitiesForDay } from '../mock/weekdata';
 
 const hours = Array.from({ length: 24 }, (_, i) => i);
 
@@ -36,16 +36,14 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   const [editingTask, setEditingTask] = useState<Activity | null>(null);
   const [selectedCrewMemberId, setSelectedCrewMemberId] = useState<string>('');
   const [newTaskStartTime, setNewTaskStartTime] = useState<number>(6);
-  
+
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [missionDay, setMissionDay] = useState<number>(1);
   const [mockDailyActivities, setMockDailyActivities] = useState<Record<string, Activity[]>>({});
 
-  const missionStartDate = mission 
-    ? new Date(mission.startDate) 
-    : new Date();
-  const missionEndDate = mission 
-    ? new Date(mission.endDate) 
+  const missionStartDate = mission ? new Date(mission.startDate) : new Date();
+  const missionEndDate = mission
+    ? new Date(mission.endDate)
     : new Date(new Date().setMonth(new Date().getMonth() + 6));
 
   // Initialize and load activities for current day
@@ -76,7 +74,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   const handlePreviousDay = () => {
     const newDate = new Date(currentDate);
     newDate.setDate(newDate.getDate() - 1);
-    
+
     if (newDate >= missionStartDate) {
       const newDay = calculateMissionDay(newDate, missionStartDate);
       setCurrentDate(newDate);
@@ -89,7 +87,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   const handleNextDay = () => {
     const newDate = new Date(currentDate);
     newDate.setDate(newDate.getDate() + 1);
-    
+
     if (newDate <= missionEndDate) {
       const newDay = calculateMissionDay(newDate, missionStartDate);
       setCurrentDate(newDate);
@@ -111,7 +109,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     const mockActivities = mockDailyActivities[crewMemberId] || [];
     const contextMember = state.crewMembers.find((m) => m.id === crewMemberId);
     const contextActivities = contextMember?.activities || [];
-    
+
     // Combine and sort by start time
     return [...mockActivities, ...contextActivities].sort((a, b) => a.start - b.start);
   };
@@ -124,14 +122,14 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     // Check if it's a mock activity or a context activity
     const mockActivities = mockDailyActivities[selectedCrewMemberId] || [];
     const isMockActivity = mockActivities.some((a) => a.id === activity.id);
-    
+
     if (isMockActivity) {
       // Don't allow editing mock activities (or implement differently)
       console.log('Cannot edit pre-scheduled activities');
       setSelectedActivity(null);
       return;
     }
-    
+
     const taskData = getTaskById(activity.id);
     if (taskData) {
       setEditingTask(activity);
@@ -182,7 +180,6 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   return (
     <>
       <Card className="overflow-hidden shadow-xl">
-
         <DayHeader
           currentDate={currentDate}
           missionDay={missionDay}
@@ -219,13 +216,15 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
 
             {state.crewMembers.map((member, idx) => {
               const memberActivities = getCrewMemberActivities(member.id);
-              
+
               return (
                 <div
                   key={member.id}
                   className={cn(
                     'flex border-b border-slate-200 dark:border-slate-800 transition-colors',
-                    idx % 2 === 0 ? 'bg-white dark:bg-slate-900' : 'bg-slate-25 dark:bg-slate-900/20'
+                    idx % 2 === 0
+                      ? 'bg-white dark:bg-slate-900'
+                      : 'bg-slate-25 dark:bg-slate-900/20'
                   )}
                 >
                   <div className="w-32 md:w-40 shrink-0 px-6 py-10 flex items-center justify-between">

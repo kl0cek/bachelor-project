@@ -92,12 +92,7 @@ export const DayHeader = ({
         </Button>
       </div>
 
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={onDateSelect}
-        className="hidden sm:flex"
-      >
+      <Button variant="outline" size="sm" onClick={onDateSelect} className="hidden sm:flex">
         <Calendar className="h-4 w-4 mr-2" />
         Select Date
       </Button>
