@@ -15,11 +15,11 @@ export const ActivityModal = ({ activity, onClose, onEdit }: ActivityModalProps)
   const startTime = formatTime(activity.start);
   const endTime = formatTime(activity.start + activity.duration);
 
-  const priorityColors: Record<Priority, string> = {
-    high: 'bg-orange-500 text-white shadow-orange',
-    medium: 'bg-space-600 text-white shadow-space',
-    low: 'bg-slate-400 text-white dark:bg-slate-600',
-  };
+const priorityColors: Record<Exclude<Priority, undefined>, string> = {
+  high: 'bg-orange-500 text-white shadow-orange',
+  medium: 'bg-space-600 text-white shadow-space',
+  low: 'bg-slate-400 text-white dark:bg-slate-600',
+};
 
   const typeLabels: Record<ActivityType, string> = {
     exercise: 'Exercise',
