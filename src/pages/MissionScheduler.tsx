@@ -114,7 +114,7 @@ export const MissionScheduler = () => {
                   <Users className="h-4 w-4" />
                   <span>{mission.crewMembers.length} crew members</span>
                 </div>
-                <div className="text-sm text-slate-600 dark:text-slate-400">GMT Timeline</div>
+                <div className="text-sm text-slate-600 dark:text-slate-400">UTC Timeline</div>
               </div>
             </div>
 

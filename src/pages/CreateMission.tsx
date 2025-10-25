@@ -32,7 +32,7 @@ export const CreateMission = () => {
       const newMissionId = `mission-${Date.now()}`;
       console.log('Creating mission:', { ...formData, id: newMissionId });
 
-      navigate(`/mission/${newMissionId}/scheduler`);
+      navigate(`/mission/${newMissionId}/crew`);
     }, 1500);
   };
 
@@ -175,7 +175,7 @@ export const CreateMission = () => {
             </h3>
             <div className="space-y-4 text-sm">
               <div className="flex gap-3">
-                <div className="w-6 h-6 rounded-full bg-space-100 dark:bg-space-900 flex items-center justify-center flex-shrink-0">
+                <div className="w-6 h-6 rounded-full bg-space-100 dark:bg-space-900 flex items-center justify-center shrink-0">
                   <span className="text-xs font-semibold text-space-600 dark:text-space-400">
                     1
                   </span>
@@ -191,7 +191,7 @@ export const CreateMission = () => {
               </div>
 
               <div className="flex gap-3">
-                <div className="w-6 h-6 rounded-full bg-space-100 dark:bg-space-900 flex items-center justify-center flex-shrink-0">
+                <div className="w-6 h-6 rounded-full bg-space-100 dark:bg-space-900 flex items-center justify-center shrink-0">
                   <span className="text-xs font-semibold text-space-600 dark:text-space-400">
                     2
                   </span>
@@ -205,7 +205,7 @@ export const CreateMission = () => {
               </div>
 
               <div className="flex gap-3">
-                <div className="w-6 h-6 rounded-full bg-space-100 dark:bg-space-900 flex items-center justify-center flex-shrink-0">
+                <div className="w-6 h-6 rounded-full bg-space-100 dark:bg-space-900 flex items-center justify-center shrink-0">
                   <span className="text-xs font-semibold text-space-600 dark:text-space-400">
                     3
                   </span>

@@ -75,7 +75,7 @@ const priorityColors: Record<Exclude<Priority, undefined>, string> = {
             <div className="flex items-center gap-3 text-base">
               <Clock className="h-5 w-5 text-slate-500 dark:text-slate-400" />
               <span className="text-slate-900 dark:text-slate-100 font-semibold">
-                {startTime} - {endTime} GMT
+                {startTime} - {endTime} UTC
               </span>
             </div>
             <Badge variant="outline" className="text-sm px-4 py-2">

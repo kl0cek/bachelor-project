@@ -164,7 +164,7 @@ export const TaskForm = ({
 
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                Start Time (GMT)
+                Start Time (UTC)
               </label>
               <input
                 type="number"

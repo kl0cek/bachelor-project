@@ -100,7 +100,7 @@ export const TimelineView = () => {
                     <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
                       {hour.toString().padStart(2, '0')}:00
                     </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">GMT</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">UTC</p>
                   </div>
                 ))}
               </div>
