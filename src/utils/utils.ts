@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { addDays, subtractDays, formatDate } from './dateUtils';
+import { subtractDays, formatDate } from './dateUtils';
 
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
@@ -39,11 +39,6 @@ export const missionUtils = {
     return Math.round((elapsed / total) * 100);
   },
 
-  getNextMissionDay(missionStartDate: string, currentDate: Date): Date {
-    const nextDay = addDays(currentDate, 1);
-    return nextDay;
-  },
-
   getPreviousMissionDay(missionStartDate: string, currentDate: Date): Date {
     const prevDay = subtractDays(currentDate, 1);
     const missionStart = new Date(missionStartDate);
@@ -76,7 +71,8 @@ export const validationUtils = {
       suggestions.push('Include numbers');
     }
 
-    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+    // Fixed: removed unnecessary escapes
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
       suggestions.push('Include special characters');
     }
 
@@ -167,7 +163,7 @@ export const formatUtils = {
 };
 
 export const storageUtils = {
-  setItem(key: string, value: any): void {
+  setItem(key: string, value: unknown): void {
     try {
       localStorage.setItem(key, JSON.stringify(value));
     } catch (error) {
@@ -203,7 +199,7 @@ export const storageUtils = {
 };
 
 export const urlUtils = {
-  buildQueryString(params: Record<string, any>): string {
+  buildQueryString(params: Record<string, unknown>): string {
     const searchParams = new URLSearchParams();
 
     Object.entries(params).forEach(([key, value]) => {
@@ -227,7 +223,7 @@ export const urlUtils = {
   },
 };
 
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
   delay: number
 ): ((...args: Parameters<T>) => void) => {
@@ -239,7 +235,7 @@ export const debounce = <T extends (...args: any[]) => any>(
   };
 };
 
-export const throttle = <T extends (...args: any[]) => any>(
+export const throttle = <T extends (...args: unknown[]) => unknown>(
   func: T,
   limit: number
 ): ((...args: Parameters<T>) => void) => {

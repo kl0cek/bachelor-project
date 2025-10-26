@@ -1,3 +1,5 @@
+{
+  /* 
 import type { Activity, ActivityType, Priority } from '../types/types';
 
 export interface CreateActivityRequest {
@@ -356,3 +358,5 @@ class ActivityService {
 }
 
 export const activityService = new ActivityService();
+*/
+}

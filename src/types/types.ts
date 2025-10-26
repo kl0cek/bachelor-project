@@ -185,7 +185,7 @@ export interface PaginatedResponse<T> {
 export interface ApiError {
   message: string;
   code?: string;
-  details?: any;
+  details?: Record<string, unknown>;
   timestamp: string;
 }
 
@@ -354,7 +354,7 @@ export interface AppConfig {
 
 export interface WebSocketMessage {
   type: string;
-  payload: any;
+  payload: Record<string, unknown>;
   timestamp: string;
   userId?: string;
   missionId?: string;
@@ -377,7 +377,7 @@ export interface AuditLog {
   action: string;
   resourceType: string;
   resourceId: string;
-  changes?: any;
+  changes?: Record<string, unknown>;
   timestamp: string;
   ipAddress?: string;
   userAgent?: string;
