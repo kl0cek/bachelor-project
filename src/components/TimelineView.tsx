@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { Card, Button } from './ui/index';
-import { cn, calculateActivityPosition } from '../utils/utils';
+import { cn } from '../utils/utils';
+import { calculateActivityPosition } from '../utils/activityUtils';
 import { ActivityModal, TaskForm, QuickActions, DayHeader } from './index';
 import { useTaskContext } from '../hooks/useTaskContext';
 import type { Activity, ActivityType, Mission } from '../types/types';
@@ -47,7 +48,6 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     ? new Date(mission.endDate)
     : new Date(new Date().setMonth(new Date().getMonth() + 6));
 
-  // Initialize and load activities for current day
   useEffect(() => {
     if (mission) {
       const today = new Date();
@@ -107,7 +107,6 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   const canGoPrevious = currentDate > missionStartDate;
   const canGoNext = currentDate < missionEndDate;
 
-  // Merge mock activities with user-added activities from context
   const getCrewMemberActivities = (crewMemberId: string): Activity[] => {
     const mockActivities = mockDailyActivities[crewMemberId] || [];
     const contextMember = state.crewMembers.find((m) => m.id === crewMemberId);
@@ -218,26 +217,24 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
         />
 
         <div className="overflow-x-auto">
-          <div className="min-w-[1400px] lg:min-w-0">
-            <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
-              <div className="w-32 md:w-40 shrink-0 px-6 py-6">
+          <div className="min-w-max">
+            <div className="grid grid-cols-[160px_repeat(24,minmax(60px,1fr))] border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+              <div className="px-6 py-6">
                 <p className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
                   Crew Member
                 </p>
               </div>
-              <div className="flex flex-1">
-                {hours.map((hour) => (
-                  <div
-                    key={hour}
-                    className="flex-1 border-l border-slate-200 dark:border-slate-800 px-2 py-6 text-center"
-                  >
-                    <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                      {hour.toString().padStart(2, '0')}:00
-                    </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">UTC</p>
-                  </div>
-                ))}
-              </div>
+              {hours.map((hour) => (
+                <div
+                  key={hour}
+                  className="border-l border-slate-200 dark:border-slate-800 px-2 py-6 text-center"
+                >
+                  <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                    {hour.toString().padStart(2, '0')}:00
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">UTC</p>
+                </div>
+              ))}
             </div>
 
             {state.crewMembers.map((member, idx) => {
@@ -247,13 +244,13 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
                 <div
                   key={member.id}
                   className={cn(
-                    'flex border-b border-slate-200 dark:border-slate-800 transition-colors',
+                    'grid grid-cols-[160px_repeat(24,minmax(60px,1fr))] border-b border-slate-200 dark:border-slate-800 transition-colors relative',
                     idx % 2 === 0
                       ? 'bg-white dark:bg-slate-900'
                       : 'bg-slate-25 dark:bg-slate-900/20'
                   )}
                 >
-                  <div className="w-32 md:w-40 shrink-0 px-6 py-10 flex items-center justify-between">
+                  <div className="px-6 py-10 flex items-center justify-between">
                     <div>
                       <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
                         {member.name}
@@ -272,19 +269,21 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
                       <Plus className="h-4 w-4" />
                     </Button>
                   </div>
-                  <div className="relative flex flex-1 group">
+                  <div className="contents">
                     {hours.map((hour) => (
                       <div
                         key={hour}
-                        className="flex-1 border-l border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer group/timeslot"
+                        className="relative border-l border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer group/timeslot min-h-[120px]"
                         onClick={() => handleTimeSlotClick(member.id, hour)}
                         title={`Add task at ${hour.toString().padStart(2, '0')}:00`}
                       >
-                        <div className="opacity-0 group-hover/timeslot:opacity-100 transition-opacity flex items-center justify-center h-full">
+                        <div className="opacity-0 group-hover/timeslot:opacity-100 transition-opacity flex items-center justify-center h-full min-h-[120px]">
                           <Plus className="h-4 w-4 text-slate-400" />
                         </div>
                       </div>
                     ))}
+                  </div>
+                  <div className="absolute left-40 right-0 top-0 bottom-0 pointer-events-none">
                     {memberActivities.map((activity) => {
                       const { left, width } = calculateActivityPosition(
                         activity.start,
@@ -297,7 +296,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
                           key={activity.id}
                           onClick={() => handleActivityClick(activity)}
                           className={cn(
-                            'absolute top-6 bottom-6 rounded-xl px-4 py-3 transition-all duration-200 hover:scale-105 hover:shadow-xl cursor-pointer border-2 group',
+                            'absolute top-6 bottom-6 rounded-xl px-4 py-3 transition-all duration-200 hover:scale-105 hover:shadow-xl cursor-pointer border-2 group pointer-events-auto',
                             activityColors[activity.type]
                           )}
                           style={{

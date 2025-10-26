@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router';
 import { Satellite, User, LogIn, Menu, Home, Shield } from 'lucide-react';
 import { Button } from './ui/index';
-import { LoginModel } from './LoginModel';
+import { LoginModal } from './LoginModal';
 import type { User as UserType } from '../types/auth';
 
 export const MainHeader = () => {
@@ -129,7 +129,7 @@ export const MainHeader = () => {
         </div>
       </header>
 
-      <LoginModel
+      <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
         onLogin={handleLogin}
