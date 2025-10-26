@@ -20,10 +20,11 @@ const activityColors: Record<ActivityType, string> = {
     'bg-slate-200 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700',
 };
 
-const calculateMissionDay = (currentDate: Date, missionStartDate: Date): number => {
-  const diffTime = currentDate.getTime() - missionStartDate.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return Math.max(1, diffDays);
+const calculateMissionDay = (currentDate: Date, missionStartDate: Date) => {
+  const start = new Date(missionStartDate.getFullYear(), missionStartDate.getMonth(), missionStartDate.getDate());
+  const current = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+  const diffDays = Math.floor((current.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+  return diffDays + 1;
 };
 
 interface TimelineViewProps {
@@ -73,33 +74,40 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     }
   }, [mission]);
 
-  const handlePreviousDay = () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(newDate.getDate() - 1);
+const handlePreviousDay = () => {
+  const normalizeDate = (date: Date) =>
+    new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
-    if (newDate >= missionStartDate) {
-      const newDay = calculateMissionDay(newDate, missionStartDate);
-      setCurrentDate(newDate);
-      setMissionDay(newDay);
-      const newMockData = getMockActivitiesForDay(newDay);
-      setMockDailyActivities(newMockData);
-      console.log(`Switched to Day ${newDay}`, newMockData);
-    }
-  };
+  const newDate = normalizeDate(currentDate);
+  newDate.setDate(newDate.getDate() - 1);
 
-  const handleNextDay = () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(newDate.getDate() + 1);
+  if (newDate >= normalizeDate(missionStartDate)) {
+    const newDay = calculateMissionDay(newDate, missionStartDate);
+    setCurrentDate(newDate);
+    setMissionDay(newDay);
+    const newMockData = getMockActivitiesForDay(newDay);
+    setMockDailyActivities(newMockData);
+    console.log(`Switched to Day ${newDay}`, newMockData);
+  }
+};
 
-    if (newDate <= missionEndDate) {
-      const newDay = calculateMissionDay(newDate, missionStartDate);
-      setCurrentDate(newDate);
-      setMissionDay(newDay);
-      const newMockData = getMockActivitiesForDay(newDay);
-      setMockDailyActivities(newMockData);
-      console.log(`Switched to Day ${newDay}`, newMockData);
-    }
-  };
+
+const handleNextDay = () => {
+  const normalizeDate = (date: Date) =>
+    new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  const newDate = normalizeDate(currentDate);
+  newDate.setDate(newDate.getDate() + 1);
+
+  if (newDate <= normalizeDate(missionEndDate)) {
+    const newDay = calculateMissionDay(newDate, missionStartDate);
+    setCurrentDate(newDate);
+    setMissionDay(newDay);
+    const newMockData = getMockActivitiesForDay(newDay);
+    setMockDailyActivities(newMockData);
+    console.log(`Switched to Day ${newDay}`, newMockData);
+  }
+};
 
   const handleDateSelect = () => {
     console.log('Open date picker modal');
