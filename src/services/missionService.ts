@@ -88,35 +88,38 @@ class MissionService {
     },
   ];
 
-  async getAllMissions(filters?: MissionFilters, pagination?: PaginationParams): Promise<PaginatedResponse<Mission>> {
+  async getAllMissions(
+    filters?: MissionFilters,
+    pagination?: PaginationParams
+  ): Promise<PaginatedResponse<Mission>> {
     return new Promise((resolve) => {
       setTimeout(() => {
         let filteredMissions = [...this.missions];
 
         if (filters?.status) {
-          filteredMissions = filteredMissions.filter(m => m.status === filters.status);
+          filteredMissions = filteredMissions.filter((m) => m.status === filters.status);
         }
 
         if (filters?.startDate) {
-          filteredMissions = filteredMissions.filter(m => 
-            new Date(m.startDate) >= new Date(filters.startDate!)
+          filteredMissions = filteredMissions.filter(
+            (m) => new Date(m.startDate) >= new Date(filters.startDate!)
           );
         }
 
         if (filters?.endDate) {
-          filteredMissions = filteredMissions.filter(m => 
-            new Date(m.endDate) <= new Date(filters.endDate!)
+          filteredMissions = filteredMissions.filter(
+            (m) => new Date(m.endDate) <= new Date(filters.endDate!)
           );
         }
 
         if (filters?.crewMemberId) {
-          filteredMissions = filteredMissions.filter(m => 
-            m.crewMembers.some(crew => crew.id === filters.crewMemberId)
+          filteredMissions = filteredMissions.filter((m) =>
+            m.crewMembers.some((crew) => crew.id === filters.crewMemberId)
           );
         }
 
         const total = filteredMissions.length;
-        
+
         if (pagination) {
           const start = (pagination.page - 1) * pagination.limit;
           const end = start + pagination.limit;
@@ -128,7 +131,7 @@ class MissionService {
           total,
           page: pagination?.page || 1,
           limit: pagination?.limit || total,
-          totalPages: pagination ? Math.ceil(total / pagination.limit) : 1
+          totalPages: pagination ? Math.ceil(total / pagination.limit) : 1,
         });
       }, 300);
     });
@@ -137,7 +140,7 @@ class MissionService {
   async getMissionById(id: string): Promise<Mission | null> {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const mission = this.missions.find(m => m.id === id);
+        const mission = this.missions.find((m) => m.id === id);
         resolve(mission || null);
       }, 200);
     });
@@ -164,8 +167,8 @@ class MissionService {
   async updateMission(id: string, updates: UpdateMissionRequest): Promise<Mission | null> {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const index = this.missions.findIndex(m => m.id === id);
-        
+        const index = this.missions.findIndex((m) => m.id === id);
+
         if (index === -1) {
           reject(new Error('Mission not found'));
           return;
@@ -185,8 +188,8 @@ class MissionService {
   async deleteMission(id: string): Promise<void> {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const index = this.missions.findIndex(m => m.id === id);
-        
+        const index = this.missions.findIndex((m) => m.id === id);
+
         if (index === -1) {
           reject(new Error('Mission not found'));
           return;
@@ -201,8 +204,8 @@ class MissionService {
   async addCrewMember(missionId: string, crewMember: Omit<CrewMember, 'id'>): Promise<CrewMember> {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const mission = this.missions.find(m => m.id === missionId);
-        
+        const mission = this.missions.find((m) => m.id === missionId);
+
         if (!mission) {
           reject(new Error('Mission not found'));
           return;
@@ -221,18 +224,22 @@ class MissionService {
     });
   }
 
-  async updateCrewMember(missionId: string, crewMemberId: string, updates: Partial<CrewMember>): Promise<CrewMember | null> {
+  async updateCrewMember(
+    missionId: string,
+    crewMemberId: string,
+    updates: Partial<CrewMember>
+  ): Promise<CrewMember | null> {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const mission = this.missions.find(m => m.id === missionId);
-        
+        const mission = this.missions.find((m) => m.id === missionId);
+
         if (!mission) {
           reject(new Error('Mission not found'));
           return;
         }
 
-        const crewIndex = mission.crewMembers.findIndex(c => c.id === crewMemberId);
-        
+        const crewIndex = mission.crewMembers.findIndex((c) => c.id === crewMemberId);
+
         if (crewIndex === -1) {
           reject(new Error('Crew member not found'));
           return;
@@ -252,15 +259,15 @@ class MissionService {
   async removeCrewMember(missionId: string, crewMemberId: string): Promise<void> {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const mission = this.missions.find(m => m.id === missionId);
-        
+        const mission = this.missions.find((m) => m.id === missionId);
+
         if (!mission) {
           reject(new Error('Mission not found'));
           return;
         }
 
-        const crewIndex = mission.crewMembers.findIndex(c => c.id === crewMemberId);
-        
+        const crewIndex = mission.crewMembers.findIndex((c) => c.id === crewMemberId);
+
         if (crewIndex === -1) {
           reject(new Error('Crew member not found'));
           return;

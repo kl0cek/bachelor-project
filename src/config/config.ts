@@ -12,20 +12,20 @@ export const config: AppConfig = {
     password: process.env.DB_PASSWORD || 'password',
     ssl: isProduction,
   },
-  
+
   jwt: {
     secret: process.env.JWT_SECRET || 'your-secret-key-here',
     expiresIn: process.env.JWT_EXPIRES_IN || '24h',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
   },
-  
+
   cors: {
-    origin: isDevelopment 
+    origin: isDevelopment
       ? ['http://localhost:3000', 'http://localhost:3001']
       : [process.env.FRONTEND_URL || 'https://your-domain.com'],
     credentials: true,
   },
-  
+
   uploads: {
     maxSize: parseInt(process.env.MAX_UPLOAD_SIZE || '10485760'), // 10MB
     allowedTypes: [
@@ -36,19 +36,21 @@ export const config: AppConfig = {
       'application/pdf',
       'text/csv',
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'application/vnd.ms-excel'
+      'application/vnd.ms-excel',
     ],
     destination: process.env.UPLOAD_DESTINATION || './uploads',
   },
 };
 
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 
-  (isDevelopment ? 'http://localhost:3000/api' : '/api');
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL || (isDevelopment ? 'http://localhost:3000/api' : '/api');
 
-export const WEBSOCKET_URL = process.env.NEXT_PUBLIC_WS_URL || 
+export const WEBSOCKET_URL =
+  process.env.NEXT_PUBLIC_WS_URL ||
   (isDevelopment ? 'ws://localhost:3000' : 'wss://your-domain.com');
 
-export const DATABASE_URL = process.env.DATABASE_URL || 
+export const DATABASE_URL =
+  process.env.DATABASE_URL ||
   `postgresql://${config.database.username}:${config.database.password}@${config.database.host}:${config.database.port}/${config.database.database}`;
 
 export const APP_NAME = 'Mission Control Platform';
@@ -80,16 +82,18 @@ export const SECURITY_SETTINGS = {
   sessionSecret: process.env.SESSION_SECRET || 'your-session-secret',
   csrfProtection: isProduction,
   helmetConfig: {
-    contentSecurityPolicy: isProduction ? {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
-        fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        imgSrc: ["'self'", "data:", "https:"],
-        scriptSrc: ["'self'"],
-        connectSrc: ["'self'", "https://api.wheretheiss.at"],
-      },
-    } : false,
+    contentSecurityPolicy: isProduction
+      ? {
+          directives: {
+            defaultSrc: ["'self'"],
+            styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
+            fontSrc: ["'self'", 'https://fonts.gstatic.com'],
+            imgSrc: ["'self'", 'data:', 'https:'],
+            scriptSrc: ["'self'"],
+            connectSrc: ["'self'", 'https://api.wheretheiss.at'],
+          },
+        }
+      : false,
   },
 };
 
@@ -171,17 +175,11 @@ export const FEATURE_FLAGS = {
 };
 
 export const validateConfig = (): void => {
-  const requiredEnvVars = [
-    'DB_HOST',
-    'DB_NAME',
-    'DB_USER',
-    'DB_PASSWORD',
-    'JWT_SECRET',
-  ];
+  const requiredEnvVars = ['DB_HOST', 'DB_NAME', 'DB_USER', 'DB_PASSWORD', 'JWT_SECRET'];
 
   if (isProduction) {
-    const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
-    
+    const missingVars = requiredEnvVars.filter((varName) => !process.env[varName]);
+
     if (missingVars.length > 0) {
       throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
     }

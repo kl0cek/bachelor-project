@@ -57,16 +57,19 @@ class ActivityService {
     return new Promise((resolve) => {
       setTimeout(() => {
         const crewIds = ['fe-1', 'fe-2', 'fe-4', 'fe-5'];
-        const schedules: DaySchedule[] = crewIds.map(crewId => ({
+        const schedules: DaySchedule[] = crewIds.map((crewId) => ({
           crewMemberId: crewId,
-          activities: this.getMockActivitiesForDay(crewId, 1)
+          activities: this.getMockActivitiesForDay(crewId, 1),
         }));
         resolve(schedules);
       }, 300);
     });
   }
 
-  async createActivity(crewMemberId: string, activityData: CreateActivityRequest): Promise<Activity> {
+  async createActivity(
+    crewMemberId: string,
+    activityData: CreateActivityRequest
+  ): Promise<Activity> {
     return new Promise((resolve) => {
       setTimeout(() => {
         const newActivity: Activity = {
@@ -79,7 +82,10 @@ class ActivityService {
     });
   }
 
-  async updateActivity(activityId: string, updates: UpdateActivityRequest): Promise<Activity | null> {
+  async updateActivity(
+    activityId: string,
+    updates: UpdateActivityRequest
+  ): Promise<Activity | null> {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         resolve({
@@ -105,7 +111,11 @@ class ActivityService {
     });
   }
 
-  async getAvailableTimeSlots(crewMemberId: string, date: string, duration: number): Promise<TimeSlot[]> {
+  async getAvailableTimeSlots(
+    crewMemberId: string,
+    date: string,
+    duration: number
+  ): Promise<TimeSlot[]> {
     return new Promise((resolve) => {
       setTimeout(() => {
         const activities = this.getMockActivitiesForDay(crewMemberId, 1);
@@ -113,37 +123,42 @@ class ActivityService {
 
         for (let hour = 6; hour <= 22; hour += 0.5) {
           const slotEnd = hour + duration;
-          const hasConflict = activities.some(activity => {
+          const hasConflict = activities.some((activity) => {
             const activityEnd = activity.start + activity.duration;
-            return (hour < activityEnd && slotEnd > activity.start);
+            return hour < activityEnd && slotEnd > activity.start;
           });
 
           timeSlots.push({
             start: hour,
             end: slotEnd,
             isAvailable: !hasConflict && slotEnd <= 24,
-            conflictingActivity: hasConflict ? activities.find(a => 
-              hour < (a.start + a.duration) && slotEnd > a.start
-            ) : undefined
+            conflictingActivity: hasConflict
+              ? activities.find((a) => hour < a.start + a.duration && slotEnd > a.start)
+              : undefined,
           });
         }
 
-        resolve(timeSlots.filter(slot => slot.isAvailable));
+        resolve(timeSlots.filter((slot) => slot.isAvailable));
       }, 200);
     });
   }
 
-  async validateActivityTime(crewMemberId: string, start: number, duration: number, excludeActivityId?: string): Promise<boolean> {
+  async validateActivityTime(
+    crewMemberId: string,
+    start: number,
+    duration: number,
+    excludeActivityId?: string
+  ): Promise<boolean> {
     const activities = await this.getActivitiesForCrewMember(crewMemberId);
-    const filteredActivities = excludeActivityId 
-      ? activities.filter(a => a.id !== excludeActivityId)
+    const filteredActivities = excludeActivityId
+      ? activities.filter((a) => a.id !== excludeActivityId)
       : activities;
 
     const activityEnd = start + duration;
-    
-    return !filteredActivities.some(activity => {
+
+    return !filteredActivities.some((activity) => {
       const existingEnd = activity.start + activity.duration;
-      return (start < existingEnd && activityEnd > activity.start);
+      return start < existingEnd && activityEnd > activity.start;
     });
   }
 
@@ -164,19 +179,30 @@ class ActivityService {
   }
 
   filterActivities(activities: Activity[], filters: ActivityFilters): Activity[] {
-    return activities.filter(activity => {
+    return activities.filter((activity) => {
       if (filters.type && activity.type !== filters.type) return false;
       if (filters.priority && activity.priority !== filters.priority) return false;
       if (filters.mission && activity.mission !== filters.mission) return false;
       if (filters.startTime !== undefined && activity.start < filters.startTime) return false;
-      if (filters.endTime !== undefined && (activity.start + activity.duration) > filters.endTime) return false;
-      if (filters.equipment && activity.equipment && !activity.equipment.some(eq => eq.includes(filters.equipment!))) return false;
-      
+      if (filters.endTime !== undefined && activity.start + activity.duration > filters.endTime)
+        return false;
+      if (
+        filters.equipment &&
+        activity.equipment &&
+        !activity.equipment.some((eq) => eq.includes(filters.equipment!))
+      )
+        return false;
+
       return true;
     });
   }
 
-  calculateActivityPosition(start: number, duration: number, minHour: number = 0, maxHour: number = 24) {
+  calculateActivityPosition(
+    start: number,
+    duration: number,
+    minHour: number = 0,
+    maxHour: number = 24
+  ) {
     const totalHours = maxHour - minHour;
     const left = ((start - minHour) / totalHours) * 100;
     const width = (duration / totalHours) * 100;
@@ -196,14 +222,15 @@ class ActivityService {
       sleep: 'bg-slate-400 text-white dark:bg-slate-600 border-slate-500',
       work: 'bg-space-600 text-white shadow-space border-space-700',
       eva: 'bg-orange-500 text-white shadow-orange border-orange-600',
-      optional: 'bg-slate-200 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700',
+      optional:
+        'bg-slate-200 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700',
     };
     return colors[type];
   }
 
   getPriorityColor(priority: Priority): string {
     if (!priority) return 'bg-slate-400 text-white dark:bg-slate-600';
-    
+
     const colors = {
       high: 'bg-orange-500 text-white shadow-orange',
       medium: 'bg-space-600 text-white shadow-space',

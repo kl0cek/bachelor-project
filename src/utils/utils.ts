@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { addDays, subtractDays, formatDate} from './dateUtils'
+import { addDays, subtractDays, formatDate } from './dateUtils';
 
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
@@ -32,10 +32,10 @@ export const missionUtils = {
     const end = new Date(endDate);
     const total = end.getTime() - start.getTime();
     const elapsed = currentDate.getTime() - start.getTime();
-    
+
     if (elapsed < 0) return 0;
     if (elapsed > total) return 100;
-    
+
     return Math.round((elapsed / total) * 100);
   },
 
@@ -48,7 +48,7 @@ export const missionUtils = {
     const prevDay = subtractDays(currentDate, 1);
     const missionStart = new Date(missionStartDate);
     return prevDay >= missionStart ? prevDay : missionStart;
-  }
+  },
 };
 
 export const validationUtils = {
@@ -59,57 +59,57 @@ export const validationUtils = {
 
   isStrongPassword(password: string): { isStrong: boolean; suggestions: string[] } {
     const suggestions: string[] = [];
-    
+
     if (password.length < 8) {
       suggestions.push('Use at least 8 characters');
     }
-    
+
     if (!/[a-z]/.test(password)) {
       suggestions.push('Include lowercase letters');
     }
-    
+
     if (!/[A-Z]/.test(password)) {
       suggestions.push('Include uppercase letters');
     }
-    
+
     if (!/\d/.test(password)) {
       suggestions.push('Include numbers');
     }
-    
+
     if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
       suggestions.push('Include special characters');
     }
 
     return {
       isStrong: suggestions.length === 0,
-      suggestions
+      suggestions,
     };
   },
 
   isValidUsername(username: string): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
-    
+
     if (username.length < 3) {
       errors.push('Username must be at least 3 characters');
     }
-    
+
     if (username.length > 20) {
       errors.push('Username must be less than 20 characters');
     }
-    
+
     if (!/^[a-zA-Z0-9_]+$/.test(username)) {
       errors.push('Username can only contain letters, numbers, and underscores');
     }
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
     };
   },
 
   sanitizeString(input: string): string {
     return input.trim().replace(/[<>]/g, '');
-  }
+  },
 };
 
 export const formatUtils = {
@@ -124,15 +124,15 @@ export const formatUtils = {
   formatDuration(minutes: number): string {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
-    
+
     if (hours === 0) {
       return `${mins}m`;
     }
-    
+
     if (mins === 0) {
       return `${hours}h`;
     }
-    
+
     return `${hours}h ${mins}m`;
   },
 
@@ -147,7 +147,7 @@ export const formatUtils = {
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
     if (diffDays < 7) return `${diffDays}d ago`;
-    
+
     return formatDate(date, 'MMM DD, YYYY');
   },
 
@@ -163,7 +163,7 @@ export const formatUtils = {
   pluralize(count: number, singular: string, plural?: string): string {
     if (count === 1) return `${count} ${singular}`;
     return `${count} ${plural || singular + 's'}`;
-  }
+  },
 };
 
 export const storageUtils = {
@@ -199,32 +199,32 @@ export const storageUtils = {
     } catch (error) {
       console.error('Failed to clear localStorage:', error);
     }
-  }
+  },
 };
 
 export const urlUtils = {
   buildQueryString(params: Record<string, any>): string {
     const searchParams = new URLSearchParams();
-    
+
     Object.entries(params).forEach(([key, value]) => {
       if (value !== null && value !== undefined && value !== '') {
         searchParams.append(key, value.toString());
       }
     });
-    
+
     return searchParams.toString();
   },
 
   parseQueryString(queryString: string): Record<string, string> {
     const params = new URLSearchParams(queryString);
     const result: Record<string, string> = {};
-    
+
     for (const [key, value] of params.entries()) {
       result[key] = value;
     }
-    
+
     return result;
-  }
+  },
 };
 
 export const debounce = <T extends (...args: any[]) => any>(
@@ -232,7 +232,7 @@ export const debounce = <T extends (...args: any[]) => any>(
   delay: number
 ): ((...args: Parameters<T>) => void) => {
   let timeoutId: NodeJS.Timeout;
-  
+
   return (...args: Parameters<T>) => {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => func(...args), delay);
@@ -244,12 +244,12 @@ export const throttle = <T extends (...args: any[]) => any>(
   limit: number
 ): ((...args: Parameters<T>) => void) => {
   let inThrottle: boolean;
-  
+
   return (...args: Parameters<T>) => {
     if (!inThrottle) {
       func(...args);
       inThrottle = true;
-      setTimeout(() => inThrottle = false, limit);
+      setTimeout(() => (inThrottle = false), limit);
     }
   };
 };

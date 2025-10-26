@@ -1,8 +1,8 @@
 import { Satellite, Clock, AlertCircle } from 'lucide-react';
 import { useISS } from '../hooks/useISS';
 import { cn } from '../utils/utils';
-import { getVisibilityIcon, getVisibilityText } from '../utils/issUtils'
-import { getDayOfYear, formatDate } from '../utils/dateUtils'
+import { getVisibilityIcon, getVisibilityText } from '../utils/issUtils';
+import { getDayOfYear, formatDate } from '../utils/dateUtils';
 
 export const ISSStatus = () => {
   const { data, loading, error } = useISS(30000);

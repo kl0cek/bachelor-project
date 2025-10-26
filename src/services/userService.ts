@@ -81,46 +81,50 @@ class UserService {
     },
   ];
 
-  async getAllUsers(filters?: UserFilters, pagination?: PaginationParams): Promise<PaginatedResponse<User>> {
+  async getAllUsers(
+    filters?: UserFilters,
+    pagination?: PaginationParams
+  ): Promise<PaginatedResponse<User>> {
     return new Promise((resolve) => {
       setTimeout(() => {
         let filteredUsers = [...this.users];
 
         if (filters?.role) {
-          filteredUsers = filteredUsers.filter(u => u.role === filters.role);
+          filteredUsers = filteredUsers.filter((u) => u.role === filters.role);
         }
 
         if (filters?.isActive !== undefined) {
-          filteredUsers = filteredUsers.filter(u => u.isActive === filters.isActive);
+          filteredUsers = filteredUsers.filter((u) => u.isActive === filters.isActive);
         }
 
         if (filters?.search) {
           const searchTerm = filters.search.toLowerCase();
-          filteredUsers = filteredUsers.filter(u => 
-            u.fullName.toLowerCase().includes(searchTerm) ||
-            u.username.toLowerCase().includes(searchTerm) ||
-            u.email?.toLowerCase().includes(searchTerm)
+          filteredUsers = filteredUsers.filter(
+            (u) =>
+              u.fullName.toLowerCase().includes(searchTerm) ||
+              u.username.toLowerCase().includes(searchTerm) ||
+              u.email?.toLowerCase().includes(searchTerm)
           );
         }
 
-        const usersWithoutPasswords = filteredUsers.map(u => ({
+        const usersWithoutPasswords = filteredUsers.map((u) => ({
           ...u,
-          password: '****'
+          password: '****',
         }));
 
         const total = usersWithoutPasswords.length;
-        
+
         if (pagination) {
           const start = (pagination.page - 1) * pagination.limit;
           const end = start + pagination.limit;
           const paginatedUsers = usersWithoutPasswords.slice(start, end);
-          
+
           resolve({
             data: paginatedUsers,
             total,
             page: pagination.page,
             limit: pagination.limit,
-            totalPages: Math.ceil(total / pagination.limit)
+            totalPages: Math.ceil(total / pagination.limit),
           });
         } else {
           resolve({
@@ -128,7 +132,7 @@ class UserService {
             total,
             page: 1,
             limit: total,
-            totalPages: 1
+            totalPages: 1,
           });
         }
       }, 300);
@@ -138,7 +142,7 @@ class UserService {
   async getUserById(id: string): Promise<User | null> {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const user = this.users.find(u => u.id === id);
+        const user = this.users.find((u) => u.id === id);
         if (user) {
           resolve({ ...user, password: '****' });
         } else {
@@ -151,9 +155,8 @@ class UserService {
   async createUser(userData: CreateUserRequest): Promise<User> {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const existingUser = this.users.find(u => 
-          u.username === userData.username || 
-          (userData.email && u.email === userData.email)
+        const existingUser = this.users.find(
+          (u) => u.username === userData.username || (userData.email && u.email === userData.email)
         );
 
         if (existingUser) {
@@ -176,19 +179,19 @@ class UserService {
   async updateUser(id: string, updates: UpdateUserRequest): Promise<User | null> {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const userIndex = this.users.findIndex(u => u.id === id);
-        
+        const userIndex = this.users.findIndex((u) => u.id === id);
+
         if (userIndex === -1) {
           reject(new Error('User not found'));
           return;
         }
 
         if (updates.username || updates.email) {
-          const existingUser = this.users.find(u => 
-            u.id !== id && (
-              (updates.username && u.username === updates.username) ||
-              (updates.email && u.email === updates.email)
-            )
+          const existingUser = this.users.find(
+            (u) =>
+              u.id !== id &&
+              ((updates.username && u.username === updates.username) ||
+                (updates.email && u.email === updates.email))
           );
 
           if (existingUser) {
@@ -210,14 +213,17 @@ class UserService {
   async deleteUser(id: string): Promise<void> {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const userIndex = this.users.findIndex(u => u.id === id);
-        
+        const userIndex = this.users.findIndex((u) => u.id === id);
+
         if (userIndex === -1) {
           reject(new Error('User not found'));
           return;
         }
 
-        if (this.users[userIndex].role === 'admin' && this.users.filter(u => u.role === 'admin').length === 1) {
+        if (
+          this.users[userIndex].role === 'admin' &&
+          this.users.filter((u) => u.role === 'admin').length === 1
+        ) {
           reject(new Error('Cannot delete the last admin user'));
           return;
         }
@@ -231,15 +237,15 @@ class UserService {
   async toggleUserStatus(id: string): Promise<User | null> {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const userIndex = this.users.findIndex(u => u.id === id);
-        
+        const userIndex = this.users.findIndex((u) => u.id === id);
+
         if (userIndex === -1) {
           reject(new Error('User not found'));
           return;
         }
 
         if (this.users[userIndex].role === 'admin' && this.users[userIndex].isActive) {
-          const activeAdmins = this.users.filter(u => u.role === 'admin' && u.isActive);
+          const activeAdmins = this.users.filter((u) => u.role === 'admin' && u.isActive);
           if (activeAdmins.length === 1) {
             reject(new Error('Cannot deactivate the last active admin'));
             return;
@@ -255,8 +261,8 @@ class UserService {
   async changePassword(id: string, currentPassword: string, newPassword: string): Promise<void> {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const user = this.users.find(u => u.id === id);
-        
+        const user = this.users.find((u) => u.id === id);
+
         if (!user) {
           reject(new Error('User not found'));
           return;
@@ -276,8 +282,8 @@ class UserService {
   async resetPassword(id: string, newPassword: string): Promise<void> {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const user = this.users.find(u => u.id === id);
-        
+        const user = this.users.find((u) => u.id === id);
+
         if (!user) {
           reject(new Error('User not found'));
           return;
@@ -338,16 +344,21 @@ class UserService {
     return errors;
   }
 
-  getUserStats(): { total: number; byRole: Record<UserRole, number>; active: number; inactive: number } {
+  getUserStats(): {
+    total: number;
+    byRole: Record<UserRole, number>;
+    active: number;
+    inactive: number;
+  } {
     const total = this.users.length;
-    const active = this.users.filter(u => u.isActive).length;
+    const active = this.users.filter((u) => u.isActive).length;
     const inactive = total - active;
 
     const byRole: Record<UserRole, number> = {
-      admin: this.users.filter(u => u.role === 'admin').length,
-      operator: this.users.filter(u => u.role === 'operator').length,
-      astronaut: this.users.filter(u => u.role === 'astronaut').length,
-      viewer: this.users.filter(u => u.role === 'viewer').length,
+      admin: this.users.filter((u) => u.role === 'admin').length,
+      operator: this.users.filter((u) => u.role === 'operator').length,
+      astronaut: this.users.filter((u) => u.role === 'astronaut').length,
+      viewer: this.users.filter((u) => u.role === 'viewer').length,
     };
 
     return { total, byRole, active, inactive };

@@ -1,7 +1,7 @@
 import { Clock, AlertCircle, Wrench, Edit3 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, Button, Badge } from './ui/index';
 import { cn } from '../utils/utils';
-import { formatTime } from '../utils/dateUtils'
+import { formatTime } from '../utils/dateUtils';
 import type { Activity, Priority, ActivityType } from '../types/types';
 
 interface ActivityModalProps {

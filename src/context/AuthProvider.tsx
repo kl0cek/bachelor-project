@@ -75,11 +75,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       dispatch({ type: 'AUTH_LOADING' });
-      
+
       try {
         await authService.initialize();
         const currentUser = authService.getCurrentUser();
-        
+
         if (currentUser) {
           dispatch({ type: 'AUTH_SUCCESS', payload: currentUser });
         } else {
@@ -96,12 +96,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const login = async (credentials: LoginCredentials): Promise<void> => {
     dispatch({ type: 'AUTH_LOADING' });
-    
+
     try {
       const user = await authService.login(credentials);
       dispatch({ type: 'AUTH_SUCCESS', payload: user });
     } catch (error) {
-      dispatch({ type: 'AUTH_ERROR', payload: error instanceof Error ? error.message : 'Login failed' });
+      dispatch({
+        type: 'AUTH_ERROR',
+        payload: error instanceof Error ? error.message : 'Login failed',
+      });
       throw error;
     }
   };
@@ -137,11 +140,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     updateUser,
   };
 
-  return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = (): AuthContextType => {
@@ -154,7 +153,7 @@ export const useAuth = (): AuthContextType => {
 
 export const usePermissions = () => {
   const { hasPermission, hasRole, user } = useAuth();
-  
+
   return {
     hasPermission,
     hasRole,
@@ -188,50 +187,56 @@ export const AuthGuard: React.FC<{
   }
 
   if (!user) {
-    return fallback || (
-      <div className="container mx-auto px-6 py-16 text-center">
-        <div className="max-w-md mx-auto">
-          <div className="text-6xl mb-4">🔐</div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            Authentication Required
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400 mb-6">
-            Please login to access this page.
-          </p>
+    return (
+      fallback || (
+        <div className="container mx-auto px-6 py-16 text-center">
+          <div className="max-w-md mx-auto">
+            <div className="text-6xl mb-4">🔐</div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+              Authentication Required
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">
+              Please login to access this page.
+            </p>
+          </div>
         </div>
-      </div>
+      )
     );
   }
 
   if (requiredRole && !hasRole(requiredRole)) {
-    return fallback || (
-      <div className="container mx-auto px-6 py-16 text-center">
-        <div className="max-w-md mx-auto">
-          <div className="text-6xl mb-4">🚫</div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            Access Denied
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400 mb-6">
-            You don't have the required role to access this page.
-          </p>
+    return (
+      fallback || (
+        <div className="container mx-auto px-6 py-16 text-center">
+          <div className="max-w-md mx-auto">
+            <div className="text-6xl mb-4">🚫</div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+              Access Denied
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">
+              You don't have the required role to access this page.
+            </p>
+          </div>
         </div>
-      </div>
+      )
     );
   }
 
   if (requiredPermission && !hasPermission(requiredPermission)) {
-    return fallback || (
-      <div className="container mx-auto px-6 py-16 text-center">
-        <div className="max-w-md mx-auto">
-          <div className="text-6xl mb-4">🚫</div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
-            Access Denied
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400 mb-6">
-            You don't have the required permission to access this page.
-          </p>
+    return (
+      fallback || (
+        <div className="container mx-auto px-6 py-16 text-center">
+          <div className="max-w-md mx-auto">
+            <div className="text-6xl mb-4">🚫</div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+              Access Denied
+            </h1>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">
+              You don't have the required permission to access this page.
+            </p>
+          </div>
         </div>
-      </div>
+      )
     );
   }
 

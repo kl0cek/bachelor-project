@@ -59,7 +59,7 @@ class AuthService {
 
   async initialize(): Promise<void> {
     if (this.isInitialized) return;
-    
+
     try {
       const savedUser = localStorage.getItem('currentUser');
       if (savedUser) {
@@ -69,7 +69,7 @@ class AuthService {
       console.error('Failed to initialize auth:', error);
       localStorage.removeItem('currentUser');
     }
-    
+
     this.isInitialized = true;
   }
 
@@ -120,17 +120,16 @@ class AuthService {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         const user = mockUsers.find(
-          u => u.username === credentials.username && 
-               u.password === credentials.password && 
-               u.isActive
+          (u) =>
+            u.username === credentials.username && u.password === credentials.password && u.isActive
         );
 
         if (user) {
           const authenticatedUser = {
             ...user,
-            lastLogin: new Date().toISOString()
+            lastLogin: new Date().toISOString(),
           };
-          
+
           this.currentUser = authenticatedUser;
           localStorage.setItem('currentUser', JSON.stringify(authenticatedUser));
           resolve(authenticatedUser);
@@ -157,7 +156,7 @@ class AuthService {
   hasPermission(permission: string): boolean {
     if (!this.currentUser) return false;
     if (this.currentUser.role === 'admin') return true;
-    
+
     const userPermissions = ROLE_PERMISSIONS[this.currentUser.role]?.permissions || [];
     return userPermissions.includes(permission);
   }
