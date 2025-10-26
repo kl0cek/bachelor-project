@@ -1,24 +1,54 @@
+export type UserRole = 'astronaut' | 'operator' | 'viewer' | 'admin';
+
+export interface User {
+  id: string;
+  username: string;
+  password: string;
+  role: UserRole;
+  fullName: string;
+  email?: string;
+  createdAt: string;
+  lastLogin?: string;
+  isActive: boolean;
+}
+
+export interface AuthState {
+  user: User | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+}
+
+export type ActivityType = 'exercise' | 'meal' | 'sleep' | 'work' | 'eva' | 'optional';
+export type Priority = 'high' | 'medium' | 'low';
+export type MissionStatus = 'planning' | 'active' | 'completed' | 'cancelled';
+
 export interface Activity {
   id: string;
   name: string;
   start: number;
   duration: number;
-  type: 'exercise' | 'meal' | 'sleep' | 'work' | 'eva' | 'optional';
+  type: ActivityType;
   mission?: string;
   description?: string;
   equipment?: string[];
-  priority?: 'high' | 'medium' | 'low';
+  priority?: Priority;
+  crewMemberId?: string;
+  missionId?: string;
+  date?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CrewMember {
   id: string;
   name: string;
+  role?: string;
+  email?: string;
   activities: Activity[];
-}
-
-export interface ActivityCategory {
-  name: string;
-  color: string;
+  missionId?: string;
+  userId?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Mission {
@@ -27,17 +57,17 @@ export interface Mission {
   description: string;
   startDate: string;
   endDate: string;
-  status: 'planning' | 'active' | 'completed' | 'cancelled';
+  status: MissionStatus;
   crewMembers: CrewMember[];
   createdAt: string;
   updatedAt: string;
+  createdBy?: string;
 }
 
-export interface MissionFormData {
+export interface ActivityCategory {
   name: string;
-  description: string;
-  startDate: string;
-  endDate: string;
+  color: string;
+  type: ActivityType;
 }
 
 export interface ISSData {
@@ -62,9 +92,28 @@ export interface ISSState {
   error: string | null;
 }
 
-export type ActivityType = Activity['type'];
-export type Priority = Activity['priority'];
-export type MissionStatus = Mission['status'];
+export interface MissionFormData {
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+}
+
+export interface TaskState {
+  crewMembers: CrewMember[];
+  loading: boolean;
+  error: string | null;
+}
+
+export interface TaskContextType {
+  state: TaskState;
+  addTask: (crewMemberId: string, task: Activity) => void;
+  updateTask: (crewMemberId: string, task: Activity) => void;
+  deleteTask: (crewMemberId: string, taskId: string) => void;
+  getTaskById: (taskId: string) => { task: Activity; crewMemberId: string } | null;
+  loadCrewMemberActivities: (crewMemberId: string, date?: string) => Promise<void>;
+  loadMissionActivities: (missionId: string, date?: string) => Promise<void>;
+}
 
 export interface ActivityModalProps {
   activity: Activity | null;
@@ -109,14 +158,250 @@ export interface DialogTitleProps {
   children: React.ReactNode;
 }
 
-export interface TaskState {
-  crewMembers: CrewMember[];
+export interface ApiResponse<T> {
+  data: T;
+  success: boolean;
+  message?: string;
+  error?: string;
 }
 
-export interface TaskContextType {
-  state: TaskState;
-  addTask: (crewMemberId: string, task: Activity) => void;
-  updateTask: (crewMemberId: string, task: Activity) => void;
-  deleteTask: (crewMemberId: string, taskId: string) => void;
-  getTaskById: (taskId: string) => { task: Activity; crewMemberId: string } | null;
+export interface PaginationParams {
+  page: number;
+  limit: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+export interface ApiError {
+  message: string;
+  code?: string;
+  details?: any;
+  timestamp: string;
+}
+
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string;
+}
+
+export interface TokenResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  user: User;
+}
+
+export interface CreateMissionRequest {
+  name: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  status?: MissionStatus;
+}
+
+export interface UpdateMissionRequest {
+  name?: string;
+  description?: string;
+  startDate?: string;
+  endDate?: string;
+  status?: MissionStatus;
+}
+
+export interface CreateActivityRequest {
+  name: string;
+  start: number;
+  duration: number;
+  type: ActivityType;
+  mission?: string;
+  description?: string;
+  equipment?: string[];
+  priority?: Priority;
+  crewMemberId: string;
+  missionId: string;
+  date: string;
+}
+
+export interface UpdateActivityRequest {
+  name?: string;
+  start?: number;
+  duration?: number;
+  type?: ActivityType;
+  mission?: string;
+  description?: string;
+  equipment?: string[];
+  priority?: Priority;
+}
+
+export interface CreateCrewMemberRequest {
+  name: string;
+  role?: string;
+  email?: string;
+  userId?: string;
+  missionId: string;
+}
+
+export interface UpdateCrewMemberRequest {
+  name?: string;
+  role?: string;
+  email?: string;
+}
+
+export interface CreateUserRequest {
+  username: string;
+  password: string;
+  fullName: string;
+  email?: string;
+  role: UserRole;
+  isActive: boolean;
+}
+
+export interface UpdateUserRequest {
+  username?: string;
+  password?: string;
+  fullName?: string;
+  email?: string;
+  role?: UserRole;
+  isActive?: boolean;
+}
+
+export interface MissionFilters {
+  status?: MissionStatus;
+  startDate?: string;
+  endDate?: string;
+  crewMemberId?: string;
+  createdBy?: string;
+}
+
+export interface ActivityFilters {
+  type?: ActivityType;
+  priority?: Priority;
+  mission?: string;
+  startTime?: number;
+  endTime?: number;
+  equipment?: string;
+  crewMemberId?: string;
+  missionId?: string;
+  date?: string;
+}
+
+export interface UserFilters {
+  role?: UserRole;
+  isActive?: boolean;
+  search?: string;
+}
+
+export interface TimeSlot {
+  start: number;
+  end: number;
+  isAvailable: boolean;
+  conflictingActivity?: Activity;
+}
+
+export interface DaySchedule {
+  date: string;
+  crewMemberId: string;
+  activities: Activity[];
+}
+
+export interface MissionDay {
+  date: string;
+  missionDay: number;
+  schedules: DaySchedule[];
+}
+
+export interface DatabaseConfig {
+  host: string;
+  port: number;
+  database: string;
+  username: string;
+  password: string;
+  ssl?: boolean;
+}
+
+export interface JWTConfig {
+  secret: string;
+  expiresIn: string;
+  refreshExpiresIn: string;
+}
+
+export interface AppConfig {
+  database: DatabaseConfig;
+  jwt: JWTConfig;
+  cors: {
+    origin: string[];
+    credentials: boolean;
+  };
+  uploads: {
+    maxSize: number;
+    allowedTypes: string[];
+    destination: string;
+  };
+}
+
+export interface WebSocketMessage {
+  type: string;
+  payload: any;
+  timestamp: string;
+  userId?: string;
+  missionId?: string;
+}
+
+export interface Notification {
+  id: string;
+  type: 'info' | 'success' | 'warning' | 'error';
+  title: string;
+  message: string;
+  timestamp: string;
+  read: boolean;
+  userId: string;
+  actionUrl?: string;
+}
+
+export interface AuditLog {
+  id: string;
+  userId: string;
+  action: string;
+  resourceType: string;
+  resourceId: string;
+  changes?: any;
+  timestamp: string;
+  ipAddress?: string;
+  userAgent?: string;
+}
+
+export interface Permission {
+  id: string;
+  name: string;
+  description: string;
+  resource: string;
+  action: string;
+}
+
+export interface RolePermission {
+  roleId: string;
+  permissionId: string;
+  granted: boolean;
+}
+
+export interface SystemStats {
+  totalUsers: number;
+  totalMissions: number;
+  activeMissions: number;
+  totalActivities: number;
+  systemUptime: string;
+  lastBackup?: string;
 }

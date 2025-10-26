@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { Card, Button } from './ui/index';
-import { cn, calculateActivityPosition } from '../utils/utils';
+import { cn } from '../utils/utils';
+import { calculateActivityPosition } from '../utils/activityUtils';
 import { ActivityModal, TaskForm, QuickActions, DayHeader } from './index';
 import { useTaskContext } from '../hooks/useTaskContext';
 import type { Activity, ActivityType, Mission } from '../types/types';
