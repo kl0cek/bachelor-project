@@ -1,7 +1,7 @@
 export { ActivityLegend } from './ActivityLegend';
-export { ActivityModal } from './ActivityModel';
+export { ActivityModal } from './ActivityModal';
 export { ISSStatus } from './ISSStatus';
-export { LoginModel } from './LoginModel';
+export { LoginModal } from './LoginModal';
 export { MainHeader } from './MainHeader';
 export { PlaybookHeader } from './PlaybookHeader';
 export { QuickActions } from './QuickActions';
