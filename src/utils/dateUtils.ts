@@ -10,22 +10,20 @@ export function formatDate(
   format: 'DD.MM.YYYY' | 'YYYY-MM-DD' | 'MMM DD, YYYY' = 'DD.MM.YYYY'
 ): string {
   switch (format) {
-    case 'DD.MM.YYYY':
+    case 'DD.MM.YYYY': {
       const day = date.getDate().toString().padStart(2, '0');
       const month = (date.getMonth() + 1).toString().padStart(2, '0');
       const year = date.getFullYear();
       return `${day}.${month}.${year}`;
-
+    }
     case 'YYYY-MM-DD':
       return date.toISOString().split('T')[0];
-
     case 'MMM DD, YYYY':
       return date.toLocaleDateString('en-US', {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
       });
-
     default:
       return date.toLocaleDateString();
   }

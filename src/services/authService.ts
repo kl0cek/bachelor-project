@@ -1,3 +1,5 @@
+{
+  /*
 import type { User, UserRole } from '../types/auth';
 
 export interface LoginCredentials {
@@ -188,3 +190,5 @@ class AuthService {
 }
 
 export const authService = new AuthService();
+*/
+}

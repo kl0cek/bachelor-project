@@ -39,3 +39,22 @@ export const useAuth = () => {
     hasRole,
   };
 };
+
+export const usePermissions = () => {
+  const { hasPermission, hasRole, user } = useAuth();
+
+  return {
+    hasPermission,
+    hasRole,
+    canCreateMission: hasPermission('create_mission'),
+    canEditMission: hasPermission('edit_mission'),
+    canManageCrew: hasPermission('manage_crew'),
+    canViewSchedule: hasPermission('view_schedule'),
+    canManageActivities: hasPermission('manage_activities'),
+    isAdmin: hasRole('admin'),
+    isOperator: hasRole('operator'),
+    isAstronaut: hasRole('astronaut'),
+    isViewer: hasRole('viewer'),
+    userRole: user?.role,
+  };
+};

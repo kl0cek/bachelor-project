@@ -1,3 +1,5 @@
+{
+  /* 
 import { createContext, useContext, useEffect, useReducer, type ReactNode } from 'react';
 import { authService, type LoginCredentials } from '../services/authService';
 import type { User, AuthState, UserRole } from '../types/types';
@@ -242,3 +244,5 @@ export const AuthGuard: React.FC<{
 
   return <>{children}</>;
 };
+*/
+}
