@@ -218,7 +218,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
 
         <div className="overflow-x-auto">
           <div className="min-w-max">
-            <div className="grid grid-cols-[160px_repeat(24,_minmax(60px,_1fr))] border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+            <div className="grid grid-cols-[160px_repeat(24,minmax(60px,1fr))] border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
               <div className="px-6 py-6">
                 <p className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
                   Crew Member
@@ -244,7 +244,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
                 <div
                   key={member.id}
                   className={cn(
-                    'grid grid-cols-[160px_repeat(24,_minmax(60px,_1fr))] border-b border-slate-200 dark:border-slate-800 transition-colors relative',
+                    'grid grid-cols-[160px_repeat(24,minmax(60px,1fr))] border-b border-slate-200 dark:border-slate-800 transition-colors relative',
                     idx % 2 === 0
                       ? 'bg-white dark:bg-slate-900'
                       : 'bg-slate-25 dark:bg-slate-900/20'
@@ -283,7 +283,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
                       </div>
                     ))}
                   </div>
-                  <div className="absolute left-[160px] right-0 top-0 bottom-0 pointer-events-none">
+                  <div className="absolute left-40 right-0 top-0 bottom-0 pointer-events-none">
                     {memberActivities.map((activity) => {
                       const { left, width } = calculateActivityPosition(
                         activity.start,
