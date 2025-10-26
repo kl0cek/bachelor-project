@@ -6,7 +6,9 @@ import { crewMembers as initialCrewMembers } from '../mock/data';
 type TaskAction =
   | { type: 'ADD_TASK'; payload: { crewMemberId: string; task: Activity } }
   | { type: 'UPDATE_TASK'; payload: { crewMemberId: string; task: Activity } }
-  | { type: 'DELETE_TASK'; payload: { crewMemberId: string; taskId: string } };
+  | { type: 'DELETE_TASK'; payload: { crewMemberId: string; taskId: string } }
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_ERROR'; payload: string | null };
 
 interface TaskProviderProps {
   children: React.ReactNode;
@@ -61,6 +63,18 @@ const taskReducer = (state: TaskState, action: TaskAction): TaskState => {
         ),
       };
 
+    case 'SET_LOADING':
+      return {
+        ...state,
+        loading: action.payload,
+      };
+
+    case 'SET_ERROR':
+      return {
+        ...state,
+        error: action.payload,
+      };
+
     default:
       return state;
   }
@@ -69,6 +83,8 @@ const taskReducer = (state: TaskState, action: TaskAction): TaskState => {
 export const TaskProvider = ({ children }: TaskProviderProps) => {
   const [state, dispatch] = useReducer(taskReducer, {
     crewMembers: initialCrewMembers,
+    loading: false,
+    error: null,
   });
 
   const addTask = (crewMemberId: string, task: Activity) => {
@@ -93,6 +109,44 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
     return null;
   };
 
+  const loadCrewMemberActivities = async (crewMemberId: string, date?: string): Promise<void> => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'SET_ERROR', payload: null });
+    
+    try {
+      // TODO: Implement API call to load crew member activities
+      // For now, this is a placeholder
+      console.log(`Loading activities for crew member ${crewMemberId} on ${date || 'today'}`);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      dispatch({ type: 'SET_LOADING', payload: false });
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Failed to load activities' });
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  };
+
+  const loadMissionActivities = async (missionId: string, date?: string): Promise<void> => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'SET_ERROR', payload: null });
+    
+    try {
+      // TODO: Implement API call to load mission activities
+      // For now, this is a placeholder
+      console.log(`Loading activities for mission ${missionId} on ${date || 'today'}`);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      dispatch({ type: 'SET_LOADING', payload: false });
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Failed to load activities' });
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  };
+
   return (
     <TaskContext.Provider
       value={{
@@ -101,6 +155,8 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
         updateTask,
         deleteTask,
         getTaskById,
+        loadCrewMemberActivities,
+        loadMissionActivities,
       }}
     >
       {children}
