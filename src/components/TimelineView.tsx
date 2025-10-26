@@ -20,11 +20,10 @@ const activityColors: Record<ActivityType, string> = {
     'bg-slate-200 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700',
 };
 
-const calculateMissionDay = (currentDate: Date, missionStartDate: Date) => {
-  const start = new Date(missionStartDate.getFullYear(), missionStartDate.getMonth(), missionStartDate.getDate());
-  const current = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
-  const diffDays = Math.floor((current.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-  return diffDays + 1;
+const calculateMissionDay = (currentDate: Date, missionStartDate: Date): number => {
+  const diffTime = currentDate.getTime() - missionStartDate.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return Math.max(1, diffDays);
 };
 
 interface TimelineViewProps {
@@ -49,7 +48,6 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     ? new Date(mission.endDate)
     : new Date(new Date().setMonth(new Date().getMonth() + 6));
 
-  // Initialize and load activities for current day
   useEffect(() => {
     if (mission) {
       const today = new Date();
@@ -74,40 +72,33 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     }
   }, [mission]);
 
-const handlePreviousDay = () => {
-  const normalizeDate = (date: Date) =>
-    new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const handlePreviousDay = () => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() - 1);
 
-  const newDate = normalizeDate(currentDate);
-  newDate.setDate(newDate.getDate() - 1);
+    if (newDate >= missionStartDate) {
+      const newDay = calculateMissionDay(newDate, missionStartDate);
+      setCurrentDate(newDate);
+      setMissionDay(newDay);
+      const newMockData = getMockActivitiesForDay(newDay);
+      setMockDailyActivities(newMockData);
+      console.log(`Switched to Day ${newDay}`, newMockData);
+    }
+  };
 
-  if (newDate >= normalizeDate(missionStartDate)) {
-    const newDay = calculateMissionDay(newDate, missionStartDate);
-    setCurrentDate(newDate);
-    setMissionDay(newDay);
-    const newMockData = getMockActivitiesForDay(newDay);
-    setMockDailyActivities(newMockData);
-    console.log(`Switched to Day ${newDay}`, newMockData);
-  }
-};
+  const handleNextDay = () => {
+    const newDate = new Date(currentDate);
+    newDate.setDate(newDate.getDate() + 1);
 
-
-const handleNextDay = () => {
-  const normalizeDate = (date: Date) =>
-    new Date(date.getFullYear(), date.getMonth(), date.getDate());
-
-  const newDate = normalizeDate(currentDate);
-  newDate.setDate(newDate.getDate() + 1);
-
-  if (newDate <= normalizeDate(missionEndDate)) {
-    const newDay = calculateMissionDay(newDate, missionStartDate);
-    setCurrentDate(newDate);
-    setMissionDay(newDay);
-    const newMockData = getMockActivitiesForDay(newDay);
-    setMockDailyActivities(newMockData);
-    console.log(`Switched to Day ${newDay}`, newMockData);
-  }
-};
+    if (newDate <= missionEndDate) {
+      const newDay = calculateMissionDay(newDate, missionStartDate);
+      setCurrentDate(newDate);
+      setMissionDay(newDay);
+      const newMockData = getMockActivitiesForDay(newDay);
+      setMockDailyActivities(newMockData);
+      console.log(`Switched to Day ${newDay}`, newMockData);
+    }
+  };
 
   const handleDateSelect = () => {
     console.log('Open date picker modal');
@@ -116,7 +107,6 @@ const handleNextDay = () => {
   const canGoPrevious = currentDate > missionStartDate;
   const canGoNext = currentDate < missionEndDate;
 
-  // Merge mock activities with user-added activities from context
   const getCrewMemberActivities = (crewMemberId: string): Activity[] => {
     const mockActivities = mockDailyActivities[crewMemberId] || [];
     const contextMember = state.crewMembers.find((m) => m.id === crewMemberId);
@@ -227,26 +217,24 @@ const handleNextDay = () => {
         />
 
         <div className="overflow-x-auto">
-          <div className="min-w-[1400px] lg:min-w-0">
-            <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
-              <div className="w-32 md:w-40 shrink-0 px-6 py-6">
+          <div className="min-w-max">
+            <div className="grid grid-cols-[160px_repeat(24,_minmax(60px,_1fr))] border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+              <div className="px-6 py-6">
                 <p className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
                   Crew Member
                 </p>
               </div>
-              <div className="flex flex-1">
-                {hours.map((hour) => (
-                  <div
-                    key={hour}
-                    className="flex-1 border-l border-slate-200 dark:border-slate-800 px-2 py-6 text-center"
-                  >
-                    <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                      {hour.toString().padStart(2, '0')}:00
-                    </p>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">UTC</p>
-                  </div>
-                ))}
-              </div>
+              {hours.map((hour) => (
+                <div
+                  key={hour}
+                  className="border-l border-slate-200 dark:border-slate-800 px-2 py-6 text-center"
+                >
+                  <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                    {hour.toString().padStart(2, '0')}:00
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">UTC</p>
+                </div>
+              ))}
             </div>
 
             {state.crewMembers.map((member, idx) => {
@@ -256,13 +244,13 @@ const handleNextDay = () => {
                 <div
                   key={member.id}
                   className={cn(
-                    'flex border-b border-slate-200 dark:border-slate-800 transition-colors',
+                    'grid grid-cols-[160px_repeat(24,_minmax(60px,_1fr))] border-b border-slate-200 dark:border-slate-800 transition-colors relative',
                     idx % 2 === 0
                       ? 'bg-white dark:bg-slate-900'
                       : 'bg-slate-25 dark:bg-slate-900/20'
                   )}
                 >
-                  <div className="w-32 md:w-40 shrink-0 px-6 py-10 flex items-center justify-between">
+                  <div className="px-6 py-10 flex items-center justify-between">
                     <div>
                       <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
                         {member.name}
@@ -281,19 +269,21 @@ const handleNextDay = () => {
                       <Plus className="h-4 w-4" />
                     </Button>
                   </div>
-                  <div className="relative flex flex-1 group">
+                  <div className="contents">
                     {hours.map((hour) => (
                       <div
                         key={hour}
-                        className="flex-1 border-l border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer group/timeslot"
+                        className="relative border-l border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer group/timeslot min-h-[120px]"
                         onClick={() => handleTimeSlotClick(member.id, hour)}
                         title={`Add task at ${hour.toString().padStart(2, '0')}:00`}
                       >
-                        <div className="opacity-0 group-hover/timeslot:opacity-100 transition-opacity flex items-center justify-center h-full">
+                        <div className="opacity-0 group-hover/timeslot:opacity-100 transition-opacity flex items-center justify-center h-full min-h-[120px]">
                           <Plus className="h-4 w-4 text-slate-400" />
                         </div>
                       </div>
                     ))}
+                  </div>
+                  <div className="absolute left-[160px] right-0 top-0 bottom-0 pointer-events-none">
                     {memberActivities.map((activity) => {
                       const { left, width } = calculateActivityPosition(
                         activity.start,
@@ -306,7 +296,7 @@ const handleNextDay = () => {
                           key={activity.id}
                           onClick={() => handleActivityClick(activity)}
                           className={cn(
-                            'absolute top-6 bottom-6 rounded-xl px-4 py-3 transition-all duration-200 hover:scale-105 hover:shadow-xl cursor-pointer border-2 group',
+                            'absolute top-6 bottom-6 rounded-xl px-4 py-3 transition-all duration-200 hover:scale-105 hover:shadow-xl cursor-pointer border-2 group pointer-events-auto',
                             activityColors[activity.type]
                           )}
                           style={{
