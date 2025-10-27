@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router';
-import { Satellite, User, LogIn, Menu, Home, Shield } from 'lucide-react';
+import { Satellite, User, LogIn, Home, Shield } from 'lucide-react';
 import { Button } from './ui/index';
 import { LoginModal } from './LoginModal';
 import type { User as UserType } from '../types/auth';
@@ -58,9 +58,10 @@ export const MainHeader = () => {
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 sm:gap-6 min-w-0 flex-1">
+              {/** 
               <Button variant="ghost" size="icon" className="lg:hidden shrink-0">
                 <Menu className="h-5 w-5" />
-              </Button>
+              </Button>*/}
 
               <Link to="/" className="flex items-center gap-2 sm:gap-4 min-w-0">
                 <div className="p-2 sm:p-3 rounded-xl bg-space-100 dark:bg-space-900 shrink-0">

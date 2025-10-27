@@ -3,7 +3,7 @@ import type { BadgeProps } from '../../types/types';
 
 export function Badge({ variant = 'default', className, children, ...props }: BadgeProps) {
   const variants = {
-    default: 'bg-space-600 text-white shadow-space',
+    default: 'bg-space-600 text-gray-200 shadow-space',
     secondary: 'bg-slate-200 text-slate-800 dark:bg-slate-800 dark:text-slate-200',
     outline:
       'border border-slate-300 text-slate-700 bg-transparent dark:border-slate-700 dark:text-slate-300',

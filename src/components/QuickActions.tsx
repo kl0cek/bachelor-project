@@ -61,7 +61,7 @@ export const QuickActions = ({ onCreateTask }: QuickActionsProps) => {
           onClick={toggleExpanded}
           className={cn(
             'h-14 w-14 rounded-full shadow-lg transition-all duration-200',
-            'bg-slate-600 hover:bg-slate-700 text-white',
+            'bg-slate-600 hover:bg-slate-700 text-gray-200',
             'hover:shadow-xl hover:scale-110',
             isExpanded ? 'rotate-45' : 'rotate-0'
           )}
