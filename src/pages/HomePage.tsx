@@ -119,7 +119,8 @@ export const HomePage = () => {
 
             <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-700">
               <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                Click the <strong>Login</strong> button in the header to get started
+                Click the <strong className="text-slate-900 dark:text-slate-100">Login</strong>{' '}
+                button in the header to get started
               </p>
             </div>
           </Card>
@@ -137,7 +138,11 @@ export const HomePage = () => {
               Mission Control Home
             </h1>
             <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mt-1 sm:mt-2">
-              Welcome back, <span className="font-semibold text-slate-900 dark:text-slate-100">{user.fullName}</span>!{' '}
+              Welcome back,{' '}
+              <span className="font-semibold text-slate-900 dark:text-slate-100">
+                {user.fullName}
+              </span>
+              !{' '}
               <span className="text-xs sm:text-sm font-medium inline-block">
                 ({user.role.charAt(0).toUpperCase() + user.role.slice(1)})
               </span>
@@ -148,16 +153,20 @@ export const HomePage = () => {
             {hasPermission('create_mission') && (
               <Link to="/create-mission" className="flex-1 sm:flex-initial">
                 <Button size="lg" className="w-full sm:w-auto text-sm sm:text-base">
-                  <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2" />
+                  <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2 dark:text-white text-sky-950" />
                   <span className="hidden xs:inline">Create New Mission</span>
-                  <span className="xs:hidden">New Mission</span>
+                  <span className="xs:hidden dark:text-white text-sky-950 ">New Mission</span>
                 </Button>
               </Link>
             )}
 
             {hasRole('admin') && (
               <Link to="/admin/users" className="flex-1 sm:flex-initial">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto text-sm sm:text-base"
+                >
                   <Shield className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2" />
                   <span className="hidden xs:inline">Manage Users</span>
                   <span className="xs:hidden">Users</span>
@@ -178,7 +187,9 @@ export const HomePage = () => {
               <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
                 {activeMissions.length}
               </p>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 truncate">Active Missions</p>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 truncate">
+                Active Missions
+              </p>
             </div>
           </div>
         </Card>
@@ -192,7 +203,9 @@ export const HomePage = () => {
               <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
                 {missions.filter((m) => m.status === 'planning').length}
               </p>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 truncate">In Planning</p>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 truncate">
+                In Planning
+              </p>
             </div>
           </div>
         </Card>
@@ -206,7 +219,9 @@ export const HomePage = () => {
               <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
                 {missions.filter((m) => m.status === 'completed').length}
               </p>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 truncate">Completed</p>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 truncate">
+                Completed
+              </p>
             </div>
           </div>
         </Card>
@@ -220,7 +235,9 @@ export const HomePage = () => {
               <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
                 {missions.length}
               </p>
-              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 truncate">Total Missions</p>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 truncate">
+                Total Missions
+              </p>
             </div>
           </div>
         </Card>
