@@ -111,7 +111,11 @@ export const TaskForm = ({
   const priorities: { value: Priority; label: string; color: string }[] = [
     { value: 'high', label: 'High', color: 'bg-orange-500 dark:text-white text-sky-950' },
     { value: 'medium', label: 'Medium', color: 'bg-space-600 dark:text-white text-sky-950' },
-    { value: 'low', label: 'Low', color: 'bg-slate-400 dark:text-white text-sky-950 dark:bg-slate-600' },
+    {
+      value: 'low',
+      label: 'Low',
+      color: 'bg-slate-400 dark:text-white text-sky-950 dark:bg-slate-600',
+    },
   ];
 
   return (

@@ -176,10 +176,10 @@ export const HomePage = () => {
                       {role === 'admin'
                         ? 'admin/admin123'
                         : role === 'operator'
-                        ? 'operator1/operator123'
-                        : role === 'astronaut'
-                        ? 'astronaut1/astronaut123'
-                        : 'viewer1/viewer123'}
+                          ? 'operator1/operator123'
+                          : role === 'astronaut'
+                            ? 'astronaut1/astronaut123'
+                            : 'viewer1/viewer123'}
                     </span>
                   </div>
                 ))}
@@ -187,11 +187,10 @@ export const HomePage = () => {
             </div>
 
             <div className="flex justify-end">
-              <Button
-                type="submit"
-                disabled={!username.trim() || !password.trim() || isLoading}
-              >
-                <span className='dark:text-white text-sky-950'>{isLoading ? 'Logging in...' : 'Login'}</span>
+              <Button type="submit" disabled={!username.trim() || !password.trim() || isLoading}>
+                <span className="dark:text-white text-sky-950">
+                  {isLoading ? 'Logging in...' : 'Login'}
+                </span>
               </Button>
             </div>
           </form>
@@ -265,7 +264,7 @@ export const HomePage = () => {
         <Link to="/create-mission">
           <Button>
             <Plus className="h-4 w-4 mr-2 dark:text-white text-sky-950" />
-            <span className='dark:text-white text-sky-950'>New Mission</span>
+            <span className="dark:text-white text-sky-950">New Mission</span>
           </Button>
         </Link>
       </div>
@@ -375,6 +374,5 @@ export const HomePage = () => {
     </div>
   );
 };
-
 
 export default HomePage;

@@ -206,7 +206,9 @@ export const UserManagement = () => {
               Cancel
             </Button>
             <Button onClick={editingUser ? handleUpdateUser : handleCreateUser}>
-              <span className='dark:text-white text-sky-950'>{editingUser ? 'Update User' : 'Create User'}</span>
+              <span className="dark:text-white text-sky-950">
+                {editingUser ? 'Update User' : 'Create User'}
+              </span>
             </Button>
           </div>
         </Card>

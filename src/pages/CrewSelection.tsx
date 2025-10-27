@@ -190,7 +190,7 @@ export const CrewSelection = () => {
                       </>
                     ) : (
                       <>
-                        <span className='dark:text-white text-sky-950'>Continue to Scheduler</span>
+                        <span className="dark:text-white text-sky-950">Continue to Scheduler</span>
                         <ArrowRight className="h-4 w-4 ml-2 dark:text-white text-sky-950" />
                       </>
                     )}
