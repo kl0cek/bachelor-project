@@ -1,5 +1,15 @@
 @import 'tailwindcss';
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+}
+
+.dark {
+  color-scheme: dark;
+}
+
 :root {
   --space-50: #f0f4ff;
   --space-100: #e1eaff;
