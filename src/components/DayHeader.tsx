@@ -48,54 +48,59 @@ export const DayHeader = ({
   };
 
   return (
-    <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
-      <div className="flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onPreviousDay}
-          disabled={!canGoPrevious}
-          className="h-9 w-9"
-          title="Previous day"
-        >
-          <ChevronLeft className="h-5 w-5" />
-        </Button>
+    <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onPreviousDay}
+            disabled={!canGoPrevious}
+            className="h-8 w-8 sm:h-9 sm:w-9 shrink-0"
+            title="Previous day"
+          >
+            <ChevronLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+          </Button>
 
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-            <Calendar className="h-4 w-4 text-space-600 dark:text-space-400" />
-            <div className="flex items-center gap-2">
-              <span className="text-lg font-bold text-slate-900 dark:text-slate-100">
+          <div className="flex items-center gap-1.5 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 min-w-0 overflow-x-auto scrollbar-hide">
+            <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-space-600 dark:text-space-400 shrink-0" />
+            <div className="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap">
+              <span className="text-sm sm:text-lg font-bold text-slate-900 dark:text-slate-100">
                 {formatDate(currentDate)}
               </span>
-              <span className="text-slate-400 dark:text-slate-600">/</span>
-              <span className="text-lg font-bold text-space-600 dark:text-space-400">
-                Day {missionDay} of {getTotalMissionDays()}
+              <span className="text-slate-400 dark:text-slate-600 hidden xs:inline">/</span>
+              <span className="text-sm sm:text-lg font-bold text-space-600 dark:text-space-400 hidden xs:inline">
+                D{missionDay}/{getTotalMissionDays()}
               </span>
-              <span className="text-slate-400 dark:text-slate-600">/</span>
-              <span className="text-lg font-bold text-slate-500 dark:text-slate-400">
+              <span className="text-slate-400 dark:text-slate-600 hidden md:inline">/</span>
+              <span className="text-sm sm:text-lg font-bold text-slate-500 dark:text-slate-400 hidden md:inline">
                 Day {getDayOfYear(currentDate)}
               </span>
             </div>
           </div>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onNextDay}
+            disabled={!canGoNext}
+            className="h-8 w-8 sm:h-9 sm:w-9 shrink-0"
+            title="Next day"
+          >
+            <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" />
+          </Button>
         </div>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onNextDay}
-          disabled={!canGoNext}
-          className="h-9 w-9"
-          title="Next day"
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={onDateSelect} 
+          className="hidden sm:flex shrink-0"
         >
-          <ChevronRight className="h-5 w-5" />
+          <Calendar className="h-4 w-4 mr-2" />
+          Select Date
         </Button>
       </div>
-
-      <Button variant="outline" size="sm" onClick={onDateSelect} className="hidden sm:flex">
-        <Calendar className="h-4 w-4 mr-2" />
-        Select Date
-      </Button>
     </div>
   );
 };
