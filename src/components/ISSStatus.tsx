@@ -50,14 +50,23 @@ export const ISSStatus = () => {
             {formattedDate}
           </span>
           <span className="text-[10px] sm:text-xs text-slate-600 dark:text-slate-400 whitespace-nowrap">
-            <span className="hidden sm:inline">Day {dayOfYear} of {currentDate.getFullYear()}</span>
-            <span className="sm:hidden">D{dayOfYear}/{currentDate.getFullYear()}</span>
+            <span className="hidden sm:inline">
+              Day {dayOfYear} of {currentDate.getFullYear()}
+            </span>
+            <span className="sm:hidden">
+              D{dayOfYear}/{currentDate.getFullYear()}
+            </span>
           </span>
         </div>
       </div>
 
       {data && (
-        <div className={cn('flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl border', visibilityColor)}>
+        <div
+          className={cn(
+            'flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl border',
+            visibilityColor
+          )}
+        >
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <span className="text-xs sm:text-sm">{getVisibilityIcon(data.visibility)}</span>
             <Satellite className="h-3.5 w-3.5 sm:h-4 sm:w-4" />

@@ -91,10 +91,10 @@ export const DayHeader = ({
           </Button>
         </div>
 
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={onDateSelect} 
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={onDateSelect}
           className="hidden sm:flex shrink-0"
         >
           <Calendar className="h-4 w-4 mr-2" />
