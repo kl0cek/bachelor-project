@@ -191,7 +191,7 @@ export const HomePage = () => {
                 type="submit"
                 disabled={!username.trim() || !password.trim() || isLoading}
               >
-                {isLoading ? 'Logging in...' : 'Login'}
+                <span className='dark:text-white text-sky-950'>{isLoading ? 'Logging in...' : 'Login'}</span>
               </Button>
             </div>
           </form>
@@ -264,8 +264,8 @@ export const HomePage = () => {
 
         <Link to="/create-mission">
           <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            New Mission
+            <Plus className="h-4 w-4 mr-2 dark:text-white text-sky-950" />
+            <span className='dark:text-white text-sky-950'>New Mission</span>
           </Button>
         </Link>
       </div>

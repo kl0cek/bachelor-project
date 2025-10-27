@@ -158,8 +158,8 @@ export const CreateMission = () => {
                     </>
                   ) : (
                     <>
-                      <Save className="h-4 w-4 mr-2 text-white" />
-                      Create Mission
+                      <Save className="h-4 w-4 mr-2 dark:text-white text-sky-950" />
+                      <span className='dark:text-white text-sky-950'>Create Mission</span>
                     </>
                   )}
                 </Button>
