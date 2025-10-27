@@ -301,10 +301,12 @@ export const TaskForm = ({
 
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 sm:pt-6 border-t border-slate-200 dark:border-slate-800">
             <Button type="button" variant="ghost" onClick={onClose} className="w-full sm:w-auto">
-              <span className='dark:text-white text-sky-950'>Cancel</span>
+              <span className="dark:text-white text-sky-950">Cancel</span>
             </Button>
             <Button type="submit" className="w-full sm:w-auto">
-              <span className='dark:text-white text-sky-950'>{isEditing ? 'Update Task' : 'Create Task'}</span>
+              <span className="dark:text-white text-sky-950">
+                {isEditing ? 'Update Task' : 'Create Task'}
+              </span>
             </Button>
           </div>
         </form>

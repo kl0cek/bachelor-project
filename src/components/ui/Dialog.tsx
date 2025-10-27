@@ -48,7 +48,12 @@ export function DialogHeader({ children }: DialogHeaderProps) {
 
 export function DialogTitle({ className, children }: DialogTitleProps) {
   return (
-    <h2 className={cn('text-lg sm:text-xl md:text-2xl font-semibold text-slate-900 dark:text-slate-100', className)}>
+    <h2
+      className={cn(
+        'text-lg sm:text-xl md:text-2xl font-semibold text-slate-900 dark:text-slate-100',
+        className
+      )}
+    >
       {children}
     </h2>
   );

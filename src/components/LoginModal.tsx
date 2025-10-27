@@ -151,13 +151,15 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
 
           <div className="flex justify-end gap-3">
             <Button type="button" variant="ghost" onClick={handleClose} disabled={isLoading}>
-              <span className='dark:text-white text-sky-950'>Cancel</span>
+              <span className="dark:text-white text-sky-950">Cancel</span>
             </Button>
             <Button
               onClick={handleSubmit}
               disabled={!username.trim() || !password.trim() || isLoading}
             >
-              <span className='dark:text-white text-sky-950'>{isLoading ? 'Logging in...' : 'Login'}</span>
+              <span className="dark:text-white text-sky-950">
+                {isLoading ? 'Logging in...' : 'Login'}
+              </span>
             </Button>
           </div>
         </div>

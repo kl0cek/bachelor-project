@@ -11,9 +11,11 @@ import { getMockActivitiesForDay } from '../mock/weekdata';
 const hours = Array.from({ length: 24 }, (_, i) => i);
 
 const activityColors: Record<ActivityType, string> = {
-  exercise: 'bg-space-400 dark:bg-space-500 text-white shadow-space border-space-600 dark:border-space-400',
+  exercise:
+    'bg-space-400 dark:bg-space-500 text-white shadow-space border-space-600 dark:border-space-400',
   meal: 'bg-slate-400 text-gray-900 dark:bg-slate-500 dark:text-white border-slate-500 dark:border-slate-400',
-  sleep: 'bg-slate-400 text-gray-900 dark:bg-slate-500 dark:text-white border-slate-500 dark:border-slate-400',
+  sleep:
+    'bg-slate-400 text-gray-900 dark:bg-slate-500 dark:text-white border-slate-500 dark:border-slate-400',
   work: 'bg-space-400 dark:bg-space-500 text-white shadow-space border-space-600 dark:border-space-400',
   eva: 'bg-orange-400 dark:bg-orange-500 text-gray-900 dark:text-white shadow-orange border-orange-600 dark:border-orange-400',
   optional:

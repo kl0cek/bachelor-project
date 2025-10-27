@@ -76,7 +76,6 @@ export const MainHeader = () => {
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 shrink-0">
-
               {user ? (
                 <>
                   <div className="flex items-center gap-2 sm:gap-3 px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-slate-100 dark:bg-slate-700">
@@ -103,13 +102,23 @@ export const MainHeader = () => {
                     </Link>
                   )}
 
-                  <Button variant="outline" size="sm" onClick={handleLogout} className="px-2 sm:px-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleLogout}
+                    className="px-2 sm:px-3"
+                  >
                     <span className="hidden sm:inline">Logout</span>
                     <span className="sm:hidden text-xs">Out</span>
                   </Button>
                 </>
               ) : (
-                <Button variant="default" size="sm" onClick={() => setIsLoginModalOpen(true)} className="px-2 sm:px-3">
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => setIsLoginModalOpen(true)}
+                  className="px-2 sm:px-3"
+                >
                   <LogIn className="h-3.5 w-3.5 sm:h-4 sm:w-4 dark:text-white text-sky-950" />
                   <span className="hidden xs:inline ml-1.5 sm:ml-2">Login</span>
                 </Button>

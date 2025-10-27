@@ -53,7 +53,10 @@ export const ActivityModal = ({ activity, onClose, onEdit }: ActivityModalProps)
             <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               {activity.priority && (
                 <Badge
-                  className={cn('text-xs sm:text-sm px-2 py-1 sm:px-4 sm:py-2', priorityColors[activity.priority])}
+                  className={cn(
+                    'text-xs sm:text-sm px-2 py-1 sm:px-4 sm:py-2',
+                    priorityColors[activity.priority]
+                  )}
                 >
                   {activity.priority.toUpperCase()}
                 </Badge>
@@ -108,7 +111,11 @@ export const ActivityModal = ({ activity, onClose, onEdit }: ActivityModalProps)
               </div>
               <div className="flex flex-wrap gap-2 sm:gap-3 pl-6 sm:pl-8">
                 {activity.equipment.map((item, idx) => (
-                  <Badge key={idx} variant="secondary" className="text-xs sm:text-sm px-2 sm:px-3 py-1">
+                  <Badge
+                    key={idx}
+                    variant="secondary"
+                    className="text-xs sm:text-sm px-2 sm:px-3 py-1"
+                  >
                     {item}
                   </Badge>
                 ))}
