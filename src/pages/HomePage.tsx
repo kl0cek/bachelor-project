@@ -129,38 +129,38 @@ export const HomePage = () => {
   }
 
   return (
-    <div className="container mx-auto px-6 py-8">
-      <div className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+    <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+      <div className="mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-slate-900 dark:text-slate-100">
               Mission Control Home
             </h1>
-            <p className="text-slate-600 dark:text-slate-400 mt-2">
-              Welcome back, {user.fullName}!{' '}
-              <span className="text-sm font-medium">
+            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 mt-1 sm:mt-2">
+              Welcome back, <span className="font-semibold text-slate-900 dark:text-slate-100">{user.fullName}</span>!{' '}
+              <span className="text-xs sm:text-sm font-medium inline-block">
                 ({user.role.charAt(0).toUpperCase() + user.role.slice(1)})
               </span>
             </p>
           </div>
 
-          <div className="flex gap-3">
-            {/* Only operators and admins can create missions */}
+          <div className="flex flex-wrap gap-2 sm:gap-3">
             {hasPermission('create_mission') && (
-              <Link to="/create-mission">
-                <Button size="lg" className="w-full sm:w-auto">
-                  <Plus className="h-5 w-5 mr-2" />
-                  Create New Mission
+              <Link to="/create-mission" className="flex-1 sm:flex-initial">
+                <Button size="lg" className="w-full sm:w-auto text-sm sm:text-base">
+                  <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2" />
+                  <span className="hidden xs:inline">Create New Mission</span>
+                  <span className="xs:hidden">New Mission</span>
                 </Button>
               </Link>
             )}
 
-            {/* Only admins see user management */}
             {hasRole('admin') && (
-              <Link to="/admin/users">
-                <Button size="lg" variant="outline" className="w-full sm:w-auto">
-                  <Shield className="h-5 w-5 mr-2" />
-                  Manage Users
+              <Link to="/admin/users" className="flex-1 sm:flex-initial">
+                <Button size="lg" variant="outline" className="w-full sm:w-auto text-sm sm:text-base">
+                  <Shield className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2" />
+                  <span className="hidden xs:inline">Manage Users</span>
+                  <span className="xs:hidden">Users</span>
                 </Button>
               </Link>
             )}
@@ -168,73 +168,71 @@ export const HomePage = () => {
         </div>
       </div>
 
-      {/* Stats Cards - Everyone can see these */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
-        <Card className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-lg bg-green-100 dark:bg-green-900">
-              <Activity className="h-6 w-6 text-green-600 dark:text-green-400" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
+        <Card className="p-4 sm:p-6">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="p-2 sm:p-3 rounded-lg bg-green-100 dark:bg-green-900 shrink-0">
+              <Activity className="h-5 w-5 sm:h-6 sm:w-6 text-green-600 dark:text-green-400" />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+            <div className="min-w-0">
+              <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
                 {activeMissions.length}
               </p>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Active Missions</p>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 truncate">Active Missions</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900">
-              <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+        <Card className="p-4 sm:p-6">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="p-2 sm:p-3 rounded-lg bg-blue-100 dark:bg-blue-900 shrink-0">
+              <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600 dark:text-blue-400" />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+            <div className="min-w-0">
+              <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
                 {missions.filter((m) => m.status === 'planning').length}
               </p>
-              <p className="text-sm text-slate-600 dark:text-slate-400">In Planning</p>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 truncate">In Planning</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-lg bg-slate-100 dark:bg-slate-800">
-              <Users className="h-6 w-6 text-slate-600 dark:text-slate-400" />
+        <Card className="p-4 sm:p-6">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="p-2 sm:p-3 rounded-lg bg-slate-100 dark:bg-slate-800 shrink-0">
+              <Users className="h-5 w-5 sm:h-6 sm:w-6 text-slate-600 dark:text-slate-400" />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+            <div className="min-w-0">
+              <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
                 {missions.filter((m) => m.status === 'completed').length}
               </p>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Completed</p>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 truncate">Completed</p>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-lg bg-space-100 dark:bg-space-900">
-              <Clock className="h-6 w-6 text-space-600 dark:text-space-400" />
+        <Card className="p-4 sm:p-6">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="p-2 sm:p-3 rounded-lg bg-space-100 dark:bg-space-900 shrink-0">
+              <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-space-600 dark:text-space-400" />
             </div>
-            <div>
-              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+            <div className="min-w-0">
+              <p className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
                 {missions.length}
               </p>
-              <p className="text-sm text-slate-600 dark:text-slate-400">Total Missions</p>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 truncate">Total Missions</p>
             </div>
           </div>
         </Card>
       </div>
 
-      {/* User Info Card - Show role-specific information */}
-      <Card className="p-6 mb-8 bg-linear-to-r from-space-50 to-blue-50 dark:from-space-950 dark:to-blue-950 border-space-200 dark:border-space-800">
+      <Card className="p-4 sm:p-6 mb-6 sm:mb-8 bg-linear-to-r from-space-50 to-blue-50 dark:from-space-950 dark:to-blue-950 border-space-200 dark:border-space-800">
         <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
               Your Access Level
             </h3>
-            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-3 sm:mb-4">
               {user.role === 'admin' &&
                 'You have full administrative access to all system features.'}
               {user.role === 'operator' &&
@@ -247,26 +245,26 @@ export const HomePage = () => {
 
             <div className="flex flex-wrap gap-2">
               {user.role === 'admin' ? (
-                <Badge className="bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300">
+                <Badge className="bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 text-xs">
                   <Shield className="h-3 w-3 mr-1" />
                   All Permissions
                 </Badge>
               ) : (
                 <>
                   {hasPermission('view_schedule') && (
-                    <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300">
+                    <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 text-xs">
                       <Eye className="h-3 w-3 mr-1" />
                       View Schedules
                     </Badge>
                   )}
                   {hasPermission('create_mission') && (
-                    <Badge className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                    <Badge className="bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300 text-xs">
                       <Plus className="h-3 w-3 mr-1" />
                       Create Missions
                     </Badge>
                   )}
                   {hasPermission('manage_crew') && (
-                    <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300">
+                    <Badge className="bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300 text-xs">
                       <Users className="h-3 w-3 mr-1" />
                       Manage Crew
                     </Badge>
@@ -278,50 +276,49 @@ export const HomePage = () => {
         </div>
       </Card>
 
-      {/* Active Missions Section - Everyone with view_schedule permission can see */}
       {activeMissions.length > 0 && hasPermission('view_schedule') && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3 sm:mb-4">
             Active Missions
           </h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {activeMissions.map((mission) => (
-              <Card key={mission.id} className="p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
+              <Card key={mission.id} className="p-4 sm:p-6 hover:shadow-lg transition-shadow">
+                <div className="flex items-start justify-between mb-3 sm:mb-4 gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 mb-1 sm:mb-2 truncate">
                       {mission.name}
                     </h3>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
                       {mission.description}
                     </p>
                   </div>
-                  <Badge className={cn('ml-4', statusColors[mission.status])}>
+                  <Badge className={cn('ml-2 shrink-0 text-xs', statusColors[mission.status])}>
                     {statusLabels[mission.status]}
                   </Badge>
                 </div>
 
-                <div className="space-y-2 mb-4">
-                  <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                    <Calendar className="h-4 w-4" />
-                    <span>
+                <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                    <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                    <span className="truncate">
                       {formatDate(mission.startDate)} - {formatDate(mission.endDate)}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                    <Clock className="h-4 w-4" />
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                    <Clock className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                     <span>{getDuration(mission.startDate, mission.endDate)}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                    <Users className="h-4 w-4" />
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
+                    <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                     <span>{mission.crewMembers.length} crew members</span>
                   </div>
                 </div>
 
                 <Link to={`/mission/${mission.id}/scheduler`}>
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full text-sm">
                     {hasPermission('edit_mission') ? 'Manage Mission' : 'View Mission'}
-                    <ArrowRight className="h-4 w-4 ml-2" />
+                    <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2" />
                   </Button>
                 </Link>
               </Card>
@@ -330,45 +327,44 @@ export const HomePage = () => {
         </div>
       )}
 
-      {/* All Missions Section */}
       {hasPermission('view_mission') && (
         <div>
-          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3 sm:mb-4">
             All Missions
           </h2>
           <div className="grid grid-cols-1 gap-4">
             {otherMissions.map((mission) => (
-              <Card key={mission.id} className="p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-4 mb-2">
-                      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+              <Card key={mission.id} className="p-4 sm:p-6 hover:shadow-lg transition-shadow">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-2">
+                      <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 truncate">
                         {mission.name}
                       </h3>
-                      <Badge className={cn(statusColors[mission.status])}>
+                      <Badge className={cn(statusColors[mission.status], 'text-xs shrink-0')}>
                         {statusLabels[mission.status]}
                       </Badge>
                     </div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mb-3">
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-2 sm:mb-3 line-clamp-2">
                       {mission.description}
                     </p>
-                    <div className="flex items-center gap-6 text-sm text-slate-600 dark:text-slate-400">
+                    <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        <span>
+                        <Calendar className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
+                        <span className="truncate">
                           {formatDate(mission.startDate)} - {formatDate(mission.endDate)}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4" />
+                        <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                         <span>{mission.crewMembers.length} crew</span>
                       </div>
                     </div>
                   </div>
-                  <Link to={`/mission/${mission.id}/scheduler`}>
-                    <Button variant="outline">
+                  <Link to={`/mission/${mission.id}/scheduler`} className="w-full sm:w-auto">
+                    <Button variant="outline" className="w-full sm:w-auto text-sm">
                       View Details
-                      <ArrowRight className="h-4 w-4 ml-2" />
+                      <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 ml-2" />
                     </Button>
                   </Link>
                 </div>
@@ -378,16 +374,15 @@ export const HomePage = () => {
         </div>
       )}
 
-      {/* No access message for viewers with limited permissions */}
       {!hasPermission('view_mission') && (
-        <Card className="p-8 text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-4">
-            <Eye className="h-8 w-8 text-slate-400" />
+        <Card className="p-6 sm:p-8 text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-slate-100 dark:bg-slate-800 mb-3 sm:mb-4">
+            <Eye className="h-6 w-6 sm:h-8 sm:w-8 text-slate-400" />
           </div>
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
+          <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-slate-100 mb-2">
             Limited Access
           </h3>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
             Your current role has limited access. Contact an administrator for more permissions.
           </p>
         </Card>
