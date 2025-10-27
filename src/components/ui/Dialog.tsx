@@ -29,7 +29,7 @@ export function DialogContent({ className, children }: DialogContentProps) {
   return (
     <motion.div
       className={cn(
-        'bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 rounded-2xl p-8 shadow-2xl relative max-w-lg w-full mx-4 border border-slate-200 dark:border-slate-800',
+        'bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 shadow-2xl relative max-w-lg w-full mx-3 sm:mx-4 border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto',
         className
       )}
       initial={{ scale: 0.95, opacity: 0 }}
@@ -43,12 +43,12 @@ export function DialogContent({ className, children }: DialogContentProps) {
 }
 
 export function DialogHeader({ children }: DialogHeaderProps) {
-  return <div className="mb-6">{children}</div>;
+  return <div className="mb-4 sm:mb-6">{children}</div>;
 }
 
 export function DialogTitle({ className, children }: DialogTitleProps) {
   return (
-    <h2 className={cn('text-2xl font-semibold text-slate-900 dark:text-slate-100', className)}>
+    <h2 className={cn('text-lg sm:text-xl md:text-2xl font-semibold text-slate-900 dark:text-slate-100', className)}>
       {children}
     </h2>
   );
