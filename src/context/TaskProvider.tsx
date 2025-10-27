@@ -112,18 +112,21 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
   const loadCrewMemberActivities = async (crewMemberId: string, date?: string): Promise<void> => {
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
-    
+
     try {
       // TODO: Implement API call to load crew member activities
       // For now, this is a placeholder
       console.log(`Loading activities for crew member ${crewMemberId} on ${date || 'today'}`);
-      
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       dispatch({ type: 'SET_LOADING', payload: false });
     } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Failed to load activities' });
+      dispatch({
+        type: 'SET_ERROR',
+        payload: error instanceof Error ? error.message : 'Failed to load activities',
+      });
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
@@ -131,18 +134,21 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
   const loadMissionActivities = async (missionId: string, date?: string): Promise<void> => {
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
-    
+
     try {
       // TODO: Implement API call to load mission activities
       // For now, this is a placeholder
       console.log(`Loading activities for mission ${missionId} on ${date || 'today'}`);
-      
+
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       dispatch({ type: 'SET_LOADING', payload: false });
     } catch (error) {
-      dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Failed to load activities' });
+      dispatch({
+        type: 'SET_ERROR',
+        payload: error instanceof Error ? error.message : 'Failed to load activities',
+      });
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   };

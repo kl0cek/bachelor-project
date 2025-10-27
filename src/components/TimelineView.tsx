@@ -22,8 +22,8 @@ const activityColors: Record<ActivityType, string> = {
 
 const calculateMissionDay = (currentDate: Date, missionStartDate: Date): number => {
   const diffTime = currentDate.getTime() - missionStartDate.getTime();
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return Math.max(1, diffDays);
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  return Math.max(1, diffDays + 1);
 };
 
 interface TimelineViewProps {
