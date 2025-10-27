@@ -11,13 +11,13 @@ import { getMockActivitiesForDay } from '../mock/weekdata';
 const hours = Array.from({ length: 24 }, (_, i) => i);
 
 const activityColors: Record<ActivityType, string> = {
-  exercise: 'bg-space-600 text-gray-700 shadow-space border-space-700',
-  meal: 'bg-slate-400 text-gray-700 dark:bg-slate-600 border-slate-500',
-  sleep: 'bg-slate-400 text-gray-700 dark:bg-slate-600 border-slate-500',
-  work: 'bg-space-600 text-gray-700 shadow-space border-space-700',
-  eva: 'bg-orange-500 text-gray-700 shadow-orange border-orange-600',
+  exercise: 'bg-space-400 dark:bg-space-500 text-white shadow-space border-space-600 dark:border-space-400',
+  meal: 'bg-slate-400 text-gray-900 dark:bg-slate-500 dark:text-white border-slate-500 dark:border-slate-400',
+  sleep: 'bg-slate-400 text-gray-900 dark:bg-slate-500 dark:text-white border-slate-500 dark:border-slate-400',
+  work: 'bg-space-400 dark:bg-space-500 text-white shadow-space border-space-600 dark:border-space-400',
+  eva: 'bg-orange-400 dark:bg-orange-500 text-gray-900 dark:text-white shadow-orange border-orange-600 dark:border-orange-400',
   optional:
-    'bg-slate-200 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700',
+    'bg-slate-300 text-slate-900 border-slate-400 dark:bg-slate-600 dark:text-slate-100 dark:border-slate-500',
 };
 
 const calculateMissionDay = (currentDate: Date, missionStartDate: Date): number => {

@@ -119,7 +119,7 @@ export const HomePage = () => {
 
             <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-700">
               <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
-                Click the <strong>Login</strong> button in the header to get started
+                Click the <strong className="text-slate-900 dark:text-slate-100">Login</strong> button in the header to get started
               </p>
             </div>
           </Card>
@@ -148,9 +148,9 @@ export const HomePage = () => {
             {hasPermission('create_mission') && (
               <Link to="/create-mission" className="flex-1 sm:flex-initial">
                 <Button size="lg" className="w-full sm:w-auto text-sm sm:text-base">
-                  <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2" />
+                  <Plus className="h-4 w-4 sm:h-5 sm:w-5 mr-1.5 sm:mr-2 dark:text-white text-sky-950" />
                   <span className="hidden xs:inline">Create New Mission</span>
-                  <span className="xs:hidden">New Mission</span>
+                  <span className="xs:hidden dark:text-white text-sky-950 ">New Mission</span>
                 </Button>
               </Link>
             )}

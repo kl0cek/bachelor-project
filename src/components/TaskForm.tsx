@@ -109,9 +109,9 @@ export const TaskForm = ({
   ];
 
   const priorities: { value: Priority; label: string; color: string }[] = [
-    { value: 'high', label: 'High', color: 'bg-orange-500 text-gray-700' },
-    { value: 'medium', label: 'Medium', color: 'bg-space-600 text-gray-700' },
-    { value: 'low', label: 'Low', color: 'bg-slate-400 text-gray-700 dark:bg-slate-600' },
+    { value: 'high', label: 'High', color: 'bg-orange-500 text-white' },
+    { value: 'medium', label: 'Medium', color: 'bg-space-600 text-white' },
+    { value: 'low', label: 'Low', color: 'bg-slate-400 text-white dark:bg-slate-600' },
   ];
 
   return (
@@ -301,10 +301,10 @@ export const TaskForm = ({
 
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 sm:pt-6 border-t border-slate-200 dark:border-slate-800">
             <Button type="button" variant="ghost" onClick={onClose} className="w-full sm:w-auto">
-              Cancel
+              <span className='dark:text-white text-sky-950'>Cancel</span>
             </Button>
             <Button type="submit" className="w-full sm:w-auto">
-              {isEditing ? 'Update Task' : 'Create Task'}
+              <span className='dark:text-white text-sky-950'>{isEditing ? 'Update Task' : 'Create Task'}</span>
             </Button>
           </div>
         </form>
