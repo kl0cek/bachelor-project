@@ -109,9 +109,9 @@ export const TaskForm = ({
   ];
 
   const priorities: { value: Priority; label: string; color: string }[] = [
-    { value: 'high', label: 'High', color: 'bg-orange-500 text-gray-200' },
-    { value: 'medium', label: 'Medium', color: 'bg-space-600 text-gray-200' },
-    { value: 'low', label: 'Low', color: 'bg-slate-400 text-gray-200 dark:bg-slate-600' },
+    { value: 'high', label: 'High', color: 'bg-orange-500 text-gray-700' },
+    { value: 'medium', label: 'Medium', color: 'bg-space-600 text-gray-700' },
+    { value: 'low', label: 'Low', color: 'bg-slate-400 text-gray-700 dark:bg-slate-600' },
   ];
 
   return (
