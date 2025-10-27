@@ -8,7 +8,8 @@ export function Button({
   ...props
 }: ButtonProps) {
   const variants = {
-    default: 'bg-space-600 text-white hover:bg-space-700 shadow-space focus:ring-space-500',
+    default:
+      'bg-space-600 dark:text-white text-sky-950 hover:bg-space-700 shadow-space focus:ring-space-500',
     ghost:
       'bg-transparent hover:bg-slate-100 text-slate-700 dark:hover:bg-slate-800 dark:text-slate-300',
     outline:
