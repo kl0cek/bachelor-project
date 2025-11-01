@@ -7,12 +7,17 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon",
+    "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts",
     "build": "tsc",
     "start": "node backend/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint .",
-    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,scss,md}\""
+    "typeorm": "typeorm-ts-node-commonjs",
+    "migration:generate": "npm run typeorm -- migration:generate -d src/config/database.ts",
+    "migration:run": "npm run typeorm -- migration:run -d src/config/database.ts",
+    "migration:revert": "npm run typeorm -- migration:revert -d src/config/database.ts",
+    "seed": "ts-node src/scripts/seed.ts",
+    "test": "jest --coverage",
+    "lint": "eslint src//*.ts",
+    "format": "prettier --write \"src/**/*.ts\""
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

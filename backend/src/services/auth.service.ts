@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { AppDataSource } from '../config/database';
 import { User } from '../entities/User.entity';
 import { RefreshToken } from '../entities/RefreshToken.entity';
@@ -28,7 +28,6 @@ class AuthService {
   ): Promise<TokenResponse> {
     const { username, password } = credentials;
 
-    // Find user with password field
     const user = await this.userRepository
       .createQueryBuilder('user')
       .addSelect('user.password_hash')
@@ -43,17 +42,14 @@ class AuthService {
       throw new UnauthorizedError('Account is deactivated');
     }
 
-    // Validate password
     const isValid = await user.validatePassword(password);
     if (!isValid) {
       throw new UnauthorizedError('Invalid credentials');
     }
 
-    // Update last login
     user.last_login = new Date();
     await this.userRepository.save(user);
 
-    // Generate tokens
     const accessToken = this.generateAccessToken(user.id);
     const refreshToken = await this.generateRefreshToken(
       user.id,
@@ -61,7 +57,6 @@ class AuthService {
       userAgent
     );
 
-    // Log audit
     await auditService.log({
       userId: user.id,
       action: 'login',
@@ -70,7 +65,6 @@ class AuthService {
       userAgent,
     });
 
-    // Remove sensitive data
     const { password_hash, ...userWithoutPassword } = user as any;
 
     return {
@@ -91,7 +85,6 @@ class AuthService {
       await this.refreshTokenRepository.save(token);
     }
 
-    // Log audit
     await auditService.log({
       userId,
       action: 'logout',
@@ -116,7 +109,6 @@ class AuthService {
       throw new UnauthorizedError('Account is deactivated');
     }
 
-    // Generate new access token
     const accessToken = this.generateAccessToken(token.user_id);
 
     return {
@@ -138,13 +130,17 @@ class AuthService {
 
   private generateAccessToken(userId: string): string {
     const secret = process.env.JWT_SECRET;
-    const expiresIn = process.env.JWT_EXPIRES_IN || '24h';
+    const expiresIn = (process.env.JWT_EXPIRES_IN || '24h') as string;
 
     if (!secret) {
       throw new Error('JWT_SECRET not configured');
     }
 
-    return jwt.sign({ userId }, secret, { expiresIn });
+    const options: SignOptions = {
+      expiresIn: expiresIn as any
+    };
+
+    return jwt.sign({ userId }, secret, options);
   }
 
   private async generateRefreshToken(
@@ -153,18 +149,21 @@ class AuthService {
     userAgent?: string
   ): Promise<RefreshToken> {
     const secret = process.env.JWT_REFRESH_SECRET || process.env.JWT_SECRET;
-    const expiresIn = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
+    const expiresIn = (process.env.JWT_REFRESH_EXPIRES_IN || '7d') as string;
 
     if (!secret) {
       throw new Error('JWT_REFRESH_SECRET not configured');
     }
 
-    const token = jwt.sign({ userId, type: 'refresh' }, secret, { expiresIn });
+    const options: SignOptions = {
+      expiresIn: expiresIn as any
+    };
 
-    // Calculate expiration date
+    const token = jwt.sign({ userId, type: 'refresh' }, secret, options);
+
     const expiresAt = new Date();
-    const days = parseInt(expiresIn) || 7;
-    expiresAt.setDate(expiresAt.getDate() + days);
+    const milliseconds = this.parseTimeString(expiresIn);
+    expiresAt.setTime(expiresAt.getTime() + milliseconds);
 
     const refreshToken = this.refreshTokenRepository.create({
       user_id: userId,
@@ -177,10 +176,32 @@ class AuthService {
     return await this.refreshTokenRepository.save(refreshToken);
   }
 
+  private parseTimeString(timeStr: string): number {
+    const match = timeStr.match(/^(\d+)([smhd])$/);
+    if (!match) {
+      return 7 * 24 * 60 * 60 * 1000;
+    }
+
+    const value = parseInt(match[1]);
+    const unit = match[2];
+
+    switch (unit) {
+      case 's':
+        return value * 1000;
+      case 'm':
+        return value * 60 * 1000;
+      case 'h':
+        return value * 60 * 60 * 1000;
+      case 'd':
+        return value * 24 * 60 * 60 * 1000;
+      default:
+        return 7 * 24 * 60 * 60 * 1000;
+    }
+  }
+
   private getTokenExpiresIn(): number {
     const expiresIn = process.env.JWT_EXPIRES_IN || '24h';
-    const hours = parseInt(expiresIn) || 24;
-    return hours * 3600; // Convert to seconds
+    return Math.floor(this.parseTimeString(expiresIn) / 1000);
   }
 
   async getCurrentUser(userId: string): Promise<User> {
