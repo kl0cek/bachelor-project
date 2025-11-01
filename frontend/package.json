@@ -1,5 +1,5 @@
 {
-  "name": "vite-project",
+  "name": "mission-control-frontend",
   "private": true,
   "version": "0.2.0",
   "type": "module",
@@ -14,6 +14,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",
     "amqplib": "^0.10.9",
+    "axios": "^1.13.1",
     "clsx": "^2.1.1",
     "dayjs": "^1.11.18",
     "express": "^5.1.0",

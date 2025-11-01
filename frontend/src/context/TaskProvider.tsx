@@ -1,7 +1,7 @@
-import { useReducer } from 'react';
+import { useReducer, useCallback } from 'react';
 import { TaskContext } from './TaskContext';
 import type { TaskState, Activity } from '../types/types';
-import { crewMembers as initialCrewMembers } from '../mock/data';
+import { activityService } from '../services/activityService';
 
 type TaskAction =
   | { type: 'ADD_TASK'; payload: { crewMemberId: string; task: Activity } }
@@ -82,7 +82,7 @@ const taskReducer = (state: TaskState, action: TaskAction): TaskState => {
 
 export const TaskProvider = ({ children }: TaskProviderProps) => {
   const [state, dispatch] = useReducer(taskReducer, {
-    crewMembers: initialCrewMembers,
+    crewMembers: [],
     loading: false,
     error: null,
   });
