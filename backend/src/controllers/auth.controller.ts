@@ -10,11 +10,7 @@ export class AuthController {
       const ipAddress = req.ip;
       const userAgent = req.get('user-agent');
 
-      const result = await authService.login(
-        { username, password },
-        ipAddress,
-        userAgent
-      );
+      const result = await authService.login({ username, password }, ipAddress, userAgent);
 
       res.json(successResponse(result, 'Login successful'));
     } catch (error) {
@@ -40,10 +36,7 @@ export class AuthController {
       const { refreshToken } = req.body;
       const ipAddress = req.ip;
 
-      const result = await authService.refreshAccessToken(
-        refreshToken,
-        ipAddress
-      );
+      const result = await authService.refreshAccessToken(refreshToken, ipAddress);
 
       res.json(successResponse(result, 'Token refreshed'));
     } catch (error) {

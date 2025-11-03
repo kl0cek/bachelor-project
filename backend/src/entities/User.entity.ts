@@ -80,24 +80,18 @@ export class User {
     if (this.password) {
       const rounds = parseInt(process.env.BCRYPT_ROUNDS || '12');
       this.password_hash = await bcrypt.hash(this.password, rounds);
-      delete this.password; // Remove plain password
+      delete this.password; // Remove plain password but somehow not working idk xpp
     }
   }
 
-  // Method to validate password
   async validatePassword(password: string): Promise<boolean> {
     return bcrypt.compare(password, this.password_hash);
   }
 
-  // Method to check permissions
   hasPermission(permission: string): boolean {
     const permissions: Record<UserRole, string[]> = {
       [UserRole.VIEWER]: ['view_schedule', 'view_mission'],
-      [UserRole.ASTRONAUT]: [
-        'view_schedule',
-        'view_mission',
-        'update_own_activities',
-      ],
+      [UserRole.ASTRONAUT]: ['view_schedule', 'view_mission', 'update_own_activities'],
       [UserRole.OPERATOR]: [
         'view_schedule',
         'view_mission',
@@ -116,12 +110,10 @@ export class User {
     return permissions[this.role]?.includes(permission) || false;
   }
 
-  // Method to check role
   hasRole(role: UserRole): boolean {
     return this.role === role || this.role === UserRole.ADMIN;
   }
 
-  // Sanitize user data (remove sensitive fields)
   toJSON() {
     const { password_hash, refresh_tokens, ...user } = this as any;
     return user;

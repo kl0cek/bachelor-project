@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { activityController } from '../controllers/activity.controller';
 import { authenticate } from '../middleware/auth.middleware';
-import { requirePermission } from '../middleware/rbac.middleware'
+import { requirePermission } from '../middleware/rbac.middleware';
 import { body, param, query } from 'express-validator';
 import { validate } from '../middleware/validator.middleware';
 
@@ -31,16 +31,13 @@ const updateActivityValidation = [
   body('date').optional().isISO8601(),
   body('start_hour').optional().isFloat({ min: 0, max: 24 }),
   body('duration').optional().isFloat({ min: 0.1, max: 24 }),
-  body('type')
-    .optional()
-    .isIn(['exercise', 'meal', 'sleep', 'work', 'eva', 'optional']),
+  body('type').optional().isIn(['exercise', 'meal', 'sleep', 'work', 'eva', 'optional']),
   body('priority').optional().isIn(['high', 'medium', 'low']),
   body('mission').optional().isString(),
   body('description').optional().isString(),
   body('equipment').optional().isArray(),
 ];
 
-// Routes
 router.post(
   '/missions/:missionId/activities',
   requirePermission('manage_activities'),
@@ -71,12 +68,7 @@ router.get(
   activityController.getAvailableSlots
 );
 
-router.get(
-  '/:id',
-  param('id').isUUID(),
-  validate,
-  activityController.getById
-);
+router.get('/:id', param('id').isUUID(), validate, activityController.getById);
 
 router.patch(
   '/:id',

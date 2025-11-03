@@ -47,7 +47,6 @@ class UserService {
   }
 
   async create(data: CreateUserDto, createdBy: string): Promise<User> {
-    // Check if username or email already exists
     const existing = await this.userRepository.findOne({
       where: [{ username: data.username }, { email: data.email }],
     });
@@ -58,7 +57,7 @@ class UserService {
 
     const user = this.userRepository.create({
       ...data,
-      password: data.password, // Will be hashed by entity hook
+      password: data.password,
       is_active: data.is_active ?? true,
     });
 
@@ -75,25 +74,17 @@ class UserService {
     return saved;
   }
 
-  async update(
-    id: string,
-    data: UpdateUserDto,
-    updatedBy: string
-  ): Promise<User> {
+  async update(id: string, data: UpdateUserDto, updatedBy: string): Promise<User> {
     const user = await this.getById(id);
 
-    // Check for conflicts
     if (data.username || data.email) {
       const existing = await this.userRepository
         .createQueryBuilder('user')
         .where('user.id != :id', { id })
-        .andWhere(
-          '(user.username = :username OR user.email = :email)',
-          {
-            username: data.username,
-            email: data.email,
-          }
-        )
+        .andWhere('(user.username = :username OR user.email = :email)', {
+          username: data.username,
+          email: data.email,
+        })
         .getOne();
 
       if (existing) {
@@ -105,7 +96,7 @@ class UserService {
 
     Object.assign(user, {
       ...data,
-      ...(data.password && { password: data.password }), // Will be hashed
+      ...(data.password && { password: data.password }),
     });
 
     const updated = await this.userRepository.save(user);
@@ -127,7 +118,6 @@ class UserService {
   async delete(id: string, deletedBy: string): Promise<void> {
     const user = await this.getById(id);
 
-    // Prevent deleting last admin
     if (user.role === UserRole.ADMIN) {
       const adminCount = await this.userRepository.count({
         where: { role: UserRole.ADMIN },
@@ -152,7 +142,6 @@ class UserService {
   async toggleStatus(id: string, updatedBy: string): Promise<User> {
     const user = await this.getById(id);
 
-    // Prevent deactivating last active admin
     if (user.role === UserRole.ADMIN && user.is_active) {
       const activeAdminCount = await this.userRepository.count({
         where: { role: UserRole.ADMIN, is_active: true },

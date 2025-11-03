@@ -2,14 +2,10 @@ import { Request, Response, NextFunction } from 'express';
 import { activityService } from '../services/activity.service';
 import { successResponse } from '../utils/response';
 import { AuthRequest } from '../middleware/auth.middleware';
-import { BadRequestError } from '../utils/errors'
+import { BadRequestError } from '../utils/errors';
 
 export class ActivityController {
-  async getByMissionAndDate(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ) {
+  async getByMissionAndDate(req: Request, res: Response, next: NextFunction) {
     try {
       const { missionId } = req.params;
       const { date } = req.query;
@@ -38,10 +34,7 @@ export class ActivityController {
         throw new BadRequestError('Date parameter is required');
       }
 
-      const activities = await activityService.getActivitiesByCrewAndDate(
-        crewId,
-        date as string
-      );
+      const activities = await activityService.getActivitiesByCrewAndDate(crewId, date as string);
 
       res.json(successResponse(activities));
     } catch (error) {
@@ -65,11 +58,7 @@ export class ActivityController {
       const { id } = req.params;
       const userId = req.userId!;
 
-      const activity = await activityService.updateActivity(
-        id,
-        req.body,
-        userId
-      );
+      const activity = await activityService.updateActivity(id, req.body, userId);
 
       res.json(successResponse(activity, 'Activity updated'));
     } catch (error) {

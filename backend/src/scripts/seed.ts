@@ -1,4 +1,3 @@
-// src/scripts/seed.ts
 import 'reflect-metadata';
 import dotenv from 'dotenv';
 import { AppDataSource } from '../config/database';
@@ -6,19 +5,18 @@ import { User, UserRole } from '../entities/User.entity';
 import { Mission, MissionStatus } from '../entities/Mission.entity';
 import { CrewMember } from '../entities/CrewMember.entity';
 import { Activity, ActivityType, Priority } from '../entities/Activity.entity';
+import bcrypt from 'bcrypt';
 
 dotenv.config();
 
 async function seed() {
-  console.log('🌱 Starting database seed...');
+  console.log('Starting database seed...');
 
   try {
-    // Initialize database connection
     await AppDataSource.initialize();
-    console.log('✅ Database connection established');
+    console.log('Database connection established');
 
-    // Clear existing data (optional - comment out in production)
-    console.log('🗑️  Clearing existing data...');
+    console.log('Clearing existing data...');
     await AppDataSource.query('TRUNCATE TABLE activities CASCADE');
     await AppDataSource.query('TRUNCATE TABLE crew_members CASCADE');
     await AppDataSource.query('TRUNCATE TABLE missions CASCADE');
@@ -27,18 +25,20 @@ async function seed() {
     await AppDataSource.query('TRUNCATE TABLE activity_history CASCADE');
     await AppDataSource.query('TRUNCATE TABLE users CASCADE');
 
-    // Create repositories
     const userRepo = AppDataSource.getRepository(User);
     const missionRepo = AppDataSource.getRepository(Mission);
     const crewRepo = AppDataSource.getRepository(CrewMember);
     const activityRepo = AppDataSource.getRepository(Activity);
 
-    // 1. Create Users
-    console.log('👤 Creating users...');
+    console.log('Creating users...');
+
+    async function hashPassword(pass: string) {
+      return await bcrypt.hash(pass, 10);
+    }
 
     const adminUser = userRepo.create({
       username: 'admin',
-      password: 'admin123',
+      password_hash: await hashPassword('admin123'),
       full_name: 'System Administrator',
       email: 'admin@mission-control.space',
       role: UserRole.ADMIN,
@@ -47,7 +47,7 @@ async function seed() {
 
     const operatorUser = userRepo.create({
       username: 'operator1',
-      password: 'operator123',
+      password_hash: await hashPassword('operator123'),
       full_name: 'Mission Operator',
       email: 'operator@mission-control.space',
       role: UserRole.OPERATOR,
@@ -56,7 +56,7 @@ async function seed() {
 
     const astronautUser = userRepo.create({
       username: 'astronaut1',
-      password: 'astronaut123',
+      password_hash: await hashPassword('astronaut123'),
       full_name: 'John Astronaut',
       email: 'astronaut@mission-control.space',
       role: UserRole.ASTRONAUT,
@@ -65,7 +65,7 @@ async function seed() {
 
     const viewerUser = userRepo.create({
       username: 'viewer1',
-      password: 'viewer123',
+      password_hash: await hashPassword('viewer123'),
       full_name: 'Mission Viewer',
       email: 'viewer@mission-control.space',
       role: UserRole.VIEWER,
@@ -73,10 +73,9 @@ async function seed() {
     });
 
     await userRepo.save([adminUser, operatorUser, astronautUser, viewerUser]);
-    console.log('✅ Created 4 users');
+    console.log('Created 4 users');
 
-    // 2. Create Missions
-    console.log('🚀 Creating missions...');
+    console.log('Creating missions...');
 
     const activeMission = missionRepo.create({
       name: 'ISS Expedition 71',
@@ -109,10 +108,9 @@ async function seed() {
     });
 
     await missionRepo.save([activeMission, planningMission, completedMission]);
-    console.log('✅ Created 3 missions');
+    console.log('Created 3 missions');
 
-    // 3. Create Crew Members for Active Mission
-    console.log('👨‍🚀 Creating crew members...');
+    console.log('Creating crew members...');
 
     const fe1 = crewRepo.create({
       mission_id: activeMission.id,
@@ -146,11 +144,9 @@ async function seed() {
     await crewRepo.save([fe1, fe2, fe4, fe5]);
     console.log('✅ Created 4 crew members');
 
-    // 4. Create Activities for Day 1 (2025-10-15)
     console.log('📅 Creating activities for Day 1...');
 
     const day1Activities: Partial<Activity>[] = [
-      // FE-1 Schedule
       {
         crew_member_id: fe1.id,
         mission_id: activeMission.id,
@@ -243,7 +239,6 @@ async function seed() {
         created_by: operatorUser.id,
       },
 
-      // FE-2 Schedule
       {
         crew_member_id: fe2.id,
         mission_id: activeMission.id,
@@ -519,11 +514,9 @@ async function seed() {
     await activityRepo.save(createdActivities);
     console.log(`✅ Created ${day1Activities.length} activities for Day 1`);
 
-    // 5. Create Activities for Day 2 (2025-10-16) - EVA Day
     console.log('📅 Creating activities for Day 2 (EVA Day)...');
 
     const day2Activities: Partial<Activity>[] = [
-      // FE-4 EVA Day
       {
         crew_member_id: fe4.id,
         mission_id: activeMission.id,
@@ -591,7 +584,6 @@ async function seed() {
         created_by: operatorUser.id,
       },
 
-      // FE-5 EVA Day
       {
         crew_member_id: fe5.id,
         mission_id: activeMission.id,
@@ -662,38 +654,36 @@ async function seed() {
 
     const day2Created = activityRepo.create(day2Activities);
     await activityRepo.save(day2Created);
-    console.log(`✅ Created ${day2Activities.length} activities for Day 2`);
+    console.log(`Created ${day2Activities.length} activities for Day 2`);
 
     console.log('\n✨ Database seeding completed successfully!\n');
-    console.log('📊 Summary:');
+    console.log('Summary:');
     console.log(`   - Users: 4 (admin, operator, astronaut, viewer)`);
     console.log(`   - Missions: 3 (1 active, 1 planning, 1 completed)`);
     console.log(`   - Crew Members: 4 (FE-1, FE-2, FE-4, FE-5)`);
     console.log(
       `   - Activities: ${day1Activities.length + day2Activities.length} (across 2 days)`
     );
-    console.log('\n🔐 Login Credentials:');
+    console.log('\nLogin Credentials:');
     console.log('   admin/admin123 (Admin)');
     console.log('   operator1/operator123 (Operator)');
     console.log('   astronaut1/astronaut123 (Astronaut)');
     console.log('   viewer1/viewer123 (Viewer)\n');
   } catch (error) {
-    console.error('❌ Seeding failed:', error);
+    console.error('Seeding failed:', error);
     throw error;
   } finally {
     await AppDataSource.destroy();
-    console.log('🔌 Database connection closed');
+    console.log('Database connection closed');
   }
 }
 
-// Run the seed function
 seed()
   .then(() => {
-    console.log('👋 Exiting...');
+    console.log('Exiting...');
     process.exit(0);
   })
   .catch((error) => {
     console.error('Fatal error:', error);
     process.exit(1);
   });
-  

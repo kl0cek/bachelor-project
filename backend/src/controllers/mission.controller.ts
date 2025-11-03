@@ -20,9 +20,7 @@ export class MissionController {
         limit
       );
 
-      res.json(
-        paginatedResponse(result.missions, page, limit, result.total)
-      );
+      res.json(paginatedResponse(result.missions, page, limit, result.total));
     } catch (error) {
       next(error);
     }

@@ -1,18 +1,16 @@
 import { Router } from 'express';
 import { userController } from '../controllers/user.controller';
 import { authenticate } from '../middleware/auth.middleware';
-import { requireRole } from '../middleware/rbac.middleware'
+import { requireRole } from '../middleware/rbac.middleware';
 import { UserRole } from '../entities/User.entity';
 import { body, param, query } from 'express-validator';
 import { validate } from '../middleware/validator.middleware';
 
 const router = Router();
 
-// All routes require authentication and admin/operator role
 router.use(authenticate);
 router.use(requireRole(UserRole.ADMIN, UserRole.OPERATOR));
 
-// Validation schemas
 const createUserValidation = [
   body('username').notEmpty().trim().isLength({ min: 3, max: 50 }),
   body('password').notEmpty().isLength({ min: 6 }),
@@ -32,7 +30,6 @@ const updateUserValidation = [
   body('is_active').optional().isBoolean(),
 ];
 
-// Routes
 router.get(
   '/',
   query('page').optional().isInt({ min: 1 }),
@@ -49,12 +46,7 @@ router.post(
   userController.create
 );
 
-router.get(
-  '/:id',
-  param('id').isUUID(),
-  validate,
-  userController.getById
-);
+router.get('/:id', param('id').isUUID(), validate, userController.getById);
 
 router.patch(
   '/:id',

@@ -6,7 +6,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
-  OneToMany
+  OneToMany,
 } from 'typeorm';
 
 import { Mission } from './Mission.entity';
@@ -39,7 +39,6 @@ export class CrewMember {
   @UpdateDateColumn({ type: 'timestamp with time zone' })
   updated_at!: Date;
 
-  // Relations
   @ManyToOne(() => Mission, (mission) => mission.crew_members, {
     onDelete: 'CASCADE',
   })

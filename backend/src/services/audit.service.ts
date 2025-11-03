@@ -33,10 +33,7 @@ class AuditService {
     }
   }
 
-  async getUserAuditTrail(
-    userId: string,
-    limit: number = 50
-  ): Promise<AuditLog[]> {
+  async getUserAuditTrail(userId: string, limit: number = 50): Promise<AuditLog[]> {
     return await this.auditRepository.find({
       where: { user_id: userId },
       order: { created_at: 'DESC' },

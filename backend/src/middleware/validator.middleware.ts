@@ -2,11 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { validationResult } from 'express-validator';
 import { ValidationError } from '../utils/errors';
 
-export const validate = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const validate = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
@@ -16,13 +12,7 @@ export const validate = (
       value: error.value,
     }));
 
-    return next(
-      new ValidationError(
-        'Validation failed',
-        formattedErrors,
-        'VALIDATION_ERROR'
-      )
-    );
+    return next(new ValidationError('Validation failed', formattedErrors, 'VALIDATION_ERROR'));
   }
 
   next();

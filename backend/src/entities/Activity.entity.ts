@@ -81,7 +81,6 @@ export class Activity {
   @UpdateDateColumn({ type: 'timestamp with time zone' })
   updated_at!: Date;
 
-  // Relations
   @ManyToOne(() => CrewMember, (crew) => crew.activities, {
     onDelete: 'CASCADE',
   })
@@ -98,7 +97,6 @@ export class Activity {
   @JoinColumn({ name: 'created_by' })
   created_by_user?: User;
 
-  // Helper methods
   getEndHour(): number {
     return this.start_hour + this.duration;
   }

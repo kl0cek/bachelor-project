@@ -10,13 +10,11 @@ export const requireRole = (...roles: UserRole[]) => {
     }
 
     if (req.user.role === UserRole.ADMIN) {
-      return next(); // Admin can access everything
+      return next();
     }
 
     if (!roles.includes(req.user.role)) {
-      return next(
-        new ForbiddenError('Insufficient permissions to access this resource')
-      );
+      return next(new ForbiddenError('Insufficient permissions to access this resource'));
     }
 
     next();
@@ -30,9 +28,7 @@ export const requirePermission = (permission: string) => {
     }
 
     if (!req.user.hasPermission(permission)) {
-      return next(
-        new ForbiddenError(`Missing required permission: ${permission}`)
-      );
+      return next(new ForbiddenError(`Missing required permission: ${permission}`));
     }
 
     next();

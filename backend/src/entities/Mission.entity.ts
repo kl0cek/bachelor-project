@@ -52,7 +52,6 @@ export class Mission {
   @UpdateDateColumn({ type: 'timestamp with time zone' })
   updated_at!: Date;
 
-  // Relations
   @ManyToOne(() => User, (user) => user.created_missions, {
     onDelete: 'SET NULL',
   })
@@ -65,7 +64,6 @@ export class Mission {
   @OneToMany(() => Activity, (activity) => activity.mission_ref)
   activities!: Activity[];
 
-  // Helper methods
   getDuration(): number {
     const start = new Date(this.start_date);
     const end = new Date(this.end_date);
@@ -83,10 +81,6 @@ export class Mission {
   isActive(currentDate: Date = new Date()): boolean {
     const start = new Date(this.start_date);
     const end = new Date(this.end_date);
-    return (
-      currentDate >= start &&
-      currentDate <= end &&
-      this.status === MissionStatus.ACTIVE
-    );
+    return currentDate >= start && currentDate <= end && this.status === MissionStatus.ACTIVE;
   }
 }

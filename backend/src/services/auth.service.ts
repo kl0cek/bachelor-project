@@ -2,7 +2,7 @@ import jwt, { SignOptions } from 'jsonwebtoken';
 import { AppDataSource } from '../config/database';
 import { User } from '../entities/User.entity';
 import { RefreshToken } from '../entities/RefreshToken.entity';
-import { UnauthorizedError, NotFoundError  } from '../utils/errors';
+import { UnauthorizedError, NotFoundError } from '../utils/errors';
 import { auditService } from './audit.service';
 
 export interface LoginCredentials {
@@ -51,11 +51,7 @@ class AuthService {
     await this.userRepository.save(user);
 
     const accessToken = this.generateAccessToken(user.id);
-    const refreshToken = await this.generateRefreshToken(
-      user.id,
-      ipAddress,
-      userAgent
-    );
+    const refreshToken = await this.generateRefreshToken(user.id, ipAddress, userAgent);
 
     await auditService.log({
       userId: user.id,
@@ -137,7 +133,7 @@ class AuthService {
     }
 
     const options: SignOptions = {
-      expiresIn: expiresIn as any
+      expiresIn: expiresIn as any,
     };
 
     return jwt.sign({ userId }, secret, options);
@@ -156,7 +152,7 @@ class AuthService {
     }
 
     const options: SignOptions = {
-      expiresIn: expiresIn as any
+      expiresIn: expiresIn as any,
     };
 
     const token = jwt.sign({ userId, type: 'refresh' }, secret, options);

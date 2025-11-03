@@ -16,43 +16,33 @@ const databaseUrl = process.env.DATABASE_URL;
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
-  url: databaseUrl, 
+  url: databaseUrl,
   host: databaseUrl ? undefined : process.env.DB_HOST || 'localhost',
   port: databaseUrl ? undefined : parseInt(process.env.DB_PORT || '5432'),
   username: databaseUrl ? undefined : process.env.DB_USER || 'postgres',
   password: databaseUrl ? undefined : process.env.DB_PASSWORD || 'password',
   database: databaseUrl ? undefined : process.env.DB_NAME || 'mission_control',
-  
-  ssl: isProduction 
-    ? { rejectUnauthorized: false } 
-    : false,
-  
-  entities: [
-    User,
-    Mission,
-    CrewMember,
-    Activity,
-    RefreshToken,
-    AuditLog,
-    ActivityHistory,
-  ],
-  
+
+  ssl: isProduction ? { rejectUnauthorized: false } : false,
+
+  entities: [User, Mission, CrewMember, Activity, RefreshToken, AuditLog, ActivityHistory],
+
   migrations: ['src/migrations/**/*.ts'],
-  
+
   subscribers: ['src/subscribers/**/*.ts'],
-  
+
   synchronize: process.env.DB_SYNC === 'true' && !isProduction,
-  
+
   logging: process.env.DB_LOGGING === 'true' ? ['query', 'error', 'warn'] : false,
-  
+
   extra: {
     max: 20,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 10000,
   },
-  
+
   poolSize: 10,
-  
+
   //timezone: 'Z',
 });
 
@@ -60,7 +50,7 @@ export const initializeDatabase = async (): Promise<void> => {
   try {
     await AppDataSource.initialize();
     console.log('Database connection established successfully');
-    
+
     if (process.env.DB_SYNC === 'true' && !isProduction) {
       console.log('Database synchronization is enabled (development only)');
     }

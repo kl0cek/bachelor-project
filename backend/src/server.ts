@@ -6,7 +6,7 @@ import { logger } from './config/logger';
 // Load environment variables
 dotenv.config();
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 async function startServer() {
@@ -18,7 +18,9 @@ async function startServer() {
     // Start Express server
     app.listen(PORT, () => {
       logger.info(`🚀 Server running in ${NODE_ENV} mode on port ${PORT}`);
-      logger.info(`📡 API available at http://localhost:${PORT}${process.env.API_PREFIX || '/api'}`);
+      logger.info(
+        `📡 API available at http://localhost:${PORT}${process.env.API_PREFIX || '/api'}`
+      );
       logger.info(`🏥 Health check at http://localhost:${PORT}/health`);
     });
   } catch (error) {

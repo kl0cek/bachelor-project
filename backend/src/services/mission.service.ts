@@ -28,11 +28,7 @@ export interface MissionFilters {
 class MissionService {
   private missionRepository = AppDataSource.getRepository(Mission);
 
-  async getAll(
-    filters?: MissionFilters,
-    page: number = 1,
-    limit: number = 20
-  ) {
+  async getAll(filters?: MissionFilters, page: number = 1, limit: number = 20) {
     const query = this.missionRepository
       .createQueryBuilder('mission')
       .leftJoinAndSelect('mission.created_by_user', 'user')
@@ -105,21 +101,12 @@ class MissionService {
     return saved;
   }
 
-  async update(
-    id: string,
-    data: UpdateMissionDto,
-    userId: string
-  ): Promise<Mission> {
+  async update(id: string, data: UpdateMissionDto, userId: string): Promise<Mission> {
     const mission = await this.getById(id);
 
-    // Validate dates if provided
     if (data.start_date || data.end_date) {
-      const startDate = data.start_date
-        ? new Date(data.start_date)
-        : mission.start_date;
-      const endDate = data.end_date
-        ? new Date(data.end_date)
-        : mission.end_date;
+      const startDate = data.start_date ? new Date(data.start_date) : mission.start_date;
+      const endDate = data.end_date ? new Date(data.end_date) : mission.end_date;
 
       if (endDate < startDate) {
         throw new BadRequestError('End date must be after start date');

@@ -1,16 +1,14 @@
 import { Router } from 'express';
 import { crewController } from '../controllers/crew.controller';
 import { authenticate } from '../middleware/auth.middleware';
-import { requirePermission } from '../middleware/rbac.middleware'
+import { requirePermission } from '../middleware/rbac.middleware';
 import { body, param } from 'express-validator';
 import { validate } from '../middleware/validator.middleware';
 
 const router = Router();
 
-// All routes require authentication
 router.use(authenticate);
 
-// Validation schemas
 const createCrewValidation = [
   body('mission_id').isUUID(),
   body('name').notEmpty().trim().isLength({ max: 100 }),
@@ -19,7 +17,6 @@ const createCrewValidation = [
   body('user_id').optional().isUUID(),
 ];
 
-// Routes
 router.get(
   '/missions/:missionId/crew',
   param('missionId').isUUID(),
@@ -36,12 +33,7 @@ router.post(
   crewController.create
 );
 
-router.get(
-  '/:id',
-  param('id').isUUID(),
-  validate,
-  crewController.getById
-);
+router.get('/:id', param('id').isUUID(), validate, crewController.getById);
 
 router.patch(
   '/:id',

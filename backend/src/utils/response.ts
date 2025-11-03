@@ -18,10 +18,7 @@ export interface PaginatedResponse<T = any> {
   };
 }
 
-export const successResponse = <T>(
-  data: T,
-  message?: string
-): ApiResponse<T> => ({
+export const successResponse = <T>(data: T, message?: string): ApiResponse<T> => ({
   success: true,
   data,
   ...(message && { message }),

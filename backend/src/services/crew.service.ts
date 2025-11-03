@@ -61,11 +61,7 @@ class CrewService {
     return saved;
   }
 
-  async update(
-    id: string,
-    data: Partial<CreateCrewDto>,
-    userId: string
-  ): Promise<CrewMember> {
+  async update(id: string, data: Partial<CreateCrewDto>, userId: string): Promise<CrewMember> {
     const crew = await this.getById(id);
 
     Object.assign(crew, data);
