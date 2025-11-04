@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Lock, User as UserIcon, Eye, EyeOff, ShieldAlert } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, Button } from './ui/index';
-import { authenticateUser, ROLE_PERMISSIONS } from '../utils/auth';
-import type { User } from '../types/auth';
+import { authService } from '../services/authService';
+import type { User } from '../types/types';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -21,24 +21,40 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
     e.preventDefault();
     setError('');
 
-    if (!username.trim() || !password.trim()) return;
+    if (!username.trim() || !password.trim()) {
+      setError('Please enter both username and password');
+      return;
+    }
 
     setIsLoading(true);
 
-    setTimeout(() => {
-      const user = authenticateUser(username.trim(), password);
+    try {
+      const user = await authService.login({
+        username: username.trim(),
+        password: password.trim(),
+      });
 
-      if (user) {
-        onLogin(user);
-        setUsername('');
-        setPassword('');
-        setError('');
-      } else {
+      onLogin(user);
+      setUsername('');
+      setPassword('');
+      setError('');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      
+      if (err.response?.status === 401) {
         setError('Invalid username or password');
+      } else if (err.response?.status === 403) {
+        setError('Account is disabled. Please contact administrator.');
+      } else if (err.code === 'ECONNABORTED' || err.message.includes('timeout')) {
+        setError('Connection timeout. Please try again.');
+      } else if (err.message) {
+        setError(err.message);
+      } else {
+        setError('Login failed. Please try again.');
       }
-
+    } finally {
       setIsLoading(false);
-    }, 800);
+    }
   };
 
   const handleClose = () => {
@@ -47,6 +63,12 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
     setShowPassword(false);
     setError('');
     onClose();
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && username.trim() && password.trim() && !isLoading) {
+      handleSubmit(e as any);
+    }
   };
 
   type Role = 'admin' | 'operator' | 'astronaut' | 'viewer';
@@ -62,6 +84,13 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
     return colors[role];
   };
 
+  const demoAccounts = [
+    { role: 'admin' as Role, label: 'Administrator', username: 'admindemo', password: 'admindemo123' },
+    { role: 'operator' as Role, label: 'Mission Operator', username: 'operator1', password: 'operator123' },
+    { role: 'astronaut' as Role, label: 'Astronaut', username: 'astronaut1', password: 'astronaut123' },
+    { role: 'viewer' as Role, label: 'Viewer', username: 'viewer1', password: 'viewer123' },
+  ];
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-md">
@@ -74,7 +103,7 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-4">
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-900 dark:text-slate-100">
@@ -86,8 +115,11 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-space-500 focus:border-transparent"
+                  onKeyPress={handleKeyPress}
+                  disabled={isLoading}
+                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-space-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Enter your username"
+                  autoComplete="username"
                 />
               </div>
             </div>
@@ -102,13 +134,17 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-10 pr-12 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-space-500 focus:border-transparent"
+                  onKeyPress={handleKeyPress}
+                  disabled={isLoading}
+                  className="w-full pl-10 pr-12 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-space-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Enter your password"
+                  autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300"
+                  disabled={isLoading}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 disabled:opacity-50"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -117,7 +153,7 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
 
             {error && (
               <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800">
-                <ShieldAlert className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <ShieldAlert className="h-4 w-4 text-red-600 dark:text-red-400 shrink-0" />
                 <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
               </div>
             )}
@@ -128,21 +164,15 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
               Demo Credentials:
             </p>
             <div className="space-y-2">
-              {Object.entries(ROLE_PERMISSIONS).map(([role, info]) => (
-                <div key={role} className="flex items-center justify-between text-xs">
+              {demoAccounts.map((account) => (
+                <div key={account.role} className="flex items-center justify-between text-xs">
                   <span
-                    className={`px-2 py-1 rounded font-medium ${getRoleBadgeColor(role as Role)}`}
+                    className={`px-2 py-1 rounded font-medium ${getRoleBadgeColor(account.role)}`}
                   >
-                    {info.label}
+                    {account.label}
                   </span>
                   <span className="font-mono text-slate-600 dark:text-slate-400">
-                    {role === 'admin'
-                      ? 'admin/admin123'
-                      : role === 'operator'
-                        ? 'operator1/operator123'
-                        : role === 'astronaut'
-                          ? 'astronaut1/astronaut123'
-                          : 'viewer1/viewer123'}
+                    {account.username}/{account.password}
                   </span>
                 </div>
               ))}
@@ -154,7 +184,7 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
               <span className="dark:text-white text-sky-950">Cancel</span>
             </Button>
             <Button
-              onClick={handleSubmit}
+              type="submit"
               disabled={!username.trim() || !password.trim() || isLoading}
             >
               <span className="dark:text-white text-sky-950">
@@ -162,7 +192,7 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
               </span>
             </Button>
           </div>
-        </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

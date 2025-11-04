@@ -1,5 +1,3 @@
-{
-  /* 
 import { createContext, useContext, useEffect, useReducer, type ReactNode } from 'react';
 import { authService, type LoginCredentials } from '../services/authService';
 import type { User, AuthState, UserRole } from '../types/types';
@@ -71,7 +69,7 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider = ({children}: AuthProviderProps) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   useEffect(() => {
@@ -172,12 +170,14 @@ export const usePermissions = () => {
   };
 };
 
-export const AuthGuard: React.FC<{
-  children: ReactNode;
+interface AuthGuardProps {
+  children: React.ReactNode;
   requiredPermission?: string;
   requiredRole?: UserRole;
   fallback?: ReactNode;
-}> = ({ children, requiredPermission, requiredRole, fallback }) => {
+}
+
+export const AuthGuard = ({ children, requiredPermission, requiredRole, fallback }: AuthGuardProps) => {
   const { user, isLoading, hasPermission, hasRole } = useAuth();
 
   if (isLoading) {
@@ -244,5 +244,3 @@ export const AuthGuard: React.FC<{
 
   return <>{children}</>;
 };
-*/
-}

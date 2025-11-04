@@ -4,6 +4,7 @@ import type { TaskState, Activity } from '../types/types';
 import { activityService } from '../services/activityService';
 
 type TaskAction =
+  | { type: 'SET_CREW_MEMBERS'; payload: any[] }
   | { type: 'ADD_TASK'; payload: { crewMemberId: string; task: Activity } }
   | { type: 'UPDATE_TASK'; payload: { crewMemberId: string; task: Activity } }
   | { type: 'DELETE_TASK'; payload: { crewMemberId: string; taskId: string } }
@@ -16,6 +17,12 @@ interface TaskProviderProps {
 
 const taskReducer = (state: TaskState, action: TaskAction): TaskState => {
   switch (action.type) {
+    case 'SET_CREW_MEMBERS':
+      return {
+        ...state,
+        crewMembers: action.payload,
+      };
+
     case 'ADD_TASK':
       return {
         ...state,
@@ -87,19 +94,19 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
     error: null,
   });
 
-  const addTask = (crewMemberId: string, task: Activity) => {
+  const addTask = useCallback((crewMemberId: string, task: Activity) => {
     dispatch({ type: 'ADD_TASK', payload: { crewMemberId, task } });
-  };
+  }, []);
 
-  const updateTask = (crewMemberId: string, task: Activity) => {
+  const updateTask = useCallback((crewMemberId: string, task: Activity) => {
     dispatch({ type: 'UPDATE_TASK', payload: { crewMemberId, task } });
-  };
+  }, []);
 
-  const deleteTask = (crewMemberId: string, taskId: string) => {
+  const deleteTask = useCallback((crewMemberId: string, taskId: string) => {
     dispatch({ type: 'DELETE_TASK', payload: { crewMemberId, taskId } });
-  };
+  }, []);
 
-  const getTaskById = (taskId: string): { task: Activity; crewMemberId: string } | null => {
+  const getTaskById = useCallback((taskId: string): { task: Activity; crewMemberId: string } | null => {
     for (const member of state.crewMembers) {
       const task = member.activities.find((activity) => activity.id === taskId);
       if (task) {
@@ -107,19 +114,26 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
       }
     }
     return null;
-  };
+  }, [state.crewMembers]);
 
-  const loadCrewMemberActivities = async (crewMemberId: string, date?: string): Promise<void> => {
+  const loadCrewMemberActivities = useCallback(async (crewMemberId: string, date?: string): Promise<void> => {
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
 
     try {
-      // TODO: Implement API call to load crew member activities
-      // For now, this is a placeholder
-      console.log(`Loading activities for crew member ${crewMemberId} on ${date || 'today'}`);
+      const activities = await activityService.getActivitiesForCrewMember(
+        crewMemberId,
+        date || new Date().toISOString().split('T')[0]
+      );
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      dispatch({
+        type: 'SET_CREW_MEMBERS',
+        payload: state.crewMembers.map((member) =>
+          member.id === crewMemberId
+            ? { ...member, activities: activities.sort((a, b) => a.start - b.start) }
+            : member
+        ),
+      });
 
       dispatch({ type: 'SET_LOADING', payload: false });
     } catch (error) {
@@ -129,19 +143,36 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
       });
       dispatch({ type: 'SET_LOADING', payload: false });
     }
-  };
+  }, [state.crewMembers]);
 
-  const loadMissionActivities = async (missionId: string, date?: string): Promise<void> => {
+  const loadMissionActivities = useCallback(async (missionId: string, date?: string): Promise<void> => {
     dispatch({ type: 'SET_LOADING', payload: true });
     dispatch({ type: 'SET_ERROR', payload: null });
 
     try {
-      // TODO: Implement API call to load mission activities
-      // For now, this is a placeholder
-      console.log(`Loading activities for mission ${missionId} on ${date || 'today'}`);
+      const activities = await activityService.getActivitiesForMission(
+        missionId,
+        date || new Date().toISOString().split('T')[0]
+      );
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const activitiesByCrewMember = activities.reduce((acc, activity) => {
+        const crewMemberId = activity.crewMemberId || 'unassigned';
+        if (!acc[crewMemberId]) {
+          acc[crewMemberId] = [];
+        }
+        acc[crewMemberId].push(activity);
+        return acc;
+      }, {} as Record<string, Activity[]>);
+
+      dispatch({
+        type: 'SET_CREW_MEMBERS',
+        payload: state.crewMembers.map((member) => ({
+          ...member,
+          activities: (activitiesByCrewMember[member.id] || []).sort(
+            (a, b) => a.start - b.start
+          ),
+        })),
+      });
 
       dispatch({ type: 'SET_LOADING', payload: false });
     } catch (error) {
@@ -151,7 +182,7 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
       });
       dispatch({ type: 'SET_LOADING', payload: false });
     }
-  };
+  }, [state.crewMembers]);
 
   return (
     <TaskContext.Provider

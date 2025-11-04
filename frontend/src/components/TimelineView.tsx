@@ -5,6 +5,7 @@ import { cn } from '../utils/utils';
 import { calculateActivityPosition } from '../utils/activityUtils';
 import { ActivityModal, TaskForm, QuickActions, DayHeader } from './index';
 import { useTaskContext } from '../hooks/useTaskContext';
+import { useCrew } from '../hooks/useCrew'; 
 import type { Activity, ActivityType, Mission } from '../types/types';
 import { getMockActivitiesForDay } from '../mock/weekdata';
 
@@ -33,7 +34,9 @@ interface TimelineViewProps {
 }
 
 export const TimelineView = ({ mission }: TimelineViewProps) => {
-  const { state, addTask, updateTask, deleteTask, getTaskById } = useTaskContext();
+  const { state, addTask, updateTask, deleteTask, getTaskById, loadMissionActivities } = useTaskContext();
+  const { crewMembers: apiCrewMembers, loadCrewMembers, loading: crewLoading } = useCrew(mission?.id);
+  
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
   const [editingTask, setEditingTask] = useState<Activity | null>(null);
@@ -49,6 +52,21 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   const missionEndDate = mission
     ? new Date(mission.endDate)
     : new Date(new Date().setMonth(new Date().getMonth() + 6));
+
+  useEffect(() => {
+    if (mission?.id) {
+      console.log('Loading crew members for mission:', mission.id);
+      loadCrewMembers(mission.id);
+    }
+  }, [mission?.id, loadCrewMembers]);
+
+  useEffect(() => {
+    if (mission?.id && currentDate) {
+      const dateStr = currentDate.toISOString().split('T')[0];
+      console.log('Loading activities for date:', dateStr);
+      loadMissionActivities(mission.id, dateStr);
+    }
+  }, [mission?.id, currentDate, loadMissionActivities]);
 
   useEffect(() => {
     if (mission) {
@@ -204,6 +222,44 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     }
   };
 
+  const displayCrewMembers = mission?.crewMembers || state.crewMembers || apiCrewMembers || [];
+
+  if (crewLoading && displayCrewMembers.length === 0) {
+    return (
+      <Card className="overflow-hidden shadow-xl">
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <div className="animate-spin h-8 w-8 border-4 border-space-500 border-t-transparent rounded-full mx-auto mb-4" />
+            <p className="text-slate-600 dark:text-slate-400">Loading crew members...</p>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
+  if (displayCrewMembers.length === 0) {
+    return (
+      <Card className="overflow-hidden shadow-xl">
+        <DayHeader
+          currentDate={currentDate}
+          missionDay={missionDay}
+          mission={mission}
+          onPreviousDay={handlePreviousDay}
+          onNextDay={handleNextDay}
+          onDateSelect={handleDateSelect}
+          canGoPrevious={canGoPrevious}
+          canGoNext={canGoNext}
+        />
+        <div className="flex items-center justify-center py-20">
+          <div className="text-center">
+            <p className="text-slate-600 dark:text-slate-400 mb-2">No crew members assigned to this mission</p>
+            <p className="text-sm text-slate-500 dark:text-slate-500">Add crew members to start planning activities</p>
+          </div>
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <>
       <Card className="overflow-hidden shadow-xl">
@@ -239,7 +295,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
               ))}
             </div>
 
-            {state.crewMembers.map((member, idx) => {
+            {displayCrewMembers.map((member, idx) => {
               const memberActivities = getCrewMemberActivities(member.id);
 
               return (
@@ -258,7 +314,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
                         {member.name}
                       </p>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        Flight Engineer
+                        {member.role || 'Flight Engineer'}
                       </p>
                     </div>
                     <Button

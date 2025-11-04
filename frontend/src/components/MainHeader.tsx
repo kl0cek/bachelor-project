@@ -1,39 +1,55 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router';
-import { Satellite, User, LogIn, Shield } from 'lucide-react';
+import { Link, useNavigate } from 'react-router';
+import { Satellite, User, LogIn, Shield, LogOut } from 'lucide-react';
 import { Button } from './ui/index';
 import { LoginModal } from './LoginModal';
-import type { User as UserType } from '../types/auth';
+import { authService } from '../services/authService';
+import type { User as UserType } from '../types/types';
 
 export const MainHeader = () => {
+  const navigate = useNavigate();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [user, setUser] = useState<UserType | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (error) {
-        console.error('Failed to parse saved user:', error);
-        localStorage.removeItem('currentUser');
-      }
-    }
+    // Initialize auth and get current user
+    const initAuth = async () => {
+      await authService.initialize();
+      const currentUser = authService.getCurrentUser();
+      setUser(currentUser);
+    };
+
+    initAuth();
   }, []);
 
   const handleLogin = (authenticatedUser: UserType) => {
     setUser(authenticatedUser);
-    localStorage.setItem('currentUser', JSON.stringify(authenticatedUser));
     setIsLoginModalOpen(false);
-
+    
+    // Reload to ensure all components get the new auth state
     window.location.reload();
   };
 
-  const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('currentUser');
-
-    window.location.reload();
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    
+    try {
+      await authService.logout();
+      setUser(null);
+      
+      // Redirect to home and reload
+      navigate('/');
+      window.location.reload();
+    } catch (error) {
+      console.error('Logout error:', error);
+      // Even if logout fails on backend, clear local state
+      setUser(null);
+      navigate('/');
+      window.location.reload();
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   type Role = 'admin' | 'operator' | 'astronaut' | 'viewer';
@@ -55,11 +71,6 @@ export const MainHeader = () => {
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 sm:gap-6 min-w-0 flex-1">
-              {/** 
-              <Button variant="ghost" size="icon" className="lg:hidden shrink-0">
-                <Menu className="h-5 w-5" />
-              </Button>*/}
-
               <Link to="/" className="flex items-center gap-2 sm:gap-4 min-w-0">
                 <div className="p-2 sm:p-3 rounded-xl bg-space-100 dark:bg-space-900 shrink-0">
                   <Satellite className="h-5 w-5 sm:h-6 sm:w-6 text-space-600 dark:text-space-400" />
@@ -106,10 +117,21 @@ export const MainHeader = () => {
                     variant="outline"
                     size="sm"
                     onClick={handleLogout}
+                    disabled={isLoggingOut}
                     className="px-2 sm:px-3"
                   >
-                    <span className="hidden sm:inline">Logout</span>
-                    <span className="sm:hidden text-xs">Out</span>
+                    {isLoggingOut ? (
+                      <>
+                        <div className="animate-spin h-3.5 w-3.5 sm:h-4 sm:w-4 border-2 border-slate-400 border-t-transparent rounded-full" />
+                        <span className="hidden sm:inline ml-2">Logging out...</span>
+                      </>
+                    ) : (
+                      <>
+                        <LogOut className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                        <span className="hidden sm:inline ml-2">Logout</span>
+                        <span className="sm:hidden ml-1.5 text-xs">Out</span>
+                      </>
+                    )}
                   </Button>
                 </>
               ) : (

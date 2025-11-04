@@ -1,4 +1,3 @@
-// src/services/missionService.ts
 import { apiClient } from '../api/client';
 import type { Mission } from '../types/types';
 
@@ -7,7 +6,7 @@ class MissionService {
     const response = await apiClient.get('/missions', {
       params: filters,
     });
-    return response.data.data;
+    return response.data.data.map(this.mapMissionToFrontend);
   }
 
   async getMissionById(id: string): Promise<Mission> {
@@ -16,7 +15,9 @@ class MissionService {
   }
 
   async getActiveMissions(): Promise<Mission[]> {
-    const response = await apiClient.get('/missions/active');
+    const response = await apiClient.get('/missions', {
+      params: { status: 'active' },
+    });
     return response.data.data.map(this.mapMissionToFrontend);
   }
 
@@ -26,7 +27,7 @@ class MissionService {
       description: data.description,
       start_date: data.startDate,
       end_date: data.endDate,
-      status: data.status,
+      status: data.status || 'planning',
     });
     return this.mapMissionToFrontend(response.data.data);
   }
@@ -54,7 +55,19 @@ class MissionService {
       startDate: mission.start_date,
       endDate: mission.end_date,
       status: mission.status,
-      crewMembers: mission.crew_members || [],
+      crewMembers: mission.crew_members
+        ? mission.crew_members.map((member: any) => ({
+            id: member.id,
+            name: member.name,
+            role: member.role,
+            email: member.email,
+            missionId: member.mission_id,
+            userId: member.user_id,
+            activities: [],
+            createdAt: member.created_at,
+            updatedAt: member.updated_at,
+          }))
+        : [],
       createdAt: mission.created_at,
       updatedAt: mission.updated_at,
       createdBy: mission.created_by,
