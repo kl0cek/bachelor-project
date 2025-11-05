@@ -7,10 +7,8 @@ import { validate } from '../middleware/validator.middleware';
 
 const router = Router();
 
-// All routes require authentication
 router.use(authenticate);
 
-// Validation schemas
 const createActivityValidation = [
   body('crew_member_id').isUUID(),
   body('mission_id').isUUID(),

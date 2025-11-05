@@ -301,6 +301,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
         task={selectedTask}
         crewMemberId={selectedCrewMemberId}
         defaultStartTime={defaultStartTime}
+        date={currentDate} 
       />
 
       <ActivityModal

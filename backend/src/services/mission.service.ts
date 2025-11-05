@@ -73,7 +73,6 @@ class MissionService {
   }
 
   async create(data: CreateMissionDto, userId: string): Promise<Mission> {
-    // Validate dates
     const startDate = new Date(data.start_date);
     const endDate = new Date(data.end_date);
 

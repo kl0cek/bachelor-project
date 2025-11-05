@@ -12,6 +12,7 @@ interface TaskFormProps {
   task?: Activity | null;
   crewMemberId: string;
   defaultStartTime?: number;
+  date: string;
 }
 
 export const TaskForm = ({
@@ -61,6 +62,7 @@ export const TaskForm = ({
 
     const taskData: Activity = {
       id: task?.id || `${crewMemberId}-${Date.now()}`,
+      crewMemberId,
       name: formData.name.trim(),
       start: formData.start || defaultStartTime,
       duration: formData.duration || 1,
@@ -69,6 +71,7 @@ export const TaskForm = ({
       description: formData.description?.trim() || undefined,
       equipment: formData.equipment?.filter((item) => item.trim()) || [],
       priority: formData.priority || 'medium',
+      date: new Date().toISOString().split("T")[0],
     };
 
     onSubmit(taskData);
