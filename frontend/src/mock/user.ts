@@ -1,4 +1,4 @@
-import type { User } from '../types/auth';
+/*import type { User } from '../types/auth';
 
 export const DEFAULT_USERS: User[] = [
   {
@@ -42,3 +42,4 @@ export const DEFAULT_USERS: User[] = [
     isActive: true,
   },
 ];
+*/

@@ -1,4 +1,4 @@
-import type { Mission } from '../types/types';
+/*import type { Mission } from '../types/types';
 import { crewMembers } from './data';
 
 export const missions: Mission[] = [
@@ -63,3 +63,4 @@ export const getActiveMissions = (): Mission[] => {
 export const getMissionsByStatus = (status: Mission['status']): Mission[] => {
   return missions.filter((mission) => mission.status === status);
 };
+*/

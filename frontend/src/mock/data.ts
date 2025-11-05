@@ -1,4 +1,4 @@
-import type { CrewMember } from '../types/types';
+/*import type { CrewMember } from '../types/types';
 
 export const crewMembers: CrewMember[] = [
   {
@@ -21,4 +21,4 @@ export const crewMembers: CrewMember[] = [
     name: 'FE-5',
     activities: [],
   },
-];
+];*/

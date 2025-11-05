@@ -48,6 +48,8 @@ export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
 
 class AuthService {
   private currentUser: User | null = null;
+  private isLoggingOut: boolean = false;
+  private isInitialized: boolean = false;
 
   async login(credentials: LoginCredentials): Promise<User> {
     try {
@@ -73,6 +75,7 @@ class AuthService {
 
       localStorage.setItem('currentUser', JSON.stringify(mappedUser));
       this.currentUser = mappedUser;
+      this.isInitialized = true;
 
       return mappedUser;
     } catch (error) {
@@ -82,16 +85,32 @@ class AuthService {
   }
 
   async logout(): Promise<void> {
+    if (this.isLoggingOut) {
+      return;
+    }
+
+    this.isLoggingOut = true;
+
     try {
-      await apiClient.post('/auth/logout', {});
+      await apiClient.post('/auth/logout', {}, {
+        timeout: 3000,
+      });
     } catch (error) {
-      console.error('Logout error:', error);
+      console.log('Logout API call failed (this is OK):', error);
     } finally {
       this.clearAuth();
+      this.isLoggingOut = false;
+      this.isInitialized = false;
+      window.location.href = '/login';
     }
   }
 
   async initialize(): Promise<void> {
+    // Don't initialize if already initialized or if there's no stored user
+    if (this.isInitialized || !localStorage.getItem('currentUser')) {
+      return;
+    }
+
     try {
       const response = await apiClient.get<{ success: boolean; data: any }>('/auth/me');
       const user = response.data.data;
@@ -110,9 +129,11 @@ class AuthService {
 
       localStorage.setItem('currentUser', JSON.stringify(mappedUser));
       this.currentUser = mappedUser;
+      this.isInitialized = true;
     } catch (error) {
       console.error('Auth initialization failed:', error);
       this.clearAuth();
+      this.isInitialized = false;
     }
   }
 
@@ -137,6 +158,10 @@ class AuthService {
     return null;
   }
 
+  isAuthenticated(): boolean {
+    return this.getCurrentUser() !== null;
+  }
+
   hasPermission(permission: string): boolean {
     const user = this.getCurrentUser();
     if (!user) return false;
@@ -154,6 +179,7 @@ class AuthService {
   private clearAuth(): void {
     localStorage.removeItem('currentUser');
     this.currentUser = null;
+    this.isInitialized = false;
   }
 
   private isValidUser(user: any): boolean {

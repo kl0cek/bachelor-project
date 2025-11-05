@@ -1,4 +1,4 @@
-import type { Activity } from '../types/types';
+/*import type { Activity } from '../types/types';
 
 export const getMockActivitiesForDay = (missionDay: number): Record<string, Activity[]> => {
   if (missionDay === 1) {
@@ -524,3 +524,4 @@ export const getMockActivitiesForDay = (missionDay: number): Record<string, Acti
     'fe-5': [],
   };
 };
+*/
