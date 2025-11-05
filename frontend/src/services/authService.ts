@@ -185,7 +185,7 @@ class AuthService {
     this.isInitialized = false;
   }
 
-  private isValidUser(user: any): boolean {
+  private isValidUser(user: User): boolean {
     return (
       user &&
       typeof user.id === 'string' &&

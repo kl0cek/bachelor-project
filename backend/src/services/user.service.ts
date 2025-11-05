@@ -2,6 +2,7 @@ import { AppDataSource } from '../config/database';
 import { User, UserRole } from '../entities/User.entity';
 import { NotFoundError, ConflictError, BadRequestError } from '../utils/errors';
 import { auditService } from './audit.service';
+import bcrypt from 'bcrypt';
 
 export interface CreateUserDto {
   username: string;
@@ -55,9 +56,15 @@ class UserService {
       throw new ConflictError('Username or email already exists');
     }
 
+    // Hash the password before saving
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+
     const user = this.userRepository.create({
-      ...data,
-      password: data.password,
+      username: data.username,
+      password_hash: hashedPassword,
+      full_name: data.full_name,
+      email: data.email,
+      role: data.role,
       is_active: data.is_active ?? true,
     });
 
@@ -94,10 +101,26 @@ class UserService {
 
     const originalData = { ...user };
 
-    Object.assign(user, {
-      ...data,
-      ...(data.password && { password: data.password }),
-    });
+    // Hash password if it's being updated
+    if (data.password) {
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+      Object.assign(user, {
+        username: data.username,
+        password_hash: hashedPassword,
+        full_name: data.full_name,
+        email: data.email,
+        role: data.role,
+        is_active: data.is_active,
+      });
+    } else {
+      Object.assign(user, {
+        username: data.username,
+        full_name: data.full_name,
+        email: data.email,
+        role: data.role,
+        is_active: data.is_active,
+      });
+    }
 
     const updated = await this.userRepository.save(user);
 
