@@ -1,408 +1,316 @@
-import { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
-import { Card, Button } from './ui/index';
-import { cn } from '../utils/utils';
-import { calculateActivityPosition } from '../utils/activityUtils';
-import { ActivityModal, TaskForm, QuickActions, DayHeader } from './index';
-import { useTaskContext } from '../hooks/useTaskContext';
-import { useCrew } from '../hooks/useCrew'; 
-import type { Activity, ActivityType, Mission } from '../types/types';
-import { getMockActivitiesForDay } from '../mock/weekdata';
-
-const hours = Array.from({ length: 24 }, (_, i) => i);
-
-const activityColors: Record<ActivityType, string> = {
-  exercise:
-    'bg-space-400 dark:bg-space-500 text-sky-950 dark:text-white shadow-space border-space-600 dark:border-space-400',
-  meal: 'bg-slate-400 dark:text-gray-900 text-sky-950 dark:bg-slate-500 dark:text-white border-slate-500 dark:border-slate-400',
-  sleep:
-    'bg-slate-400 dark:text-gray-900 text-sky-950 dark:bg-slate-500 dark:text-white border-slate-500 dark:border-slate-400',
-  work: 'bg-space-400 dark:bg-space-500 dark:text-white text-sky-950 shadow-space border-space-600 dark:border-space-400',
-  eva: 'bg-orange-400 dark:bg-orange-500 dark:text-gray-900 text-sky-950 dark:text-white shadow-orange border-orange-600 dark:border-orange-400',
-  optional:
-    'bg-slate-300 text-slate-900 dark:text-white border-slate-400 dark:bg-slate-600 dark:text-slate-100 dark:border-slate-500',
-};
-
-const calculateMissionDay = (currentDate: Date, missionStartDate: Date): number => {
-  const diffTime = currentDate.getTime() - missionStartDate.getTime();
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-  return Math.max(1, diffDays + 1);
-};
+import { useState } from 'react';
+import { ChevronLeft, ChevronRight, Plus, Loader2 } from 'lucide-react';
+import { Button } from './ui/index';
+import { TaskForm } from './TaskForm';
+import { ActivityModal } from './ActivityModal';
+import { useActivities } from '../hooks/useActivities';
+import { getActivityColor } from '../utils/activityUtils';
+import type { Mission, Activity } from '../types/types';
 
 interface TimelineViewProps {
-  mission?: Mission;
+  mission: Mission;
 }
 
 export const TimelineView = ({ mission }: TimelineViewProps) => {
-  const { state, addTask, updateTask, deleteTask, getTaskById, loadMissionActivities } = useTaskContext();
-  const { crewMembers: apiCrewMembers, loadCrewMembers, loading: crewLoading } = useCrew(mission?.id);
-  
-  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
-  const [isTaskFormOpen, setIsTaskFormOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<Activity | null>(null);
+  const [currentDate, setCurrentDate] = useState(() => {
+    const today = new Date();
+    const missionStart = new Date(mission.startDate);
+    const missionEnd = new Date(mission.endDate);
+
+    if (today >= missionStart && today <= missionEnd) {
+      return today.toISOString().split('T')[0];
+    }
+    return missionStart.toISOString().split('T')[0];
+  });
+
+  const { activities, loading, createActivity, updateActivity, deleteActivity } = useActivities(
+    mission.id,
+    currentDate
+  );
+
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Activity | null>(null);
   const [selectedCrewMemberId, setSelectedCrewMemberId] = useState<string>('');
-  const [newTaskStartTime, setNewTaskStartTime] = useState<number>(6);
+  const [defaultStartTime, setDefaultStartTime] = useState<number>(6);
+  const [viewingTask, setViewingTask] = useState<Activity | null>(null);
 
-  const [currentDate, setCurrentDate] = useState<Date>(new Date());
-  const [missionDay, setMissionDay] = useState<number>(1);
-  const [mockDailyActivities, setMockDailyActivities] = useState<Record<string, Activity[]>>({});
-  const [hiddenMockActivities, setHiddenMockActivities] = useState<Set<string>>(new Set());
+  const hours = Array.from({ length: 24 }, (_, i) => i);
+  const crewMembers = mission.crewMembers || [];
 
-  const missionStartDate = mission ? new Date(mission.startDate) : new Date();
-  const missionEndDate = mission
-    ? new Date(mission.endDate)
-    : new Date(new Date().setMonth(new Date().getMonth() + 6));
-
-  useEffect(() => {
-    if (mission?.id) {
-      console.log('Loading crew members for mission:', mission.id);
-      loadCrewMembers(mission.id);
-    }
-  }, [mission?.id, loadCrewMembers]);
-
-  useEffect(() => {
-    if (mission?.id && currentDate) {
-      const dateStr = currentDate.toISOString().split('T')[0];
-      console.log('Loading activities for date:', dateStr);
-      loadMissionActivities(mission.id, dateStr);
-    }
-  }, [mission?.id, currentDate, loadMissionActivities]);
-
-  useEffect(() => {
-    if (mission) {
-      const today = new Date();
-      const start = new Date(mission.startDate);
-      const end = new Date(mission.endDate);
-
-      if (today >= start && today <= end) {
-        setCurrentDate(today);
-        const day = calculateMissionDay(today, start);
-        setMissionDay(day);
-        setMockDailyActivities(getMockActivitiesForDay(day));
-      } else if (today < start) {
-        setCurrentDate(start);
-        setMissionDay(1);
-        setMockDailyActivities(getMockActivitiesForDay(1));
-      } else {
-        setCurrentDate(end);
-        const day = calculateMissionDay(end, start);
-        setMissionDay(day);
-        setMockDailyActivities(getMockActivitiesForDay(day));
-      }
-    }
-  }, [mission]);
+  const getActivitiesForCrewMember = (crewMemberId: string) => {
+    return activities.filter((activity) => activity.crewMemberId === crewMemberId);
+  };
 
   const handlePreviousDay = () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(newDate.getDate() - 1);
-
-    if (newDate >= missionStartDate) {
-      const newDay = calculateMissionDay(newDate, missionStartDate);
-      setCurrentDate(newDate);
-      setMissionDay(newDay);
-      const newMockData = getMockActivitiesForDay(newDay);
-      setMockDailyActivities(newMockData);
-      console.log(`Switched to Day ${newDay}`, newMockData);
+    const date = new Date(currentDate);
+    date.setDate(date.getDate() - 1);
+    const missionStart = new Date(mission.startDate);
+    if (date >= missionStart) {
+      setCurrentDate(date.toISOString().split('T')[0]);
     }
   };
 
   const handleNextDay = () => {
-    const newDate = new Date(currentDate);
-    newDate.setDate(newDate.getDate() + 1);
-
-    if (newDate <= missionEndDate) {
-      const newDay = calculateMissionDay(newDate, missionStartDate);
-      setCurrentDate(newDate);
-      setMissionDay(newDay);
-      const newMockData = getMockActivitiesForDay(newDay);
-      setMockDailyActivities(newMockData);
-      console.log(`Switched to Day ${newDay}`, newMockData);
+    const date = new Date(currentDate);
+    date.setDate(date.getDate() + 1);
+    const missionEnd = new Date(mission.endDate);
+    if (date <= missionEnd) {
+      setCurrentDate(date.toISOString().split('T')[0]);
     }
   };
 
-  const handleDateSelect = () => {
-    console.log('Open date picker modal');
+  const handleAddTask = (crewMemberId: string, startTime: number) => {
+    setSelectedCrewMemberId(crewMemberId);
+    setDefaultStartTime(startTime);
+    setSelectedTask(null);
+    setIsFormOpen(true);
   };
 
-  const canGoPrevious = currentDate > missionStartDate;
-  const canGoNext = currentDate < missionEndDate;
-
-  const getCrewMemberActivities = (crewMemberId: string): Activity[] => {
-    const mockActivities = mockDailyActivities[crewMemberId] || [];
-    const contextMember = state.crewMembers.find((m) => m.id === crewMemberId);
-    const contextActivities = contextMember?.activities || [];
-
-    const filteredMockActivities = mockActivities.filter(
-      (activity) => !hiddenMockActivities.has(activity.id)
-    );
-
-    return [...filteredMockActivities, ...contextActivities].sort((a, b) => a.start - b.start);
+  const handleEditTask = (task: Activity) => {
+    setSelectedTask(task);
+    setSelectedCrewMemberId(task.crewMemberId!);
+    setIsFormOpen(true);
   };
 
-  const handleActivityClick = (activity: Activity) => {
-    const mockActivities = Object.values(mockDailyActivities).flat();
-    const isMockActivity = mockActivities.some((a) => a.id === activity.id);
-
-    if (isMockActivity) {
-      const firstCrewMemberId = Object.keys(mockDailyActivities).find((crewId) =>
-        mockDailyActivities[crewId]?.some((a) => a.id === activity.id)
-      );
-      if (firstCrewMemberId) {
-        setSelectedCrewMemberId(firstCrewMemberId);
-      }
-    }
-
-    setSelectedActivity(activity);
+  const handleViewTask = (task: Activity) => {
+    setViewingTask(task);
   };
 
-  const handleEditClick = (activity: Activity) => {
-    const mockActivities = mockDailyActivities[selectedCrewMemberId] || [];
-    const isMockActivity = mockActivities.some((a) => a.id === activity.id);
+  const handleFormSubmit = async (taskData: Activity) => {
 
-    if (isMockActivity) {
-      setEditingTask(activity);
-      setSelectedCrewMemberId(selectedCrewMemberId || Object.keys(mockDailyActivities)[0]);
-      setIsTaskFormOpen(true);
-      setSelectedActivity(null);
+    if (!taskData.crewMemberId) {
+      console.error('Crew member ID is required');
       return;
     }
 
-    const taskData = getTaskById(activity.id);
-    if (taskData) {
-      setEditingTask(activity);
-      setSelectedCrewMemberId(taskData.crewMemberId);
-      setIsTaskFormOpen(true);
-    }
-    setSelectedActivity(null);
-  };
-
-  const handleCreateTask = (crewMemberId: string, startTime?: number) => {
-    setSelectedCrewMemberId(crewMemberId);
-    setNewTaskStartTime(startTime || 6);
-    setEditingTask(null);
-    setIsTaskFormOpen(true);
-  };
-
-  const handleTaskSubmit = (task: Activity) => {
-    if (editingTask) {
-      updateTask(selectedCrewMemberId, task);
-    } else {
-      addTask(selectedCrewMemberId, task);
-    }
-    setIsTaskFormOpen(false);
-    setEditingTask(null);
-  };
-
-  const handleTaskDelete = (taskId: string) => {
-    const mockActivities = Object.values(mockDailyActivities).flat();
-    const isMockActivity = mockActivities.some((activity) => activity.id === taskId);
-
-    if (isMockActivity) {
-      setHiddenMockActivities((prev) => new Set([...prev, taskId]));
-    } else {
-      const taskData = getTaskById(taskId);
-      if (taskData) {
-        deleteTask(taskData.crewMemberId, taskId);
+    try {
+      if (selectedTask) {
+        await updateActivity(selectedTask.id!, {
+          crew_member_id: taskData.crewMemberId,
+          mission_id: mission.id,
+          name: taskData.name,
+          date: currentDate,
+          start_hour: taskData.start,
+          duration: taskData.duration,
+          type: taskData.type,
+          priority: taskData.priority,
+          mission: taskData.mission,
+          description: taskData.description,
+          equipment: taskData.equipment,
+        });
+      } else {
+        await createActivity({
+          crew_member_id: taskData.crewMemberId,
+          mission_id: mission.id,
+          name: taskData.name,
+          date: currentDate,
+          start_hour: taskData.start,
+          duration: taskData.duration,
+          type: taskData.type,
+          priority: taskData.priority,
+          mission: taskData.mission,
+          description: taskData.description,
+          equipment: taskData.equipment,
+        });
       }
+      setIsFormOpen(false);
+      setSelectedTask(null);
+    } catch (error) {
+      console.error('Error saving activity:', error);
     }
-
-    setIsTaskFormOpen(false);
-    setEditingTask(null);
   };
 
-  const handleTimeSlotClick = (crewMemberId: string, hour: number) => {
-    const activities = getCrewMemberActivities(crewMemberId);
-    const conflictingActivity = activities.find((activity) => {
-      const activityEnd = activity.start + activity.duration;
-      return hour >= activity.start && hour < activityEnd;
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      await deleteActivity(taskId);
+      setIsFormOpen(false);
+      setSelectedTask(null);
+    } catch (error) {
+      console.error('Error deleting activity:', error);
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
-
-    if (!conflictingActivity) {
-      handleCreateTask(crewMemberId, hour);
-    }
   };
 
-  const displayCrewMembers = mission?.crewMembers || state.crewMembers || apiCrewMembers || [];
+  const canNavigatePrevious = () => {
+    const date = new Date(currentDate);
+    const missionStart = new Date(mission.startDate);
+    date.setDate(date.getDate() - 1);
+    return date >= missionStart;
+  };
 
-  if (crewLoading && displayCrewMembers.length === 0) {
-    return (
-      <Card className="overflow-hidden shadow-xl">
-        <div className="flex items-center justify-center py-20">
-          <div className="text-center">
-            <div className="animate-spin h-8 w-8 border-4 border-space-500 border-t-transparent rounded-full mx-auto mb-4" />
-            <p className="text-slate-600 dark:text-slate-400">Loading crew members...</p>
-          </div>
-        </div>
-      </Card>
-    );
-  }
+  const canNavigateNext = () => {
+    const date = new Date(currentDate);
+    const missionEnd = new Date(mission.endDate);
+    date.setDate(date.getDate() + 1);
+    return date <= missionEnd;
+  };
 
-  if (displayCrewMembers.length === 0) {
+  if (crewMembers.length === 0) {
     return (
-      <Card className="overflow-hidden shadow-xl">
-        <DayHeader
-          currentDate={currentDate}
-          missionDay={missionDay}
-          mission={mission}
-          onPreviousDay={handlePreviousDay}
-          onNextDay={handleNextDay}
-          onDateSelect={handleDateSelect}
-          canGoPrevious={canGoPrevious}
-          canGoNext={canGoNext}
-        />
-        <div className="flex items-center justify-center py-20">
-          <div className="text-center">
-            <p className="text-slate-600 dark:text-slate-400 mb-2">No crew members assigned to this mission</p>
-            <p className="text-sm text-slate-500 dark:text-slate-500">Add crew members to start planning activities</p>
-          </div>
-        </div>
-      </Card>
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm p-8 text-center">
+        <p className="text-slate-600 dark:text-slate-400 mb-4">
+          No crew members assigned to this mission yet.
+        </p>
+        <p className="text-sm text-slate-500 dark:text-slate-500">
+          Add crew members to start planning activities.
+        </p>
+      </div>
     );
   }
 
   return (
     <>
-      <Card className="overflow-hidden shadow-xl">
-        <DayHeader
-          currentDate={currentDate}
-          missionDay={missionDay}
-          mission={mission}
-          onPreviousDay={handlePreviousDay}
-          onNextDay={handleNextDay}
-          onDateSelect={handleDateSelect}
-          canGoPrevious={canGoPrevious}
-          canGoNext={canGoNext}
-        />
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm overflow-hidden mb-6">
+        <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePreviousDay}
+            disabled={!canNavigatePrevious()}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
 
-        <div className="overflow-x-auto">
-          <div className="min-w-max">
-            <div className="grid grid-cols-[160px_repeat(24,minmax(60px,1fr))] border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
-              <div className="px-6 py-6">
-                <p className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                  Crew Member
-                </p>
-              </div>
-              {hours.map((hour) => (
-                <div
-                  key={hour}
-                  className="border-l border-slate-200 dark:border-slate-800 px-2 py-6 text-center"
-                >
-                  <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
-                    {hour.toString().padStart(2, '0')}:00
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">UTC</p>
-                </div>
-              ))}
-            </div>
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+            {formatDate(currentDate)}
+          </h3>
 
-            {displayCrewMembers.map((member, idx) => {
-              const memberActivities = getCrewMemberActivities(member.id);
-
-              return (
-                <div
-                  key={member.id}
-                  className={cn(
-                    'grid grid-cols-[160px_repeat(24,minmax(60px,1fr))] border-b border-slate-200 dark:border-slate-800 transition-colors relative',
-                    idx % 2 === 0
-                      ? 'bg-white dark:bg-slate-900'
-                      : 'bg-slate-25 dark:bg-slate-900/20'
-                  )}
-                >
-                  <div className="px-6 py-10 flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                        {member.name}
-                      </p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                        {member.role || 'Flight Engineer'}
-                      </p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleCreateTask(member.id)}
-                      className="h-8 w-8 text-slate-500 hover:text-space-600 hover:bg-space-50 dark:hover:bg-space-950"
-                      title="Add new task"
-                    >
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="contents">
-                    {hours.map((hour) => (
-                      <div
-                        key={hour}
-                        className="relative border-l border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors cursor-pointer group/timeslot min-h-[120px]"
-                        onClick={() => handleTimeSlotClick(member.id, hour)}
-                        title={`Add task at ${hour.toString().padStart(2, '0')}:00`}
-                      >
-                        <div className="opacity-0 group-hover/timeslot:opacity-100 transition-opacity flex items-center justify-center h-full min-h-[120px]">
-                          <Plus className="h-4 w-4 text-slate-400" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="absolute left-40 right-0 top-0 bottom-0 pointer-events-none">
-                    {memberActivities.map((activity) => {
-                      const { left, width } = calculateActivityPosition(
-                        activity.start,
-                        activity.duration,
-                        0,
-                        24
-                      );
-                      return (
-                        <button
-                          key={activity.id}
-                          onClick={() => handleActivityClick(activity)}
-                          className={cn(
-                            'absolute top-6 bottom-6 rounded-xl px-4 py-3 transition-all duration-200 hover:scale-105 hover:shadow-xl cursor-pointer border-2 group pointer-events-auto',
-                            activityColors[activity.type]
-                          )}
-                          style={{
-                            left: `${left}%`,
-                            width: `${width}%`,
-                          }}
-                        >
-                          <div className="text-left">
-                            <p className="text-xs font-bold leading-tight truncate group-hover:text-clip">
-                              {activity.name}
-                            </p>
-                            {activity.mission && (
-                              <p className="text-xs opacity-80 leading-tight truncate mt-1">
-                                {activity.mission}
-                              </p>
-                            )}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+          <Button variant="outline" size="sm" onClick={handleNextDay} disabled={!canNavigateNext()}>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
-      </Card>
 
-      <ActivityModal
-        activity={selectedActivity}
-        onClose={() => setSelectedActivity(null)}
-        onEdit={handleEditClick}
-      />
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-space-600" />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <div className="inline-block min-w-full align-middle">
+              <table className="min-w-full">
+                <thead>
+                  <tr>
+                    <th className="sticky left-0 z-10 bg-slate-50 dark:bg-slate-900 px-4 py-3 text-left text-sm font-semibold text-slate-900 dark:text-slate-100 border-r border-slate-200 dark:border-slate-700">
+                      Crew Member
+                    </th>
+                    {hours.map((hour) => (
+                      <th
+                        key={hour}
+                        className="px-2 py-3 text-center text-xs font-medium text-slate-500 dark:text-slate-400 border-r border-slate-200 dark:border-slate-700"
+                        style={{ minWidth: '60px' }}
+                      >
+                        {hour.toString().padStart(2, '0')}:00
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {crewMembers.map((member) => {
+                    const memberActivities = getActivitiesForCrewMember(member.id);
+
+                    return (
+                      <tr key={member.id} className="border-t border-slate-200 dark:border-slate-700">
+                        <td className="sticky left-0 z-10 bg-white dark:bg-slate-800 px-4 py-3 border-r border-slate-200 dark:border-slate-700">
+                          <div>
+                            <div className="font-medium text-slate-900 dark:text-slate-100">
+                              {member.name}
+                            </div>
+                            <div className="text-sm text-slate-500 dark:text-slate-400">
+                              {member.role}
+                            </div>
+                          </div>
+                        </td>
+                        {hours.map((hour) => {
+                          const activityAtHour = memberActivities.find(
+                            (activity) =>
+                              activity.start <= hour && activity.start + activity.duration > hour
+                          );
+
+                          const isActivityStart = activityAtHour && activityAtHour.start === hour;
+
+                          return (
+                            <td
+                              key={hour}
+                              className="relative border-r border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer"
+                              style={{ height: '60px', minWidth: '60px' }}
+                              onClick={() => {
+                                if (!activityAtHour) {
+                                  handleAddTask(member.id, hour);
+                                }
+                              }}
+                            >
+                              {isActivityStart && activityAtHour && (
+                                <div
+                                  className={`absolute inset-0 ${getActivityColor(activityAtHour.type)} rounded px-2 py-1 text-xs font-medium text-white overflow-hidden cursor-pointer hover:opacity-90 transition-opacity`}
+                                  style={{
+                                    width: `calc(${activityAtHour.duration * 100}% - 2px)`,
+                                  }}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleViewTask(activityAtHour);
+                                  }}
+                                  title={activityAtHour.name}
+                                >
+                                  <div className="truncate">{activityAtHour.name}</div>
+                                </div>
+                              )}
+
+                              {!activityAtHour && (
+                                <button
+                                  className="absolute inset-0 w-full h-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleAddTask(member.id, hour);
+                                  }}
+                                >
+                                  <Plus className="h-4 w-4 text-slate-400" />
+                                </button>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
 
       <TaskForm
-        isOpen={isTaskFormOpen}
+        isOpen={isFormOpen}
         onClose={() => {
-          setIsTaskFormOpen(false);
-          setEditingTask(null);
+          setIsFormOpen(false);
+          setSelectedTask(null);
         }}
-        onSubmit={handleTaskSubmit}
-        onDelete={handleTaskDelete}
-        task={editingTask}
+        onSubmit={handleFormSubmit}
+        onDelete={handleDeleteTask}
+        task={selectedTask}
         crewMemberId={selectedCrewMemberId}
-        defaultStartTime={newTaskStartTime}
+        defaultStartTime={defaultStartTime}
       />
 
-      <QuickActions onCreateTask={handleCreateTask} />
+      <ActivityModal
+        activity={viewingTask}
+        onClose={() => setViewingTask(null)}
+        onEdit={(task) => {
+          setViewingTask(null);
+          handleEditTask(task);
+        }}
+      />
     </>
   );
 };
+
+export default TimelineView;

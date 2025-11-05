@@ -1,251 +1,240 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router';
-import { ArrowLeft, Calendar, FileText, Rocket, Save } from 'lucide-react';
+import { ArrowLeft, Calendar, FileText, Rocket, Loader2 } from 'lucide-react';
 import { Card, Button } from '../components/ui/index';
-import type { MissionFormData } from '../types/types';
+import { useMissions } from '../hooks/useMissions';
+import type { MissionStatus } from '../types/types';
 
 export const CreateMission = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<MissionFormData>({
+  const { createMission } = useMissions();
+
+  const [formData, setFormData] = useState({
     name: '',
     description: '',
     startDate: '',
     endDate: '',
+    status: 'planning' as MissionStatus,
   });
+
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const validateForm = () => {
+    if (!formData.name.trim()) {
+      setError('Mission name is required');
+      return false;
+    }
+
+    if (!formData.description.trim()) {
+      setError('Mission description is required');
+      return false;
+    }
+
+    if (!formData.startDate) {
+      setError('Start date is required');
+      return false;
+    }
+
+    if (!formData.endDate) {
+      setError('End date is required');
+      return false;
+    }
+
+    const startDate = new Date(formData.startDate);
+    const endDate = new Date(formData.endDate);
+
+    if (endDate <= startDate) {
+      setError('End date must be after start date');
+      return false;
+    }
+
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
 
-    if (
-      !formData.name.trim() ||
-      !formData.description.trim() ||
-      !formData.startDate ||
-      !formData.endDate
-    ) {
+    if (!validateForm()) {
       return;
     }
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      const newMissionId = `mission-${Date.now()}`;
-      console.log('Creating mission:', { ...formData, id: newMissionId });
+    try {
+      const mission = await createMission({
+        name: formData.name,
+        description: formData.description,
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        status: formData.status,
+      });
 
-      navigate(`/mission/${newMissionId}/crew`);
-    }, 1500);
+      navigate(`/mission/${mission.id}/crew`);
+    } catch (err: any) {
+      console.error('Error creating mission:', err);
+      setError(err.response?.data?.message || err.message || 'Failed to create mission');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-
-  const handleInputChange = (field: keyof MissionFormData, value: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const isFormValid =
-    formData.name.trim() &&
-    formData.description.trim() &&
-    formData.startDate &&
-    formData.endDate &&
-    new Date(formData.startDate) < new Date(formData.endDate);
-
-  const today = new Date().toISOString().split('T')[0];
 
   return (
-    <div className="container mx-auto px-6 py-8 max-w-4xl">
-      <div className="mb-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 py-8">
+      <div className="container mx-auto px-6 max-w-3xl">
         <Link
           to="/"
-          className="inline-flex items-center gap-2 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 mb-4"
+          className="inline-flex items-center text-space-600 dark:text-space-400 hover:underline mb-6"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Mission Control
         </Link>
 
-        <div className="flex items-center gap-4 mb-4">
-          <div className="p-3 rounded-xl bg-space-100 dark:bg-space-900">
-            <Rocket className="h-8 w-8 text-space-600 dark:text-space-400" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+        <Card className="p-8">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-2">
               Create New Mission
             </h1>
             <p className="text-slate-600 dark:text-slate-400">
-              Set up a new analog space mission with crew scheduling
+              Set up a new analog mission with crew and activities
             </p>
           </div>
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-          <Card className="p-8">
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  Mission Name *
-                </label>
+          {error && (
+            <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+              <p className="text-red-800 dark:text-red-200 text-sm">{error}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Mission Name
+              </label>
+              <div className="relative">
+                <Rocket className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
                 <input
                   type="text"
+                  name="name"
                   value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-space-500 focus:border-transparent"
-                  placeholder="Enter mission name (e.g., Mars Analog Simulation 2025)"
+                  onChange={handleChange}
+                  placeholder="e.g., Mars Analog Mission 2025"
+                  className="w-full pl-11 pr-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-space-500"
                   required
+                  disabled={isSubmitting}
                 />
               </div>
+            </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                  <FileText className="h-4 w-4" />
-                  Mission Description *
-                </label>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Description
+              </label>
+              <div className="relative">
+                <FileText className="absolute left-3 top-3 h-5 w-5 text-slate-400" />
                 <textarea
+                  name="description"
                   value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
-                  rows={4}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-space-500 focus:border-transparent resize-none"
-                  placeholder="Describe the mission objectives, scope, and key activities..."
+                  onChange={handleChange}
+                  placeholder="Describe the mission objectives and goals..."
+                  rows={5}
+                  className="w-full pl-11 pr-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-space-500 resize-none"
                   required
+                  disabled={isSubmitting}
                 />
               </div>
+            </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    Start Date *
-                  </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  Start Date
+                </label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
                   <input
                     type="date"
+                    name="startDate"
                     value={formData.startDate}
-                    onChange={(e) => handleInputChange('startDate', e.target.value)}
-                    min={today}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-space-500 focus:border-transparent"
+                    onChange={handleChange}
+                    className="w-full pl-11 pr-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-space-500"
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
+              </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    End Date *
-                  </label>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  End Date
+                </label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
                   <input
                     type="date"
+                    name="endDate"
                     value={formData.endDate}
-                    onChange={(e) => handleInputChange('endDate', e.target.value)}
-                    min={formData.startDate || today}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-space-500 focus:border-transparent"
+                    onChange={handleChange}
+                    className="w-full pl-11 pr-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-space-500"
                     required
+                    disabled={isSubmitting}
                   />
                 </div>
               </div>
-
-              <div className="flex justify-end gap-3 pt-6 border-t border-slate-200 dark:border-slate-800">
-                <Link to="/">
-                  <Button type="button" variant="ghost">
-                    Cancel
-                  </Button>
-                </Link>
-                <Button type="submit" disabled={!isFormValid || isSubmitting} size="lg">
-                  {isSubmitting ? (
-                    <>
-                      <div className="animate-spin h-4 w-4 mr-2 border-2 border-white border-t-transparent rounded-full" />
-                      Creating Mission...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4 mr-2 dark:text-white text-sky-950" />
-                      <span className="dark:text-white text-sky-950">Create Mission</span>
-                    </>
-                  )}
-                </Button>
-              </div>
-            </form>
-          </Card>
-        </div>
-
-        <div className="space-y-6">
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
-              Mission Setup Guide
-            </h3>
-            <div className="space-y-4 text-sm">
-              <div className="flex gap-3">
-                <div className="w-6 h-6 rounded-full bg-space-100 dark:bg-space-900 flex items-center justify-center shrink-0">
-                  <span className="text-xs font-semibold text-space-600 dark:text-space-400">
-                    1
-                  </span>
-                </div>
-                <div>
-                  <p className="font-medium text-slate-900 dark:text-slate-100">
-                    Basic Information
-                  </p>
-                  <p className="text-slate-600 dark:text-slate-400">
-                    Provide mission name and detailed description
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <div className="w-6 h-6 rounded-full bg-space-100 dark:bg-space-900 flex items-center justify-center shrink-0">
-                  <span className="text-xs font-semibold text-space-600 dark:text-space-400">
-                    2
-                  </span>
-                </div>
-                <div>
-                  <p className="font-medium text-slate-900 dark:text-slate-100">Timeline</p>
-                  <p className="text-slate-600 dark:text-slate-400">
-                    Set mission start and end dates
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <div className="w-6 h-6 rounded-full bg-space-100 dark:bg-space-900 flex items-center justify-center shrink-0">
-                  <span className="text-xs font-semibold text-space-600 dark:text-space-400">
-                    3
-                  </span>
-                </div>
-                <div>
-                  <p className="font-medium text-slate-900 dark:text-slate-100">Scheduler Setup</p>
-                  <p className="text-slate-600 dark:text-slate-400">
-                    Add crew members and create activity schedules
-                  </p>
-                </div>
-              </div>
             </div>
-          </Card>
 
-          <Card className="p-6">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">
-              Mission Types
-            </h3>
-            <div className="space-y-3 text-sm">
-              <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800">
-                <p className="font-medium text-slate-900 dark:text-slate-100">ISS Analog</p>
-                <p className="text-slate-600 dark:text-slate-400">
-                  International Space Station operations simulation
-                </p>
-              </div>
-              <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800">
-                <p className="font-medium text-slate-900 dark:text-slate-100">Mars Simulation</p>
-                <p className="text-slate-600 dark:text-slate-400">
-                  Long-duration Mars surface operations
-                </p>
-              </div>
-              <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800">
-                <p className="font-medium text-slate-900 dark:text-slate-100">Lunar Gateway</p>
-                <p className="text-slate-600 dark:text-slate-400">
-                  Lunar orbital platform missions
-                </p>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                Mission Status
+              </label>
+              <select
+                name="status"
+                value={formData.status}
+                onChange={handleChange}
+                className="w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-space-500"
+                disabled={isSubmitting}
+              >
+                <option value="planning">Planning</option>
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
             </div>
-          </Card>
-        </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => navigate('/')}
+                disabled={isSubmitting}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting} className="flex-1">
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Rocket className="h-4 w-4 mr-2" />
+                    Create Mission
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </Card>
       </div>
     </div>
   );

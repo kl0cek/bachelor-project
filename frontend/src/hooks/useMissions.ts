@@ -1,133 +1,95 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { missionService } from '../services/missionService';
 import type { Mission, MissionStatus } from '../types/types';
 
-interface UseMissionsOptions {
-  status?: MissionStatus;
-  autoLoad?: boolean;
-}
-
-export const useMissions = (options: UseMissionsOptions = {}) => {
+export const useMissions = (filters?: { status?: MissionStatus }) => {
   const [missions, setMissions] = useState<Mission[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadMissions = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-
+  const fetchMissions = async () => {
     try {
-      const filters = options.status ? { status: options.status } : undefined;
+      setLoading(true);
+      setError(null);
       const data = await missionService.getAllMissions(filters);
       setMissions(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load missions');
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch missions');
+      console.error('Error fetching missions:', err);
     } finally {
       setLoading(false);
     }
-  }, [options.status]);
+  };
 
   useEffect(() => {
-    if (options.autoLoad !== false) {
-      loadMissions();
-    }
-  }, [loadMissions, options.autoLoad]);
+    fetchMissions();
+  }, [filters?.status]);
 
-  const createMission = useCallback(async (data: any) => {
-    setLoading(true);
-    setError(null);
-
+  const createMission = async (missionData: {
+    name: string;
+    description: string;
+    startDate: string;
+    endDate: string;
+    status?: MissionStatus;
+  }) => {
     try {
-      const newMission = await missionService.createMission(data);
+      const newMission = await missionService.createMission(missionData);
       setMissions((prev) => [...prev, newMission]);
       return newMission;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create mission';
-      setError(errorMessage);
+    } catch (err: any) {
+      setError(err.message || 'Failed to create mission');
       throw err;
-    } finally {
-      setLoading(false);
     }
-  }, []);
+  };
 
-  const updateMission = useCallback(async (id: string, data: any) => {
-    setLoading(true);
-    setError(null);
-
+  const updateMission = async (
+    missionId: string,
+    updates: Partial<{
+      name: string;
+      description: string;
+      startDate: string;
+      endDate: string;
+      status: MissionStatus;
+    }>
+  ) => {
     try {
-      const updatedMission = await missionService.updateMission(id, data);
-      setMissions((prev) =>
-        prev.map((mission) => (mission.id === id ? updatedMission : mission))
-      );
+      const updatedMission = await missionService.updateMission(missionId, updates);
+      setMissions((prev) => prev.map((m) => (m.id === missionId ? updatedMission : m)));
       return updatedMission;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update mission';
-      setError(errorMessage);
+    } catch (err: any) {
+      setError(err.message || 'Failed to update mission');
       throw err;
-    } finally {
-      setLoading(false);
     }
-  }, []);
+  };
 
-  const deleteMission = useCallback(async (id: string) => {
-    setLoading(true);
-    setError(null);
-
+  const deleteMission = async (missionId: string) => {
     try {
-      await missionService.deleteMission(id);
-      setMissions((prev) => prev.filter((mission) => mission.id !== id));
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete mission';
-      setError(errorMessage);
+      await missionService.deleteMission(missionId);
+      setMissions((prev) => prev.filter((m) => m.id !== missionId));
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete mission');
       throw err;
-    } finally {
-      setLoading(false);
     }
-  }, []);
+  };
+
+  const getMissionById = async (missionId: string) => {
+    try {
+      const mission = await missionService.getMissionById(missionId);
+      return mission;
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch mission');
+      throw err;
+    }
+  };
 
   return {
     missions,
     loading,
     error,
-    loadMissions,
+    refetch: fetchMissions,
     createMission,
     updateMission,
     deleteMission,
-  };
-};
-
-export const useMission = (missionId: string | null) => {
-  const [mission, setMission] = useState<Mission | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const loadMission = useCallback(async () => {
-    if (!missionId) {
-      setMission(null);
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const data = await missionService.getMissionById(missionId);
-      setMission(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load mission');
-    } finally {
-      setLoading(false);
-    }
-  }, [missionId]);
-
-  useEffect(() => {
-    loadMission();
-  }, [loadMission]);
-
-  return {
-    mission,
-    loading,
-    error,
-    reload: loadMission,
+    getMissionById,
   };
 };

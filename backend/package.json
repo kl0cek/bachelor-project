@@ -30,6 +30,7 @@
     "express-validator": "^7.3.0",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.1",
     "pg": "^8.16.3",
     "typeorm": "^0.3.27",
     "winston": "^3.18.3"
@@ -42,6 +43,7 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.5",
     "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
     "eslint": "^9.39.0",
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",

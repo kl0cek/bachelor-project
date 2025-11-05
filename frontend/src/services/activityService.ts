@@ -1,5 +1,5 @@
 import { apiClient } from '../api/client';
-import type { Activity } from '../types/types';
+import type { Activity, ActivityType, Priority } from '../types/types';
 
 export interface CreateActivityRequest {
   crew_member_id: string;
@@ -8,31 +8,22 @@ export interface CreateActivityRequest {
   date: string;
   start_hour: number;
   duration: number;
-  type: string;
-  priority?: string;
+  type: ActivityType;
+  priority?: Priority;
   mission?: string;
   description?: string;
   equipment?: string[];
 }
 
 class ActivityService {
-  async getActivitiesForMission(
-    missionId: string,
-    date: string
-  ): Promise<Activity[]> {
-    const response = await apiClient.get(
-      `/missions/${missionId}/activities`,
-      {
-        params: { date },
-      }
-    );
+  async getActivitiesForMission(missionId: string, date: string): Promise<Activity[]> {
+    const response = await apiClient.get(`/missions/${missionId}/activities`, {
+      params: { date },
+    });
     return this.mapActivitiesToFrontend(response.data.data);
   }
 
-  async getActivitiesForCrewMember(
-    crewMemberId: string,
-    date: string
-  ): Promise<Activity[]> {
+  async getActivitiesForCrewMember(crewMemberId: string, date: string): Promise<Activity[]> {
     const response = await apiClient.get(`/crew/${crewMemberId}/activities`, {
       params: { date },
     });
@@ -40,38 +31,17 @@ class ActivityService {
   }
 
   async createActivity(data: CreateActivityRequest): Promise<Activity> {
-    const response = await apiClient.post(
-      `/missions/${data.mission_id}/activities`,
-      {
-        ...data,
-        start_hour: data.start_hour,
-        duration: data.duration,
-      }
-    );
+    const response = await apiClient.post(`/missions/${data.mission_id}/activities`, data);
     return this.mapActivityToFrontend(response.data.data);
   }
 
-  async updateActivity(
-    activityId: string,
-    data: Partial<CreateActivityRequest>
-  ): Promise<Activity> {
+  async updateActivity(activityId: string, data: Partial<CreateActivityRequest>): Promise<Activity> {
     const response = await apiClient.patch(`/activities/${activityId}`, data);
     return this.mapActivityToFrontend(response.data.data);
   }
 
   async deleteActivity(activityId: string): Promise<void> {
     await apiClient.delete(`/activities/${activityId}`);
-  }
-
-  async getAvailableTimeSlots(
-    crewMemberId: string,
-    date: string,
-    duration: number
-  ): Promise<Array<{ start: number; end: number }>> {
-    const response = await apiClient.get(`/crew/${crewMemberId}/available-slots`, {
-      params: { date, duration },
-    });
-    return response.data.data;
   }
 
   private mapActivityToFrontend(activity: any): Activity {
@@ -84,7 +54,7 @@ class ActivityService {
       priority: activity.priority,
       mission: activity.mission,
       description: activity.description,
-      equipment: activity.equipment,
+      equipment: activity.equipment || [],
       crewMemberId: activity.crew_member_id,
       missionId: activity.mission_id,
       date: activity.date,

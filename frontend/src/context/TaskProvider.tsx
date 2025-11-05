@@ -1,202 +1,230 @@
-import { useReducer, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { TaskContext } from './TaskContext';
-import type { TaskState, Activity } from '../types/types';
 import { activityService } from '../services/activityService';
-
-type TaskAction =
-  | { type: 'SET_CREW_MEMBERS'; payload: any[] }
-  | { type: 'ADD_TASK'; payload: { crewMemberId: string; task: Activity } }
-  | { type: 'UPDATE_TASK'; payload: { crewMemberId: string; task: Activity } }
-  | { type: 'DELETE_TASK'; payload: { crewMemberId: string; taskId: string } }
-  | { type: 'SET_LOADING'; payload: boolean }
-  | { type: 'SET_ERROR'; payload: string | null };
+import type { Activity, CrewMember, TaskState } from '../types/types';
 
 interface TaskProviderProps {
   children: React.ReactNode;
 }
 
-const taskReducer = (state: TaskState, action: TaskAction): TaskState => {
-  switch (action.type) {
-    case 'SET_CREW_MEMBERS':
-      return {
-        ...state,
-        crewMembers: action.payload,
-      };
-
-    case 'ADD_TASK':
-      return {
-        ...state,
-        crewMembers: state.crewMembers.map((member) =>
-          member.id === action.payload.crewMemberId
-            ? {
-                ...member,
-                activities: [...member.activities, action.payload.task].sort(
-                  (a, b) => a.start - b.start
-                ),
-              }
-            : member
-        ),
-      };
-
-    case 'UPDATE_TASK':
-      return {
-        ...state,
-        crewMembers: state.crewMembers.map((member) =>
-          member.id === action.payload.crewMemberId
-            ? {
-                ...member,
-                activities: member.activities
-                  .map((activity) =>
-                    activity.id === action.payload.task.id ? action.payload.task : activity
-                  )
-                  .sort((a, b) => a.start - b.start),
-              }
-            : member
-        ),
-      };
-
-    case 'DELETE_TASK':
-      return {
-        ...state,
-        crewMembers: state.crewMembers.map((member) =>
-          member.id === action.payload.crewMemberId
-            ? {
-                ...member,
-                activities: member.activities.filter(
-                  (activity) => activity.id !== action.payload.taskId
-                ),
-              }
-            : member
-        ),
-      };
-
-    case 'SET_LOADING':
-      return {
-        ...state,
-        loading: action.payload,
-      };
-
-    case 'SET_ERROR':
-      return {
-        ...state,
-        error: action.payload,
-      };
-
-    default:
-      return state;
-  }
-};
-
 export const TaskProvider = ({ children }: TaskProviderProps) => {
-  const [state, dispatch] = useReducer(taskReducer, {
+  const [state, setState] = useState<TaskState>({
     crewMembers: [],
     loading: false,
     error: null,
   });
 
-  const addTask = useCallback((crewMemberId: string, task: Activity) => {
-    dispatch({ type: 'ADD_TASK', payload: { crewMemberId, task } });
-  }, []);
-
-  const updateTask = useCallback((crewMemberId: string, task: Activity) => {
-    dispatch({ type: 'UPDATE_TASK', payload: { crewMemberId, task } });
-  }, []);
-
-  const deleteTask = useCallback((crewMemberId: string, taskId: string) => {
-    dispatch({ type: 'DELETE_TASK', payload: { crewMemberId, taskId } });
-  }, []);
-
-  const getTaskById = useCallback((taskId: string): { task: Activity; crewMemberId: string } | null => {
-    for (const member of state.crewMembers) {
-      const task = member.activities.find((activity) => activity.id === taskId);
-      if (task) {
-        return { task, crewMemberId: member.id };
-      }
-    }
-    return null;
-  }, [state.crewMembers]);
-
-  const loadCrewMemberActivities = useCallback(async (crewMemberId: string, date?: string): Promise<void> => {
-    dispatch({ type: 'SET_LOADING', payload: true });
-    dispatch({ type: 'SET_ERROR', payload: null });
+  const loadCrewMemberActivities = useCallback(async (crewMemberId: string, date?: string) => {
+    setState((prev) => ({ ...prev, loading: true, error: null }));
 
     try {
-      const activities = await activityService.getActivitiesForCrewMember(
-        crewMemberId,
-        date || new Date().toISOString().split('T')[0]
-      );
+      const dateStr = date || new Date().toISOString().split('T')[0];
+      const activities = await activityService.getActivitiesForCrewMember(crewMemberId, dateStr);
 
-      dispatch({
-        type: 'SET_CREW_MEMBERS',
-        payload: state.crewMembers.map((member) =>
-          member.id === crewMemberId
-            ? { ...member, activities: activities.sort((a, b) => a.start - b.start) }
-            : member
-        ),
-      });
+      setState((prev) => {
+        const existingCrewIndex = prev.crewMembers.findIndex((c) => c.id === crewMemberId);
+        let updatedCrewMembers: CrewMember[];
 
-      dispatch({ type: 'SET_LOADING', payload: false });
-    } catch (error) {
-      dispatch({
-        type: 'SET_ERROR',
-        payload: error instanceof Error ? error.message : 'Failed to load activities',
-      });
-      dispatch({ type: 'SET_LOADING', payload: false });
-    }
-  }, [state.crewMembers]);
-
-  const loadMissionActivities = useCallback(async (missionId: string, date?: string): Promise<void> => {
-    dispatch({ type: 'SET_LOADING', payload: true });
-    dispatch({ type: 'SET_ERROR', payload: null });
-
-    try {
-      const activities = await activityService.getActivitiesForMission(
-        missionId,
-        date || new Date().toISOString().split('T')[0]
-      );
-
-      const activitiesByCrewMember = activities.reduce((acc, activity) => {
-        const crewMemberId = activity.crewMemberId || 'unassigned';
-        if (!acc[crewMemberId]) {
-          acc[crewMemberId] = [];
+        if (existingCrewIndex >= 0) {
+          updatedCrewMembers = [...prev.crewMembers];
+          updatedCrewMembers[existingCrewIndex] = {
+            ...updatedCrewMembers[existingCrewIndex],
+            activities,
+          };
+        } else {
+          const newCrew: CrewMember = {
+            id: crewMemberId,
+            name: '',
+            activities,
+          };
+          updatedCrewMembers = [...prev.crewMembers, newCrew];
         }
-        acc[crewMemberId].push(activity);
-        return acc;
-      }, {} as Record<string, Activity[]>);
 
-      dispatch({
-        type: 'SET_CREW_MEMBERS',
-        payload: state.crewMembers.map((member) => ({
-          ...member,
-          activities: (activitiesByCrewMember[member.id] || []).sort(
-            (a, b) => a.start - b.start
-          ),
-        })),
+        return {
+          ...prev,
+          crewMembers: updatedCrewMembers,
+          loading: false,
+        };
       });
-
-      dispatch({ type: 'SET_LOADING', payload: false });
-    } catch (error) {
-      dispatch({
-        type: 'SET_ERROR',
-        payload: error instanceof Error ? error.message : 'Failed to load activities',
-      });
-      dispatch({ type: 'SET_LOADING', payload: false });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load activities';
+      setState((prev) => ({ ...prev, loading: false, error: errorMessage }));
     }
-  }, [state.crewMembers]);
+  }, []);
 
-  return (
-    <TaskContext.Provider
-      value={{
-        state,
-        addTask,
-        updateTask,
-        deleteTask,
-        getTaskById,
-        loadCrewMemberActivities,
-        loadMissionActivities,
-      }}
-    >
-      {children}
-    </TaskContext.Provider>
+  const loadMissionActivities = useCallback(async (missionId: string, date?: string) => {
+    setState((prev) => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const dateStr = date || new Date().toISOString().split('T')[0];
+      const activities = await activityService.getActivitiesForMission(missionId, dateStr);
+
+      const crewActivitiesMap = new Map<string, Activity[]>();
+      activities.forEach((activity) => {
+        if (activity.crewMemberId) {
+          const existing = crewActivitiesMap.get(activity.crewMemberId) || [];
+          crewActivitiesMap.set(activity.crewMemberId, [...existing, activity]);
+        }
+      });
+
+      setState((prev) => {
+        const updatedCrewMembers = prev.crewMembers.map((crew) => {
+          const crewActivities = crewActivitiesMap.get(crew.id) || [];
+          return { ...crew, activities: crewActivities };
+        });
+
+        crewActivitiesMap.forEach((activities, crewMemberId) => {
+          if (!updatedCrewMembers.find((c) => c.id === crewMemberId)) {
+            updatedCrewMembers.push({
+              id: crewMemberId,
+              name: '',
+              activities,
+            });
+          }
+        });
+
+        return {
+          ...prev,
+          crewMembers: updatedCrewMembers,
+          loading: false,
+        };
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to load mission activities';
+      setState((prev) => ({ ...prev, loading: false, error: errorMessage }));
+    }
+  }, []);
+
+  const addTask = useCallback(async (crewMemberId: string, task: Activity) => {
+    setState((prev) => ({ ...prev, loading: true, error: null }));
+
+    try {
+      if (!task.missionId || !task.date) {
+        throw new Error('Mission ID and date are required');
+      }
+
+      const newActivity = await activityService.createActivity({
+        crew_member_id: crewMemberId,
+        mission_id: task.missionId,
+        name: task.name,
+        date: task.date,
+        start_hour: task.start,
+        duration: task.duration,
+        type: task.type,
+        priority: task.priority,
+        mission: task.mission,
+        description: task.description,
+        equipment: task.equipment,
+      });
+
+      setState((prev) => {
+        const crewIndex = prev.crewMembers.findIndex((c) => c.id === crewMemberId);
+        if (crewIndex >= 0) {
+          const updatedCrewMembers = [...prev.crewMembers];
+          updatedCrewMembers[crewIndex] = {
+            ...updatedCrewMembers[crewIndex],
+            activities: [...updatedCrewMembers[crewIndex].activities, newActivity],
+          };
+          return { ...prev, crewMembers: updatedCrewMembers, loading: false };
+        }
+        return { ...prev, loading: false };
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to add task';
+      setState((prev) => ({ ...prev, loading: false, error: errorMessage }));
+      throw err;
+    }
+  }, []);
+
+  const updateTask = useCallback(async (crewMemberId: string, task: Activity) => {
+    setState((prev) => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const updatedActivity = await activityService.updateActivity(task.id, {
+        name: task.name,
+        start_hour: task.start,
+        duration: task.duration,
+        type: task.type,
+        priority: task.priority,
+        mission: task.mission,
+        description: task.description,
+        equipment: task.equipment,
+        date: task.date,
+        crew_member_id: crewMemberId,
+        mission_id: task.missionId!,
+      });
+
+      setState((prev) => {
+        const crewIndex = prev.crewMembers.findIndex((c) => c.id === crewMemberId);
+        if (crewIndex >= 0) {
+          const updatedCrewMembers = [...prev.crewMembers];
+          const activityIndex = updatedCrewMembers[crewIndex].activities.findIndex(
+            (a) => a.id === task.id
+          );
+          if (activityIndex >= 0) {
+            updatedCrewMembers[crewIndex].activities[activityIndex] = updatedActivity;
+          }
+          return { ...prev, crewMembers: updatedCrewMembers, loading: false };
+        }
+        return { ...prev, loading: false };
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update task';
+      setState((prev) => ({ ...prev, loading: false, error: errorMessage }));
+      throw err;
+    }
+  }, []);
+
+  const deleteTask = useCallback(async (crewMemberId: string, taskId: string) => {
+    setState((prev) => ({ ...prev, loading: true, error: null }));
+
+    try {
+      await activityService.deleteActivity(taskId);
+
+      setState((prev) => {
+        const crewIndex = prev.crewMembers.findIndex((c) => c.id === crewMemberId);
+        if (crewIndex >= 0) {
+          const updatedCrewMembers = [...prev.crewMembers];
+          updatedCrewMembers[crewIndex] = {
+            ...updatedCrewMembers[crewIndex],
+            activities: updatedCrewMembers[crewIndex].activities.filter((a) => a.id !== taskId),
+          };
+          return { ...prev, crewMembers: updatedCrewMembers, loading: false };
+        }
+        return { ...prev, loading: false };
+      });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete task';
+      setState((prev) => ({ ...prev, loading: false, error: errorMessage }));
+      throw err;
+    }
+  }, []);
+
+  const getTaskById = useCallback(
+    (taskId: string): { task: Activity; crewMemberId: string } | null => {
+      for (const crewMember of state.crewMembers) {
+        const task = crewMember.activities.find((a) => a.id === taskId);
+        if (task) {
+          return { task, crewMemberId: crewMember.id };
+        }
+      }
+      return null;
+    },
+    [state.crewMembers]
   );
+
+  const value = useMemo(
+    () => ({
+      state,
+      addTask,
+      updateTask,
+      deleteTask,
+      getTaskById,
+      loadCrewMemberActivities,
+      loadMissionActivities,
+    }),
+    [state, addTask, updateTask, deleteTask, getTaskById, loadCrewMemberActivities, loadMissionActivities]
+  );
+
+  return <TaskContext.Provider value={value}>{children}</TaskContext.Provider>;
 };

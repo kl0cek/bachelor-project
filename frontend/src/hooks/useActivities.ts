@@ -1,83 +1,78 @@
-import { useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { activityService, type CreateActivityRequest } from '../services/activityService';
+import type { Activity } from '../types/types';
 
-export const useActivities = () => {
+export const useActivities = (missionId?: string, date?: string) => {
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const createActivity = useCallback(async (data: CreateActivityRequest) => {
-    setLoading(true);
-    setError(null);
+  const fetchActivities = async () => {
+    if (!missionId || !date) return;
 
     try {
-      const newActivity = await activityService.createActivity(data);
+      setLoading(true);
+      setError(null);
+      const data = await activityService.getActivitiesForMission(missionId, date);
+      setActivities(data);
+    } catch (err: any) {
+      setError(err.message || 'Failed to fetch activities');
+      console.error('Error fetching activities:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (missionId && date) {
+      fetchActivities();
+    }
+  }, [missionId, date]);
+
+  const createActivity = async (activityData: CreateActivityRequest) => {
+    try {
+      const newActivity = await activityService.createActivity(activityData);
+      setActivities((prev) => [...prev, newActivity]);
       return newActivity;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create activity';
-      setError(errorMessage);
+    } catch (err: any) {
+      setError(err.message || 'Failed to create activity');
       throw err;
-    } finally {
-      setLoading(false);
     }
-  }, []);
+  };
 
-  const updateActivity = useCallback(async (activityId: string, data: Partial<CreateActivityRequest>) => {
-    setLoading(true);
-    setError(null);
-
+  const updateActivity = async (
+    activityId: string,
+    updates: Partial<CreateActivityRequest>
+  ) => {
     try {
-      const updatedActivity = await activityService.updateActivity(activityId, data);
+      const updatedActivity = await activityService.updateActivity(activityId, updates);
+      setActivities((prev) =>
+        prev.map((a) => (a.id === activityId ? updatedActivity : a))
+      );
       return updatedActivity;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update activity';
-      setError(errorMessage);
+    } catch (err: any) {
+      setError(err.message || 'Failed to update activity');
       throw err;
-    } finally {
-      setLoading(false);
     }
-  }, []);
+  };
 
-  const deleteActivity = useCallback(async (activityId: string) => {
-    setLoading(true);
-    setError(null);
-
+  const deleteActivity = async (activityId: string) => {
     try {
       await activityService.deleteActivity(activityId);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete activity';
-      setError(errorMessage);
+      setActivities((prev) => prev.filter((a) => a.id !== activityId));
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete activity');
       throw err;
-    } finally {
-      setLoading(false);
     }
-  }, []);
-
-  const getAvailableTimeSlots = useCallback(async (
-    crewMemberId: string,
-    date: string,
-    duration: number
-  ) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const slots = await activityService.getAvailableTimeSlots(crewMemberId, date, duration);
-      return slots;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to get available time slots';
-      setError(errorMessage);
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  };
 
   return {
+    activities,
     loading,
     error,
+    refetch: fetchActivities,
     createActivity,
     updateActivity,
     deleteActivity,
-    getAvailableTimeSlots,
   };
 };

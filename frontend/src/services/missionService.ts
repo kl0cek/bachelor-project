@@ -1,8 +1,14 @@
 import { apiClient } from '../api/client';
-import type { Mission } from '../types/types';
+import type { Mission, MissionStatus } from '../types/types';
+
+interface MissionFilters {
+  status?: MissionStatus;
+  startDate?: string;
+  endDate?: string;
+}
 
 class MissionService {
-  async getAllMissions(filters?: any): Promise<Mission[]> {
+  async getAllMissions(filters?: MissionFilters): Promise<Mission[]> {
     const response = await apiClient.get('/missions', {
       params: filters,
     });
@@ -21,7 +27,13 @@ class MissionService {
     return response.data.data.map(this.mapMissionToFrontend);
   }
 
-  async createMission(data: any): Promise<Mission> {
+  async createMission(data: {
+    name: string;
+    description: string;
+    startDate: string;
+    endDate: string;
+    status?: MissionStatus;
+  }): Promise<Mission> {
     const response = await apiClient.post('/missions', {
       name: data.name,
       description: data.description,
@@ -32,14 +44,24 @@ class MissionService {
     return this.mapMissionToFrontend(response.data.data);
   }
 
-  async updateMission(uuid: string, data: any): Promise<Mission> {
-    const response = await apiClient.patch(`/missions/${uuid}`, {
-      name: data.name,
-      description: data.description,
-      start_date: data.startDate,
-      end_date: data.endDate,
-      status: data.status,
-    });
+  async updateMission(
+    uuid: string,
+    data: Partial<{
+      name: string;
+      description: string;
+      startDate: string;
+      endDate: string;
+      status: MissionStatus;
+    }>
+  ): Promise<Mission> {
+    const payload: any = {};
+    if (data.name) payload.name = data.name;
+    if (data.description) payload.description = data.description;
+    if (data.startDate) payload.start_date = data.startDate;
+    if (data.endDate) payload.end_date = data.endDate;
+    if (data.status) payload.status = data.status;
+
+    const response = await apiClient.patch(`/missions/${uuid}`, payload);
     return this.mapMissionToFrontend(response.data.data);
   }
 
@@ -59,8 +81,8 @@ class MissionService {
         ? mission.crew_members.map((member: any) => ({
             id: member.id,
             name: member.name,
-            role: member.role,
-            email: member.email,
+            role: member.role || '',
+            email: member.email || '',
             missionId: member.mission_id,
             userId: member.user_id,
             activities: [],
