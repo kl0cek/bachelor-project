@@ -9,8 +9,8 @@ class MissionService {
     return response.data.data.map(this.mapMissionToFrontend);
   }
 
-  async getMissionById(id: string): Promise<Mission> {
-    const response = await apiClient.get(`/missions/${id}`);
+  async getMissionById(uuid: string): Promise<Mission> {
+    const response = await apiClient.get(`/missions/${uuid}`);
     return this.mapMissionToFrontend(response.data.data);
   }
 
@@ -32,8 +32,8 @@ class MissionService {
     return this.mapMissionToFrontend(response.data.data);
   }
 
-  async updateMission(id: string, data: any): Promise<Mission> {
-    const response = await apiClient.patch(`/missions/${id}`, {
+  async updateMission(uuid: string, data: any): Promise<Mission> {
+    const response = await apiClient.patch(`/missions/${uuid}`, {
       name: data.name,
       description: data.description,
       start_date: data.startDate,
@@ -43,8 +43,8 @@ class MissionService {
     return this.mapMissionToFrontend(response.data.data);
   }
 
-  async deleteMission(id: string): Promise<void> {
-    await apiClient.delete(`/missions/${id}`);
+  async deleteMission(uuid: string): Promise<void> {
+    await apiClient.delete(`/missions/${uuid}`);
   }
 
   private mapMissionToFrontend(mission: any): Mission {

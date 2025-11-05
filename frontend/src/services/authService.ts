@@ -7,8 +7,6 @@ export interface LoginCredentials {
 }
 
 interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
   expiresIn: number;
   user: {
     id: string;
@@ -62,16 +60,12 @@ class AuthService {
       credentials
     );
 
-    const { accessToken, refreshToken, user } = response.data.data;
+    const { user } = response.data.data;
 
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
-
-    // Map backend user format to frontend User type
     const mappedUser: User = {
       id: user.id,
       username: user.username,
-      password: '', // Never store password
+      password: '',
       role: user.role as any,
       fullName: user.full_name,
       email: user.email,
@@ -87,27 +81,22 @@ class AuthService {
   }
 
   async logout(): Promise<void> {
-    const refreshToken = localStorage.getItem('refreshToken');
-
     try {
-      await apiClient.post('/auth/logout', { refreshToken });
+      await apiClient.post('/auth/logout');
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
       localStorage.removeItem('currentUser');
       this.currentUser = null;
     }
   }
 
   async initialize(): Promise<void> {
-    const token = localStorage.getItem('accessToken');
-    if (!token) {
+    const userStr = localStorage.getItem('currentUser');
+    if (!userStr) {
       this.currentUser = null;
       return;
     }
-
     try {
       const response = await apiClient.get<{ success: boolean; data: any }>('/auth/me');
       const user = response.data.data;
@@ -129,8 +118,6 @@ class AuthService {
     } catch (error) {
       console.error('Failed to initialize auth:', error);
       this.currentUser = null;
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
       localStorage.removeItem('currentUser');
     }
   }
@@ -155,7 +142,7 @@ class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!localStorage.getItem('accessToken') && !!this.getCurrentUser();
+    return !!this.getCurrentUser();
   }
 
   hasPermission(permission: string): boolean {

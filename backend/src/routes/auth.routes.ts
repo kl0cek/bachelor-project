@@ -12,17 +12,8 @@ const loginValidation = [
 ];
 
 router.post('/login', loginValidation, validate, authController.login);
-
-router.post(
-  '/logout',
-  authenticate,
-  body('refreshToken').notEmpty(),
-  validate,
-  authController.logout
-);
-
-router.post('/refresh', body('refreshToken').notEmpty(), validate, authController.refresh);
-
+router.post('/logout', authenticate, authController.logout);
+router.post('/refresh', authController.refresh);
 router.get('/me', authenticate, authController.getCurrentUser);
 
 export default router;

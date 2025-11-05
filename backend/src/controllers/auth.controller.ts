@@ -12,7 +12,23 @@ export class AuthController {
 
       const result = await authService.login({ username, password }, ipAddress, userAgent);
 
-      res.json(successResponse(result, 'Login successful'));
+      res.cookie('accessToken', result.accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: result.expiresIn * 1000,
+      });
+
+      res.cookie('refreshToken', result.refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      const { accessToken, refreshToken, ...responseData } = result;
+
+      res.json(successResponse(responseData, 'Login successful'));
     } catch (error) {
       next(error);
     }
@@ -20,10 +36,15 @@ export class AuthController {
 
   async logout(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const { refreshToken } = req.body;
+      const refreshToken = req.cookies.refreshToken;
       const userId = req.userId!;
 
-      await authService.logout(refreshToken, userId);
+      if (refreshToken) {
+        await authService.logout(refreshToken, userId);
+      }
+
+      res.clearCookie('accessToken');
+      res.clearCookie('refreshToken');
 
       res.json(successResponse(null, 'Logout successful'));
     } catch (error) {
@@ -33,13 +54,29 @@ export class AuthController {
 
   async refresh(req: Request, res: Response, next: NextFunction) {
     try {
-      const { refreshToken } = req.body;
+      const refreshToken = req.cookies.refreshToken;
       const ipAddress = req.ip;
+
+      if (!refreshToken) {
+        return res.status(401).json({
+          success: false,
+          error: { message: 'No refresh token provided' },
+        });
+      }
 
       const result = await authService.refreshAccessToken(refreshToken, ipAddress);
 
-      res.json(successResponse(result, 'Token refreshed'));
+      res.cookie('accessToken', result.accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: result.expiresIn * 1000,
+      });
+
+      res.json(successResponse({ expiresIn: result.expiresIn }, 'Token refreshed'));
     } catch (error) {
+      res.clearCookie('accessToken');
+      res.clearCookie('refreshToken');
       next(error);
     }
   }

@@ -4,22 +4,33 @@ import { AppDataSource } from '../config/database';
 import { User } from '../entities/User.entity';
 import { UnauthorizedError } from '../utils/errors';
 
+declare global {
+  namespace Express {
+    interface Request {
+      user?: User;
+      userId?: string;
+    }
+  }
+}
+
 export interface AuthRequest extends Request {
   user?: User;
   userId?: string;
 }
 
-export const authenticate = async (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authenticate = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   try {
-    const authHeader = req.headers.authorization;
+    const token = req.cookies.accessToken;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!token) {
       throw new UnauthorizedError('No token provided');
     }
 
-    const token = authHeader.substring(7);
     const jwtSecret = process.env.JWT_SECRET;
-
     if (!jwtSecret) {
       throw new Error('JWT_SECRET not configured');
     }
@@ -37,7 +48,6 @@ export const authenticate = async (req: AuthRequest, res: Response, next: NextFu
 
     req.user = user;
     req.userId = user.id;
-
     next();
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
