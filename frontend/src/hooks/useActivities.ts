@@ -1,96 +1,95 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { activityService, type CreateActivityRequest } from '../services/activityService';
 import type { Activity } from '../types/types';
+
+const activityCache = new Map<string, Activity[]>();
 
 export const useActivities = (missionId?: string, date?: string) => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchActivities = async () => {
-    if (!missionId || !date) {
-      console.log('Missing missionId or date:', { missionId, date });
+  const fetchTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const cacheKey = missionId && date ? `${missionId}|${date}` : null;
+
+  const fetchActivities = async (force = false) => {
+    if (!missionId || !date) return;
+
+    if (!force && activityCache.has(cacheKey!)) {
+      setActivities(activityCache.get(cacheKey!)!);
       return;
     }
 
     try {
       setLoading(true);
       setError(null);
-      console.log('Fetching activities for:', { missionId, date });
-      
+
       const data = await activityService.getActivitiesForMission(missionId, date);
-      console.log('Received activities from service:', data);
-      
+
+      activityCache.set(cacheKey!, data);
       setActivities(data);
     } catch (err: any) {
       const errorMessage = err.message || 'Failed to fetch activities';
-      setError(errorMessage);
       console.error('Error fetching activities:', err);
-      console.error('Error details:', {
-        message: err.message,
-        response: err.response?.data,
-        status: err.response?.status
-      });
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (missionId && date) {
+    if (!cacheKey) return;
+
+    if (fetchTimeout.current) clearTimeout(fetchTimeout.current);
+
+    fetchTimeout.current = setTimeout(() => {
       fetchActivities();
-    }
-  }, [missionId, date]);
+    }, 120);
 
-  const createActivity = async (activityData: CreateActivityRequest) => {
-    try {
-      console.log('Creating activity:', activityData);
-      const newActivity = await activityService.createActivity(activityData);
-      console.log('Created activity:', newActivity);
-      setActivities((prev) => [...prev, newActivity]);
-      return newActivity;
-    } catch (err: any) {
-      const errorMessage = err.message || 'Failed to create activity';
-      setError(errorMessage);
-      console.error('Error creating activity:', err);
-      throw err;
-    }
+    return () => {
+      if (fetchTimeout.current) clearTimeout(fetchTimeout.current);
+    };
+  }, [cacheKey]);
+
+  const createActivity = async (data: CreateActivityRequest) => {
+    const newActivity = await activityService.createActivity(data);
+
+    setActivities((prev) => [...prev, newActivity]);
+    if (cacheKey) activityCache.set(cacheKey, [...activities, newActivity]);
+
+    return newActivity;
   };
 
-  const updateActivity = async (activityId: string, updates: Partial<CreateActivityRequest>) => {
-    try {
-      console.log('Updating activity:', { activityId, updates });
-      const updatedActivity = await activityService.updateActivity(activityId, updates);
-      console.log('Updated activity:', updatedActivity);
-      setActivities((prev) => prev.map((a) => (a.id === activityId ? updatedActivity : a)));
-      return updatedActivity;
-    } catch (err: any) {
-      const errorMessage = err.message || 'Failed to update activity';
-      setError(errorMessage);
-      console.error('Error updating activity:', err);
-      throw err;
-    }
+  const updateActivity = async (id: string, updates: Partial<CreateActivityRequest>) => {
+    const updated = await activityService.updateActivity(id, updates);
+
+    setActivities((prev) => prev.map((a) => (a.id === id ? updated : a)));
+    if (cacheKey)
+      activityCache.set(
+        cacheKey,
+        activities.map((a) => (a.id === id ? updated : a))
+      );
+
+    return updated;
   };
 
-  const deleteActivity = async (activityId: string) => {
-    try {
-      console.log('Deleting activity:', activityId);
-      await activityService.deleteActivity(activityId);
-      setActivities((prev) => prev.filter((a) => a.id !== activityId));
-      console.log('Deleted activity successfully');
-    } catch (err: any) {
-      const errorMessage = err.message || 'Failed to delete activity';
-      setError(errorMessage);
-      console.error('Error deleting activity:', err);
-      throw err;
-    }
+  const deleteActivity = async (id: string) => {
+    await activityService.deleteActivity(id);
+
+    setActivities((prev) => prev.filter((a) => a.id !== id));
+    if (cacheKey)
+      activityCache.set(
+        cacheKey,
+        activities.filter((a) => a.id !== id)
+      );
   };
 
   return {
     activities,
     loading,
     error,
-    refetch: fetchActivities,
+    refetch: () => fetchActivities(true),
     createActivity,
     updateActivity,
     deleteActivity,

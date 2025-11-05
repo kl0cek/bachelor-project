@@ -4,7 +4,7 @@ export const ActivityLegend = () => {
   const categories: ActivityCategory[] = [
     { name: 'Exercise', color: 'bg-blue-500 dark:bg-slate-700', type: 'exercise' },
     { name: 'EVA / Spacewalk', color: 'bg-orange-500 dark:bg-orange-700', type: 'eva' },
-    { name: 'Work / Research', color: 'bg-indigo-400 dark:bg-slate-600', type: 'work' },
+    { name: 'Work / Research', color: 'bg-sky-800 dark:bg-sky-800', type: 'work' },
     {
       name: 'Optional',
       color: 'bg-slate-200 border border-slate-300 dark:bg-slate-800 dark:border-slate-700',

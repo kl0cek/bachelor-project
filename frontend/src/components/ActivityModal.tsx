@@ -18,7 +18,7 @@ export const ActivityModal = ({ activity, onClose, onEdit }: ActivityModalProps)
 
   const priorityColors: Record<Exclude<Priority, undefined>, string> = {
     high: 'bg-orange-500 text-gray shadow-orange',
-    medium: 'bg-space-600 text-gray shadow-space',
+    medium: 'bg-sky-600 text-gray shadow-space',
     low: 'bg-slate-400 text-gray dark:bg-slate-600',
   };
 

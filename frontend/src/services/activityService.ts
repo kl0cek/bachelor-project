@@ -19,20 +19,20 @@ class ActivityService {
   async getActivitiesForMission(missionId: string, date: string): Promise<Activity[]> {
     try {
       console.log('API Request - getActivitiesForMission:', { missionId, date });
-      
+
       const response = await apiClient.get(`/activities/missions/${missionId}/activities`, {
         params: { date },
       });
-      
+
       console.log('API Response - raw:', response.data);
-      
+
       // Handle different response structures
       const rawActivities = response.data.data || response.data || [];
       console.log('Raw activities before mapping:', rawActivities);
-      
+
       const mappedActivities = this.mapActivitiesToFrontend(rawActivities);
       console.log('Mapped activities:', mappedActivities);
-      
+
       return mappedActivities;
     } catch (error: any) {
       console.error('Error in getActivitiesForMission:', error);
@@ -44,13 +44,13 @@ class ActivityService {
   async getActivitiesForCrewMember(crewMemberId: string, date: string): Promise<Activity[]> {
     try {
       console.log('API Request - getActivitiesForCrewMember:', { crewMemberId, date });
-      
+
       const response = await apiClient.get(`/activities/crew/${crewMemberId}/activities`, {
         params: { date },
       });
-      
+
       console.log('API Response - raw:', response.data);
-      
+
       const rawActivities = response.data.data || response.data || [];
       return this.mapActivitiesToFrontend(rawActivities);
     } catch (error: any) {
@@ -62,11 +62,14 @@ class ActivityService {
   async createActivity(data: CreateActivityRequest): Promise<Activity> {
     try {
       console.log('API Request - createActivity:', data);
-      
-      const response = await apiClient.post(`/activities/missions/${data.mission_id}/activities`, data);
-      
+
+      const response = await apiClient.post(
+        `/activities/missions/${data.mission_id}/activities`,
+        data
+      );
+
       console.log('API Response - createActivity:', response.data);
-      
+
       const rawActivity = response.data.data || response.data;
       return this.mapActivityToFrontend(rawActivity);
     } catch (error: any) {
@@ -82,11 +85,11 @@ class ActivityService {
   ): Promise<Activity> {
     try {
       console.log('API Request - updateActivity:', { activityId, data });
-      
+
       const response = await apiClient.patch(`/activities/${activityId}`, data);
-      
+
       console.log('API Response - updateActivity:', response.data);
-      
+
       const rawActivity = response.data.data || response.data;
       return this.mapActivityToFrontend(rawActivity);
     } catch (error: any) {

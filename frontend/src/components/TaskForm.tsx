@@ -71,7 +71,7 @@ export const TaskForm = ({
       description: formData.description?.trim() || undefined,
       equipment: formData.equipment?.filter((item) => item.trim()) || [],
       priority: formData.priority || 'medium',
-      date: new Date().toISOString().split("T")[0],
+      date: new Date().toISOString().split('T')[0],
     };
 
     onSubmit(taskData);
@@ -113,7 +113,7 @@ export const TaskForm = ({
 
   const priorities: { value: Priority; label: string; color: string }[] = [
     { value: 'high', label: 'High', color: 'bg-orange-500 dark:text-white text-sky-950' },
-    { value: 'medium', label: 'Medium', color: 'bg-space-600 dark:text-white text-sky-950' },
+    { value: 'medium', label: 'Medium', color: 'bg-sky-600 dark:text-white text-sky-950' },
     {
       value: 'low',
       label: 'Low',
