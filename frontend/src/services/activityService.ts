@@ -35,7 +35,10 @@ class ActivityService {
     return this.mapActivityToFrontend(response.data.data);
   }
 
-  async updateActivity(activityId: string, data: Partial<CreateActivityRequest>): Promise<Activity> {
+  async updateActivity(
+    activityId: string,
+    data: Partial<CreateActivityRequest>
+  ): Promise<Activity> {
     const response = await apiClient.patch(`/activities/${activityId}`, data);
     return this.mapActivityToFrontend(response.data.data);
   }

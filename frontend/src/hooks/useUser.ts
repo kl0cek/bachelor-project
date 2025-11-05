@@ -19,10 +19,7 @@ export const useUsers = (options: UseUsersOptions = {}) => {
     setError(null);
 
     try {
-      const response = await userService.getAllUsers(
-        options.filters,
-        options.pagination
-      );
+      const response = await userService.getAllUsers(options.filters, options.pagination);
       setUsers(response.data);
       setPagination(response.pagination);
     } catch (err) {
@@ -61,9 +58,7 @@ export const useUsers = (options: UseUsersOptions = {}) => {
 
     try {
       const updatedUser = await userService.updateUser(id, updates);
-      setUsers((prev) =>
-        prev.map((user) => (user.id === id ? updatedUser : user))
-      );
+      setUsers((prev) => prev.map((user) => (user.id === id ? updatedUser : user)));
       return updatedUser;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to update user';
@@ -96,9 +91,7 @@ export const useUsers = (options: UseUsersOptions = {}) => {
 
     try {
       const updatedUser = await userService.toggleUserStatus(id);
-      setUsers((prev) =>
-        prev.map((user) => (user.id === id ? updatedUser : user))
-      );
+      setUsers((prev) => prev.map((user) => (user.id === id ? updatedUser : user)));
       return updatedUser;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to toggle user status';

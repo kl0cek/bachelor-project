@@ -77,7 +77,6 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   };
 
   const handleFormSubmit = async (taskData: Activity) => {
-
     if (!taskData.crewMemberId) {
       console.error('Crew member ID is required');
       return;
@@ -218,7 +217,10 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
                     const memberActivities = getActivitiesForCrewMember(member.id);
 
                     return (
-                      <tr key={member.id} className="border-t border-slate-200 dark:border-slate-700">
+                      <tr
+                        key={member.id}
+                        className="border-t border-slate-200 dark:border-slate-700"
+                      >
                         <td className="sticky left-0 z-10 bg-white dark:bg-slate-800 px-4 py-3 border-r border-slate-200 dark:border-slate-700">
                           <div>
                             <div className="font-medium text-slate-900 dark:text-slate-100">

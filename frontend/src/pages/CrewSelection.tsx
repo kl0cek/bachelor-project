@@ -85,9 +85,7 @@ export const CrewSelection = () => {
 
   const updateCrewMember = (memberId: string, field: keyof CrewMemberForm, value: string) => {
     setCrewMembers(
-      crewMembers.map((member) =>
-        member.id === memberId ? { ...member, [field]: value } : member
-      )
+      crewMembers.map((member) => (member.id === memberId ? { ...member, [field]: value } : member))
     );
   };
 

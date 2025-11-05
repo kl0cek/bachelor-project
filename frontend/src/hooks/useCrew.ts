@@ -40,10 +40,7 @@ export const useCrew = (missionId?: string) => {
     }
   };
 
-  const updateCrewMember = async (
-    crewId: string,
-    updates: Partial<CreateCrewMemberRequest>
-  ) => {
+  const updateCrewMember = async (crewId: string, updates: Partial<CreateCrewMemberRequest>) => {
     try {
       const updatedMember = await crewService.updateCrewMember(crewId, updates);
       setCrew((prev) => prev.map((m) => (m.id === crewId ? updatedMember : m)));

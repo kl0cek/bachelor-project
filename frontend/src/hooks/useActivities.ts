@@ -40,15 +40,10 @@ export const useActivities = (missionId?: string, date?: string) => {
     }
   };
 
-  const updateActivity = async (
-    activityId: string,
-    updates: Partial<CreateActivityRequest>
-  ) => {
+  const updateActivity = async (activityId: string, updates: Partial<CreateActivityRequest>) => {
     try {
       const updatedActivity = await activityService.updateActivity(activityId, updates);
-      setActivities((prev) =>
-        prev.map((a) => (a.id === activityId ? updatedActivity : a))
-      );
+      setActivities((prev) => prev.map((a) => (a.id === activityId ? updatedActivity : a)));
       return updatedActivity;
     } catch (err: any) {
       setError(err.message || 'Failed to update activity');

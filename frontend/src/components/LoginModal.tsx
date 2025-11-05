@@ -40,7 +40,7 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
       setError('');
     } catch (err: any) {
       console.error('Login error:', err);
-      
+
       if (err.response?.status === 401) {
         setError('Invalid username or password');
       } else if (err.response?.status === 403) {
@@ -85,9 +85,24 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
   };
 
   const demoAccounts = [
-    { role: 'admin' as Role, label: 'Administrator', username: 'admindemo', password: 'admindemo123' },
-    { role: 'operator' as Role, label: 'Mission Operator', username: 'operator1', password: 'operator123' },
-    { role: 'astronaut' as Role, label: 'Astronaut', username: 'astronaut1', password: 'astronaut123' },
+    {
+      role: 'admin' as Role,
+      label: 'Administrator',
+      username: 'admindemo',
+      password: 'admindemo123',
+    },
+    {
+      role: 'operator' as Role,
+      label: 'Mission Operator',
+      username: 'operator1',
+      password: 'operator123',
+    },
+    {
+      role: 'astronaut' as Role,
+      label: 'Astronaut',
+      username: 'astronaut1',
+      password: 'astronaut123',
+    },
     { role: 'viewer' as Role, label: 'Viewer', username: 'viewer1', password: 'viewer123' },
   ];
 
@@ -183,10 +198,7 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
             <Button type="button" variant="ghost" onClick={handleClose} disabled={isLoading}>
               <span className="dark:text-white text-sky-950">Cancel</span>
             </Button>
-            <Button
-              type="submit"
-              disabled={!username.trim() || !password.trim() || isLoading}
-            >
+            <Button type="submit" disabled={!username.trim() || !password.trim() || isLoading}>
               <span className="dark:text-white text-sky-950">
                 {isLoading ? 'Logging in...' : 'Login'}
               </span>

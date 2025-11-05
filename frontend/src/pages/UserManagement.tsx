@@ -6,14 +6,9 @@ import type { UserRole } from '../types/auth';
 import { useUsers } from '../hooks/useUser';
 
 export const UserManagement = () => {
-  const { 
-    users, 
-    loading, 
-    error, 
-    createUser, 
-    updateUser, 
-    deleteUser 
-  } = useUsers({ autoLoad: true });
+  const { users, loading, error, createUser, updateUser, deleteUser } = useUsers({
+    autoLoad: true,
+  });
 
   const [isCreating, setIsCreating] = useState(false);
   const [editingUser, setEditingUser] = useState<any | null>(null);
@@ -44,7 +39,7 @@ export const UserManagement = () => {
         if (!updates.password) {
           delete updates.password;
         }
-        
+
         await updateUser(editingUser.id, updates);
         resetForm();
         setEditingUser(null);
@@ -233,10 +228,7 @@ export const UserManagement = () => {
             >
               Cancel
             </Button>
-            <Button 
-              onClick={editingUser ? handleUpdateUser : handleCreateUser}
-              disabled={loading}
-            >
+            <Button onClick={editingUser ? handleUpdateUser : handleCreateUser} disabled={loading}>
               <span className="dark:text-white text-sky-950">
                 {loading ? 'Processing...' : editingUser ? 'Update User' : 'Create User'}
               </span>
@@ -280,7 +272,9 @@ export const UserManagement = () => {
                         <p className="font-medium text-slate-900 dark:text-slate-100">
                           {user.fullName}
                         </p>
-                        <p className="text-sm text-slate-600 dark:text-slate-400">@{user.username}</p>
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          @{user.username}
+                        </p>
                       </div>
                     </td>
                     <td className="py-3 px-4">{getRoleBadge(user.role)}</td>

@@ -11,7 +11,7 @@ export interface CreateCrewMemberRequest {
 
 class CrewService {
   async getCrewByMission(missionId: string): Promise<CrewMember[]> {
-    const response = await apiClient.get(`/missions/${missionId}/crew`);
+    const response = await apiClient.get(`/crew/missions/${missionId}/crew`);
     return response.data.data.map(this.mapCrewMemberToFrontend);
   }
 
@@ -21,7 +21,7 @@ class CrewService {
   }
 
   async createCrewMember(data: CreateCrewMemberRequest): Promise<CrewMember> {
-    const response = await apiClient.post(`/missions/${data.mission_id}/crew`, data);
+    const response = await apiClient.post(`/crew/missions/${data.mission_id}/crew`, data);
     return this.mapCrewMemberToFrontend(response.data.data);
   }
 

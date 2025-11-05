@@ -223,7 +223,15 @@ export const TaskProvider = ({ children }: TaskProviderProps) => {
       loadCrewMemberActivities,
       loadMissionActivities,
     }),
-    [state, addTask, updateTask, deleteTask, getTaskById, loadCrewMemberActivities, loadMissionActivities]
+    [
+      state,
+      addTask,
+      updateTask,
+      deleteTask,
+      getTaskById,
+      loadCrewMemberActivities,
+      loadMissionActivities,
+    ]
   );
 
   return <TaskContext.Provider value={value}>{children}</TaskContext.Provider>;

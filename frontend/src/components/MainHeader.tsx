@@ -26,18 +26,18 @@ export const MainHeader = () => {
   const handleLogin = (authenticatedUser: UserType) => {
     setUser(authenticatedUser);
     setIsLoginModalOpen(false);
-    
+
     // Reload to ensure all components get the new auth state
     window.location.reload();
   };
 
   const handleLogout = async () => {
     setIsLoggingOut(true);
-    
+
     try {
       await authService.logout();
       setUser(null);
-      
+
       // Redirect to home and reload
       navigate('/');
       window.location.reload();

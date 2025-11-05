@@ -92,9 +92,13 @@ class AuthService {
     this.isLoggingOut = true;
 
     try {
-      await apiClient.post('/auth/logout', {}, {
-        timeout: 3000,
-      });
+      await apiClient.post(
+        '/auth/logout',
+        {},
+        {
+          timeout: 3000,
+        }
+      );
     } catch (error) {
       console.log('Logout API call failed (this is OK):', error);
     } finally {
@@ -106,7 +110,6 @@ class AuthService {
   }
 
   async initialize(): Promise<void> {
-    // Don't initialize if already initialized or if there's no stored user
     if (this.isInitialized || !localStorage.getItem('currentUser')) {
       return;
     }

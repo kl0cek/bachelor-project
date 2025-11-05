@@ -9,7 +9,6 @@ export const useMissions = (filters?: { status?: MissionStatus }) => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchMissions = async () => {
-    // Don't fetch if user is not authenticated
     if (!authService.isAuthenticated()) {
       setLoading(false);
       setMissions([]);
@@ -22,12 +21,10 @@ export const useMissions = (filters?: { status?: MissionStatus }) => {
       const data = await missionService.getAllMissions(filters);
       setMissions(data);
     } catch (err: any) {
-      // Only set error if it's not a 401 (which means user is logged out)
       if (err.response?.status !== 401) {
         setError(err.message || 'Failed to fetch missions');
         console.error('Error fetching missions:', err);
       } else {
-        // Silent fail for 401 - user is not authenticated
         setMissions([]);
       }
     } finally {

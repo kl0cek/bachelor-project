@@ -7,8 +7,7 @@ export const ActivityLegend = () => {
     { name: 'Work / Research', color: 'bg-indigo-400 dark:bg-slate-600', type: 'work' },
     {
       name: 'Optional',
-      color:
-        'bg-slate-200 border border-slate-300 dark:bg-slate-800 dark:border-slate-700',
+      color: 'bg-slate-200 border border-slate-300 dark:bg-slate-800 dark:border-slate-700',
       type: 'optional',
     },
     {
