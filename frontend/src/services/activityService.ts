@@ -12,20 +12,14 @@ export type CreateActivityRequest = CreateActivityBackendRequest;
 class ActivityService {
   async getActivitiesForMission(missionId: string, date: string): Promise<Activity[]> {
     try {
-      console.log('API Request - getActivitiesForMission:', { missionId, date });
-
       const response = await apiClient.get<ApiResponse<BackendActivity[]>>(
         `/activities/missions/${missionId}/activities`,
         { params: { date } }
       );
 
-      console.log('API Response - raw:', response.data);
-
       const rawActivities = response.data.data || [];
-      console.log('Raw activities before mapping:', rawActivities);
 
       const mappedActivities = this.mapActivitiesToFrontend(rawActivities);
-      console.log('Mapped activities:', mappedActivities);
 
       return mappedActivities;
     } catch (error) {
@@ -42,14 +36,10 @@ class ActivityService {
 
   async getActivitiesForCrewMember(crewMemberId: string, date: string): Promise<Activity[]> {
     try {
-      console.log('API Request - getActivitiesForCrewMember:', { crewMemberId, date });
-
       const response = await apiClient.get<ApiResponse<BackendActivity[]>>(
         `/activities/crew/${crewMemberId}/activities`,
         { params: { date } }
       );
-
-      console.log('API Response - raw:', response.data);
 
       const rawActivities = response.data.data || [];
       return this.mapActivitiesToFrontend(rawActivities);
@@ -61,14 +51,10 @@ class ActivityService {
 
   async createActivity(data: CreateActivityBackendRequest): Promise<Activity> {
     try {
-      console.log('API Request - createActivity:', data);
-
       const response = await apiClient.post<ApiResponse<BackendActivity>>(
         `/activities/missions/${data.mission_id}/activities`,
         data
       );
-
-      console.log('API Response - createActivity:', response.data);
 
       const rawActivity = response.data.data;
       return this.mapActivityToFrontend(rawActivity);
@@ -86,14 +72,10 @@ class ActivityService {
 
   async updateActivity(activityId: string, data: UpdateActivityBackendRequest): Promise<Activity> {
     try {
-      console.log('API Request - updateActivity:', { activityId, data });
-
       const response = await apiClient.patch<ApiResponse<BackendActivity>>(
         `/activities/${activityId}`,
         data
       );
-
-      console.log('API Response - updateActivity:', response.data);
 
       const rawActivity = response.data.data;
       return this.mapActivityToFrontend(rawActivity);
@@ -105,9 +87,7 @@ class ActivityService {
 
   async deleteActivity(activityId: string): Promise<void> {
     try {
-      console.log('API Request - deleteActivity:', activityId);
       await apiClient.delete(`/activities/${activityId}`);
-      console.log('Activity deleted successfully');
     } catch (error) {
       console.error('Error in deleteActivity:', error);
       throw error;
@@ -119,8 +99,6 @@ class ActivityService {
       console.warn('Attempted to map null/undefined activity');
       throw new Error('Invalid activity data');
     }
-
-    console.log('Mapping activity to frontend:', activity);
 
     const mapped: Activity = {
       id: activity.id,
@@ -139,7 +117,6 @@ class ActivityService {
       updatedAt: activity.updated_at,
     };
 
-    console.log('Mapped activity result:', mapped);
     return mapped;
   }
 
@@ -149,7 +126,6 @@ class ActivityService {
       return [];
     }
 
-    console.log(`Mapping ${activities.length} activities to frontend`);
     return activities.map((activity) => this.mapActivityToFrontend(activity));
   }
 }

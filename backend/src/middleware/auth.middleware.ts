@@ -18,11 +18,7 @@ export interface AuthRequest extends Request {
   userId?: string;
 }
 
-export const authenticate = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
+export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const token = req.cookies.accessToken;
 

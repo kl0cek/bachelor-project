@@ -15,9 +15,7 @@ async function startServer() {
 
     app.listen(PORT, () => {
       logger.info(`Server running in ${NODE_ENV} mode on port ${PORT}`);
-      logger.info(
-        `API available at http://localhost:${PORT}${process.env.API_PREFIX || '/api'}`
-      );
+      logger.info(`API available at http://localhost:${PORT}${process.env.API_PREFIX || '/api'}`);
       logger.info(`Health check at http://localhost:${PORT}/health`);
     });
   } catch (error) {
