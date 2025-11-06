@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { activityService, type CreateActivityRequest } from '../services/activityService';
 import type { Activity } from '../types/types';
 
@@ -13,30 +13,33 @@ export const useActivities = (missionId?: string, date?: string) => {
 
   const cacheKey = missionId && date ? `${missionId}|${date}` : null;
 
-  const fetchActivities = async (force = false) => {
-    if (!missionId || !date) return;
+  const fetchActivities = useCallback(
+    async (force = false) => {
+      if (!missionId || !date) return;
 
-    if (!force && activityCache.has(cacheKey!)) {
-      setActivities(activityCache.get(cacheKey!)!);
-      return;
-    }
+      if (!force && activityCache.has(cacheKey!)) {
+        setActivities(activityCache.get(cacheKey!)!);
+        return;
+      }
 
-    try {
-      setLoading(true);
-      setError(null);
+      try {
+        setLoading(true);
+        setError(null);
 
-      const data = await activityService.getActivitiesForMission(missionId, date);
+        const data = await activityService.getActivitiesForMission(missionId, date);
 
-      activityCache.set(cacheKey!, data);
-      setActivities(data);
-    } catch (err: any) {
-      const errorMessage = err.message || 'Failed to fetch activities';
-      console.error('Error fetching activities:', err);
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
+        activityCache.set(cacheKey!, data);
+        setActivities(data);
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch activities';
+        console.error('Error fetching activities:', err);
+        setError(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [missionId, date, cacheKey]
+  );
 
   useEffect(() => {
     if (!cacheKey) return;
@@ -50,7 +53,7 @@ export const useActivities = (missionId?: string, date?: string) => {
     return () => {
       if (fetchTimeout.current) clearTimeout(fetchTimeout.current);
     };
-  }, [cacheKey]);
+  }, [cacheKey, fetchActivities]);
 
   const createActivity = async (data: CreateActivityRequest) => {
     const newActivity = await activityService.createActivity(data);

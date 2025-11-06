@@ -1,4 +1,9 @@
 import { apiClient } from '../api/client';
+import type {
+  BackendCrewMember,
+  BackendMission,
+  UpdateMissionBackendRequest,
+} from '../types/apiTypes';
 import type { Mission, MissionStatus } from '../types/types';
 
 interface MissionFilters {
@@ -54,7 +59,7 @@ class MissionService {
       status: MissionStatus;
     }>
   ): Promise<Mission> {
-    const payload: any = {};
+    const payload: UpdateMissionBackendRequest = {};
     if (data.name) payload.name = data.name;
     if (data.description) payload.description = data.description;
     if (data.startDate) payload.start_date = data.startDate;
@@ -69,7 +74,7 @@ class MissionService {
     await apiClient.delete(`/missions/${uuid}`);
   }
 
-  private mapMissionToFrontend(mission: any): Mission {
+  private mapMissionToFrontend(mission: BackendMission): Mission {
     return {
       id: mission.id,
       name: mission.name,
@@ -78,7 +83,7 @@ class MissionService {
       endDate: mission.end_date,
       status: mission.status,
       crewMembers: mission.crew_members
-        ? mission.crew_members.map((member: any) => ({
+        ? mission.crew_members.map((member: BackendCrewMember) => ({
             id: member.id,
             name: member.name,
             role: member.role || '',

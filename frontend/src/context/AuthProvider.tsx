@@ -1,17 +1,7 @@
-import { createContext, useState, useEffect, type ReactNode } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { authService } from '../services/authService';
-import type { User } from '../types/types';
-
-interface AuthContextType {
-  user: User | null;
-  loading: boolean;
-  login: (username: string, password: string) => Promise<void>;
-  logout: () => Promise<void>;
-  hasPermission: (permission: string) => boolean;
-  hasRole: (role: string) => boolean;
-}
-
-export const AuthContext = createContext<AuthContextType | undefined>(undefined);
+import type { User, UserRole } from '../types/types';
+import { AuthContext } from './AuthContext';
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -52,8 +42,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     return authService.hasPermission(permission);
   };
 
-  const hasRole = (role: string): boolean => {
-    return authService.hasRole(role as any);
+  const hasRole = (role: UserRole): boolean => {
+    return authService.hasRole(role);
   };
 
   return (

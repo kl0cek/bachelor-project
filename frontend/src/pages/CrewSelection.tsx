@@ -40,8 +40,9 @@ export const CrewSelection = () => {
         setLoading(true);
         const missionData = await getMissionById(id);
         setMission(missionData);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load mission');
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load mission';
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }
@@ -119,9 +120,10 @@ export const CrewSelection = () => {
       }
 
       navigate(`/mission/${mission.id}/scheduler`);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error creating crew members:', err);
-      alert(err.message || 'Failed to create crew members');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create crew members';
+      alert(errorMessage);
     } finally {
       setIsSubmitting(false);
     }

@@ -79,9 +79,16 @@ export const CreateMission = () => {
       });
 
       navigate(`/mission/${mission.id}/crew`);
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error creating mission:', err);
-      setError(err.response?.data?.message || err.message || 'Failed to create mission');
+      if (err && typeof err === 'object' && 'response' in err) {
+        const response = (err as { response?: { data?: { message?: string } } }).response;
+        setError(response?.data?.message || 'Failed to create mission');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Failed to create mission');
+      }
     } finally {
       setIsSubmitting(false);
     }

@@ -41,8 +41,15 @@ export const HomePage = () => {
     try {
       await authService.login({ username: username.trim(), password });
       window.location.reload();
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid username or password');
+    } catch (err) {
+      if (err && typeof err === 'object' && 'response' in err) {
+        const response = (err as { response?: { data?: { message?: string } } }).response;
+        setError(response?.data?.message || 'Invalid username or password');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unexpected error occurred');
+      }
     } finally {
       setIsLoading(false);
     }

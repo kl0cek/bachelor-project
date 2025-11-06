@@ -38,19 +38,14 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
       setUsername('');
       setPassword('');
       setError('');
-    } catch (err: any) {
-      console.error('Login error:', err);
-
-      if (err.response?.status === 401) {
-        setError('Invalid username or password');
-      } else if (err.response?.status === 403) {
-        setError('Account is disabled. Please contact administrator.');
-      } else if (err.code === 'ECONNABORTED' || err.message.includes('timeout')) {
-        setError('Connection timeout. Please try again.');
-      } else if (err.message) {
+    } catch (err) {
+      if (err && typeof err === 'object' && 'response' in err) {
+        const response = (err as { response?: { data?: { message?: string } } }).response;
+        setError(response?.data?.message || 'Invalid username or password');
+      } else if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError('Login failed. Please try again.');
+        setError('An unexpected error occurred');
       }
     } finally {
       setIsLoading(false);
@@ -67,7 +62,7 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && username.trim() && password.trim() && !isLoading) {
-      handleSubmit(e as any);
+      handleSubmit(e);
     }
   };
 

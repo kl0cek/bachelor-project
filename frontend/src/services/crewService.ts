@@ -1,4 +1,5 @@
 import { apiClient } from '../api/client';
+import type { BackendCrewMember } from '../types/apiTypes';
 import type { CrewMember } from '../types/types';
 
 export interface CreateCrewMemberRequest {
@@ -37,7 +38,7 @@ class CrewService {
     await apiClient.delete(`/crew/${crewId}`);
   }
 
-  private mapCrewMemberToFrontend(member: any): CrewMember {
+  private mapCrewMemberToFrontend(member: BackendCrewMember): CrewMember {
     return {
       id: member.id,
       name: member.name,

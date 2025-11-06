@@ -105,6 +105,15 @@ export interface TaskState {
   error: string | null;
 }
 
+export interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  login: (username: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  hasPermission: (permission: string) => boolean;
+  hasRole: (role: UserRole) => boolean;
+}
+
 export interface TaskContextType {
   state: TaskState;
   addTask: (crewMemberId: string, task: Activity) => void;

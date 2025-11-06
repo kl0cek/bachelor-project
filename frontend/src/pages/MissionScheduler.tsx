@@ -26,9 +26,10 @@ export const MissionScheduler = () => {
         setError(null);
         const missionData = await getMissionById(id);
         setMission(missionData);
-      } catch (err: any) {
+      } catch (err) {
         console.error('Error loading mission:', err);
-        setError(err.message || 'Failed to load mission');
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load mission';
+        setError(errorMessage);
       } finally {
         setLoading(false);
       }

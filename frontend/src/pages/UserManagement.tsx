@@ -2,8 +2,17 @@ import { useState } from 'react';
 import { UserPlus, Edit, Trash2, Shield, Eye, User as UserIcon } from 'lucide-react';
 import { Card, Button } from '../components/ui/index';
 import { ROLE_PERMISSIONS } from '../utils/auth';
-import type { UserRole } from '../types/auth';
+import type { UserRole, User } from '../types/types';
 import { useUsers } from '../hooks/useUser';
+
+interface UserFormData {
+  username: string;
+  password: string;
+  full_name: string;
+  email: string;
+  role: UserRole;
+  is_active: boolean;
+}
 
 export const UserManagement = () => {
   const { users, loading, error, createUser, updateUser, deleteUser } = useUsers({
@@ -11,15 +20,15 @@ export const UserManagement = () => {
   });
 
   const [isCreating, setIsCreating] = useState(false);
-  const [editingUser, setEditingUser] = useState<any | null>(null);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<UserFormData>({
     username: '',
     password: '',
-    fullName: '',
+    full_name: '',
     email: '',
-    role: 'viewer' as UserRole,
-    isActive: true,
+    role: 'viewer',
+    is_active: true,
   });
 
   const handleCreateUser = async () => {
@@ -63,10 +72,10 @@ export const UserManagement = () => {
     setFormData({
       username: '',
       password: '',
-      fullName: '',
+      full_name: '',
       email: '',
       role: 'viewer',
-      isActive: true,
+      is_active: true,
     });
   };
 
@@ -162,8 +171,8 @@ export const UserManagement = () => {
               </label>
               <input
                 type="text"
-                value={formData.fullName}
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                value={formData.full_name}
+                onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
                 className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
                 placeholder="John Doe"
                 disabled={loading}
@@ -205,8 +214,8 @@ export const UserManagement = () => {
             <div className="flex items-center space-x-2">
               <input
                 type="checkbox"
-                checked={formData.isActive}
-                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                checked={formData.is_active}
+                onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                 className="rounded"
                 disabled={loading}
               />
@@ -302,10 +311,10 @@ export const UserManagement = () => {
                             setFormData({
                               username: user.username,
                               password: '',
-                              fullName: user.fullName,
+                              full_name: user.fullName,
                               email: user.email || '',
                               role: user.role,
-                              isActive: user.isActive,
+                              is_active: user.isActive,
                             });
                           }}
                           disabled={loading}

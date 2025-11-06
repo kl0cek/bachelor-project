@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { missionService } from '../services/missionService';
 import { authService } from '../services/authService';
 import type { Mission, MissionStatus } from '../types/types';
@@ -8,7 +8,7 @@ export const useMissions = (filters?: { status?: MissionStatus }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchMissions = async () => {
+  const fetchMissions = useCallback(async () => {
     if (!authService.isAuthenticated()) {
       setLoading(false);
       setMissions([]);
@@ -20,9 +20,16 @@ export const useMissions = (filters?: { status?: MissionStatus }) => {
       setError(null);
       const data = await missionService.getAllMissions(filters);
       setMissions(data);
-    } catch (err: any) {
-      if (err.response?.status !== 401) {
-        setError(err.message || 'Failed to fetch missions');
+    } catch (err) {
+      const isUnauthorized =
+        err &&
+        typeof err === 'object' &&
+        'response' in err &&
+        (err as { response?: { status?: number } }).response?.status === 401;
+
+      if (!isUnauthorized) {
+        const errorMessage = err instanceof Error ? err.message : 'Failed to fetch missions';
+        setError(errorMessage);
         console.error('Error fetching missions:', err);
       } else {
         setMissions([]);
@@ -30,11 +37,11 @@ export const useMissions = (filters?: { status?: MissionStatus }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters?.status]);
 
   useEffect(() => {
     fetchMissions();
-  }, [filters?.status]);
+  }, [fetchMissions]);
 
   const createMission = async (missionData: {
     name: string;
@@ -47,8 +54,9 @@ export const useMissions = (filters?: { status?: MissionStatus }) => {
       const newMission = await missionService.createMission(missionData);
       setMissions((prev) => [...prev, newMission]);
       return newMission;
-    } catch (err: any) {
-      setError(err.message || 'Failed to create mission');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create mission';
+      setError(errorMessage);
       throw err;
     }
   };
@@ -67,8 +75,9 @@ export const useMissions = (filters?: { status?: MissionStatus }) => {
       const updatedMission = await missionService.updateMission(missionId, updates);
       setMissions((prev) => prev.map((m) => (m.id === missionId ? updatedMission : m)));
       return updatedMission;
-    } catch (err: any) {
-      setError(err.message || 'Failed to update mission');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update mission';
+      setError(errorMessage);
       throw err;
     }
   };
@@ -77,8 +86,9 @@ export const useMissions = (filters?: { status?: MissionStatus }) => {
     try {
       await missionService.deleteMission(missionId);
       setMissions((prev) => prev.filter((m) => m.id !== missionId));
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete mission');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete mission';
+      setError(errorMessage);
       throw err;
     }
   };
@@ -87,8 +97,9 @@ export const useMissions = (filters?: { status?: MissionStatus }) => {
     try {
       const mission = await missionService.getMissionById(missionId);
       return mission;
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch mission');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch mission';
+      setError(errorMessage);
       throw err;
     }
   };

@@ -1,4 +1,5 @@
 import { apiClient } from '../api/client';
+import type { BackendUser } from '../types/apiTypes';
 import type { User, UserRole } from '../types/types';
 
 export interface LoginCredentials {
@@ -115,7 +116,7 @@ class AuthService {
     }
 
     try {
-      const response = await apiClient.get<{ success: boolean; data: any }>('/auth/me');
+      const response = await apiClient.get<{ success: boolean; data: BackendUser }>('/auth/me');
       const user = response.data.data;
 
       const mappedUser: User = {
