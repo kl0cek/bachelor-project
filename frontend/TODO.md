@@ -11,6 +11,13 @@ w taksu variant name ktory task np first task (time)
 
 w bazie danych pdf z taskiem - pan dr ma dac pdf z 'przykladem'
 
+Opcja autorobienia misji 
+plus chat plus kamerka 
+automatyczne przejscie przez dzien
+logo WTK / AGH
+
+A I do optymalizacji schedulera 
+
 DONE:
 API DB DONE WORKS FINE ON LOCALHOST 
 dzien roku w obrebie grida (gdzies na gorze)
