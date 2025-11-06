@@ -13,7 +13,6 @@ export const MainHeader = () => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   useEffect(() => {
-    // Initialize auth and get current user
     const initAuth = async () => {
       await authService.initialize();
       const currentUser = authService.getCurrentUser();
@@ -27,7 +26,6 @@ export const MainHeader = () => {
     setUser(authenticatedUser);
     setIsLoginModalOpen(false);
 
-    // Reload to ensure all components get the new auth state
     window.location.reload();
   };
 
@@ -38,12 +36,10 @@ export const MainHeader = () => {
       await authService.logout();
       setUser(null);
 
-      // Redirect to home and reload
       navigate('/');
       window.location.reload();
     } catch (error) {
       console.error('Logout error:', error);
-      // Even if logout fails on backend, clear local state
       setUser(null);
       navigate('/');
       window.location.reload();
@@ -71,21 +67,26 @@ export const MainHeader = () => {
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 sm:gap-6 min-w-0 flex-1">
-              <Link to="/" className="flex items-center gap-2 sm:gap-4 min-w-0">
-                <div className="p-2 sm:p-3 rounded-xl bg-space-100 dark:bg-space-900 shrink-0">
-                  <Satellite className="h-5 w-5 sm:h-6 sm:w-6 text-space-600 dark:text-space-400" />
+              <Link to="/" className="flex items-center sm:gap-4 min-w-0 -ml-2">
+                <div className="h-24 w-24 sm:h-20 sm:w-20 rounded-xl bg-space-100 dark:bg-space-900 flex items-center justify-center">
+                  <img
+                    src="/WTK_light.png"
+                    alt="Space Technology Centre AGH University"
+                    className="h-full w-full block dark:hidden object-contain"
+                  />
+                  <img
+                    src="/WTK_dark.png"
+                    alt="Space Technology Centre AGH University"
+                    className="h-full w-full hidden dark:block object-contain"
+                  />
                 </div>
                 <div className="min-w-0">
-                  <h1 className="text-base sm:text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100 truncate">
+                  <h1 className="text-base sm:text-xl font-light tracking-tight text-slate-900 dark:text-slate-100 truncate">
                     Mission Control Platform
                   </h1>
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 truncate hidden sm:block">
-                    Analog Mission Communication System
-                  </p>
                 </div>
               </Link>
             </div>
-
             <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 shrink-0">
               {user ? (
                 <>
