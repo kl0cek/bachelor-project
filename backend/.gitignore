@@ -1,0 +1,33 @@
+# Logs
+logs/
+*.log
+
+# Database
+*.sqlite
+*.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+.DS_Store
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# TypeScript
+*.tsbuildinfo
+
+# Misc
+.cache/
+.temp/
+.tmp/
+
+# Production
+uploads/
+backups/
+
+.env

@@ -1,0 +1,19 @@
+import { Router } from 'express';
+import { authController } from '../controllers/auth.controller';
+import { authenticate } from '../middleware/auth.middleware';
+import { body } from 'express-validator';
+import { validate } from '../middleware/validator.middleware';
+
+const router = Router();
+
+const loginValidation = [
+  body('username').notEmpty().trim().isLength({ min: 3 }),
+  body('password').notEmpty().isLength({ min: 6 }),
+];
+
+router.post('/login', loginValidation, validate, authController.login);
+router.post('/logout', authenticate, authController.logout);
+router.post('/refresh', authController.refresh);
+router.get('/me', authenticate, authController.getCurrentUser);
+
+export default router;
