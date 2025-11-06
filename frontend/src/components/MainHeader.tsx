@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router';
-import { Satellite, User, LogIn, Shield, LogOut } from 'lucide-react';
+import { User, LogIn, Shield, LogOut } from 'lucide-react';
 import { Button } from './ui/index';
 import { LoginModal } from './LoginModal';
 import { authService } from '../services/authService';
