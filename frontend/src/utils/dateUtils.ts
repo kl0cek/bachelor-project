@@ -1,3 +1,5 @@
+import type { ActivityType } from "../types/types";
+
 export function getDayOfYear(date: Date = new Date()): number {
   const start = new Date(date.getFullYear(), 0, 1);
   const diff = date.getTime() - start.getTime();
@@ -93,3 +95,15 @@ export function toUTCString(date: Date): string {
 export function fromUTCString(utcString: string): Date {
   return new Date(utcString);
 }
+
+export const getActivityColor = (type: ActivityType): string => {
+  const colors: Record<ActivityType, string> = {
+    exercise: 'bg-space-400 dark:bg-sky-800 text-sky-950 dark:text-white',
+    meal: 'bg-slate-400 dark:bg-slate-500 text-sky-950 dark:text-white',
+    sleep: 'bg-slate-400 dark:bg-slate-500 text-sky-950 dark:text-white',
+    work: 'bg-sky-800 dark:bg-sky-800 text-sky-950 dark:text-white',
+    eva: 'bg-orange-400 dark:bg-orange-500 text-sky-950 dark:text-white',
+    optional: 'bg-slate-300 dark:bg-slate-600 text-slate-900 dark:text-white',
+  };
+  return colors[type];
+};

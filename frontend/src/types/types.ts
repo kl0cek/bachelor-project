@@ -70,6 +70,15 @@ export interface ActivityCategory {
   type: ActivityType;
 }
 
+export interface TimelineDayProps {
+  date: string;
+  mission: Mission;
+  activities: Activity[];
+  loading: boolean;
+  onAddTask: (crewMemberId: string, startTime: number) => void;
+  onViewTask: (task: Activity) => void;
+}
+
 export interface ISSData {
   name: string;
   id: number;

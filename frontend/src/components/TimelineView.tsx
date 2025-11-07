@@ -1,15 +1,33 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/index';
 import { TaskForm } from './TaskForm';
 import { ActivityModal } from './ActivityModal';
+import { TimelineDay } from './TimelineDay';
 import { useActivities } from '../hooks/useActivities';
-import { getActivityColor } from '../utils/activityUtils';
+import { useTimelineScroll } from '../hooks/useTimelineScroll';
 import type { Mission, Activity } from '../types/types';
 
 interface TimelineViewProps {
   mission: Mission;
 }
+
+const addDays = (dateStr: string, days: number): string => {
+  const date = new Date(dateStr);
+  date.setDate(date.getDate() + days);
+  return date.toISOString().split('T')[0];
+};
+
+const formatDate = (dateStr: string) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
 
 export const TimelineView = ({ mission }: TimelineViewProps) => {
   const [currentDate, setCurrentDate] = useState(() => {
@@ -23,40 +41,47 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     return missionStart.toISOString().split('T')[0];
   });
 
-  const { activities, loading, createActivity, updateActivity, deleteActivity } = useActivities(
-    mission.id,
-    currentDate
-  );
-
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Activity | null>(null);
   const [selectedCrewMemberId, setSelectedCrewMemberId] = useState<string>('');
   const [defaultStartTime, setDefaultStartTime] = useState<number>(6);
   const [viewingTask, setViewingTask] = useState<Activity | null>(null);
 
-  const hours = Array.from({ length: 24 }, (_, i) => i);
   const crewMembers = mission.crewMembers || [];
 
-  const getActivitiesForCrewMember = (crewMemberId: string) => {
-    return activities.filter((activity) => activity.crewMemberId === crewMemberId);
+  const {
+    scrollContainerRef,
+    canNavigatePrevious,
+    canNavigateNext,
+    handlePreviousDay,
+    handleNextDay,
+  } = useTimelineScroll({
+    currentDate,
+    missionStartDate: mission.startDate,
+    missionEndDate: mission.endDate,
+    onDateChange: setCurrentDate,
+  });
+
+  const dates = [
+    addDays(currentDate, -1),
+    currentDate,
+    addDays(currentDate, 1),
+  ];
+
+  const prevDayActivities = useActivities(mission.id, dates[0]);
+  const currentDayActivities = useActivities(mission.id, dates[1]);
+  const nextDayActivities = useActivities(mission.id, dates[2]);
+
+  const activitiesMap = {
+    [dates[0]]: prevDayActivities.activities,
+    [dates[1]]: currentDayActivities.activities,
+    [dates[2]]: nextDayActivities.activities,
   };
 
-  const handlePreviousDay = () => {
-    const date = new Date(currentDate);
-    date.setDate(date.getDate() - 1);
-    const missionStart = new Date(mission.startDate);
-    if (date >= missionStart) {
-      setCurrentDate(date.toISOString().split('T')[0]);
-    }
-  };
-
-  const handleNextDay = () => {
-    const date = new Date(currentDate);
-    date.setDate(date.getDate() + 1);
-    const missionEnd = new Date(mission.endDate);
-    if (date <= missionEnd) {
-      setCurrentDate(date.toISOString().split('T')[0]);
-    }
+  const loadingMap = {
+    [dates[0]]: prevDayActivities.loading,
+    [dates[1]]: currentDayActivities.loading,
+    [dates[2]]: nextDayActivities.loading,
   };
 
   const handleAddTask = (crewMemberId: string, startTime: number) => {
@@ -84,7 +109,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
 
     try {
       if (selectedTask) {
-        await updateActivity(selectedTask.id!, {
+        await currentDayActivities.updateActivity(selectedTask.id!, {
           crew_member_id: taskData.crewMemberId,
           mission_id: mission.id,
           name: taskData.name,
@@ -98,7 +123,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
           equipment: taskData.equipment,
         });
       } else {
-        await createActivity({
+        await currentDayActivities.createActivity({
           crew_member_id: taskData.crewMemberId,
           mission_id: mission.id,
           name: taskData.name,
@@ -121,36 +146,12 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
 
   const handleDeleteTask = async (taskId: string) => {
     try {
-      await deleteActivity(taskId);
+      await currentDayActivities.deleteActivity(taskId);
       setIsFormOpen(false);
       setSelectedTask(null);
     } catch (error) {
       console.error('Error deleting activity:', error);
     }
-  };
-
-  const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
-  const canNavigatePrevious = () => {
-    const date = new Date(currentDate);
-    const missionStart = new Date(mission.startDate);
-    date.setDate(date.getDate() - 1);
-    return date >= missionStart;
-  };
-
-  const canNavigateNext = () => {
-    const date = new Date(currentDate);
-    const missionEnd = new Date(mission.endDate);
-    date.setDate(date.getDate() + 1);
-    return date <= missionEnd;
   };
 
   if (crewMembers.length === 0) {
@@ -169,12 +170,13 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   return (
     <>
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm overflow-hidden mb-6">
+        {/* Header with navigation */}
         <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
           <Button
             variant="outline"
             size="sm"
             onClick={handlePreviousDay}
-            disabled={!canNavigatePrevious()}
+            disabled={!canNavigatePrevious}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -183,111 +185,47 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
             {formatDate(currentDate)}
           </h3>
 
-          <Button variant="outline" size="sm" onClick={handleNextDay} disabled={!canNavigateNext()}>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleNextDay} 
+            disabled={!canNavigateNext}
+          >
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
 
-        {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-8 w-8 animate-spin text-space-600" />
+        <div
+          ref={scrollContainerRef}
+          className="overflow-x-scroll snap-x snap-mandatory scroll-smooth timeline-scroll-container"
+          style={{
+            scrollSnapType: 'x mandatory',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
+          <div className="flex">
+            <AnimatePresence mode="sync" initial={false}>
+              {dates.map((date) => (
+                <motion.div
+                  key={date}
+                  initial={{ opacity: 0.8 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0.8 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <TimelineDay
+                    date={date}
+                    mission={mission}
+                    activities={activitiesMap[date] || []}
+                    loading={loadingMap[date] || false}
+                    onAddTask={handleAddTask}
+                    onViewTask={handleViewTask}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <div className="inline-block min-w-full align-middle">
-              <table className="min-w-full">
-                <thead>
-                  <tr>
-                    <th className="sticky left-0 z-10 bg-slate-50 dark:bg-slate-900 px-4 py-3 text-left text-sm font-semibold text-slate-900 dark:text-slate-100 border-r border-slate-200 dark:border-slate-700">
-                      Crew Member
-                    </th>
-                    {hours.map((hour) => (
-                      <th
-                        key={hour}
-                        className="px-2 py-3 text-center text-xs font-medium text-slate-500 dark:text-slate-400 border-r border-slate-200 dark:border-slate-700"
-                        style={{ minWidth: '60px' }}
-                      >
-                        {hour.toString().padStart(2, '0')}:00
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {crewMembers.map((member) => {
-                    const memberActivities = getActivitiesForCrewMember(member.id);
-
-                    return (
-                      <tr
-                        key={member.id}
-                        className="border-t border-slate-200 dark:border-slate-700"
-                      >
-                        <td className="sticky left-0 z-10 bg-white dark:bg-slate-800 px-4 py-3 border-r border-slate-200 dark:border-slate-700">
-                          <div>
-                            <div className="font-medium text-slate-900 dark:text-slate-100">
-                              {member.name}
-                            </div>
-                            <div className="text-sm text-slate-500 dark:text-slate-400">
-                              {member.role}
-                            </div>
-                          </div>
-                        </td>
-                        {hours.map((hour) => {
-                          const activityAtHour = memberActivities.find(
-                            (activity) =>
-                              activity.start <= hour && activity.start + activity.duration > hour
-                          );
-
-                          const isActivityStart = activityAtHour && activityAtHour.start === hour;
-
-                          return (
-                            <td
-                              key={hour}
-                              className="relative border-r border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer"
-                              style={{ height: '60px', minWidth: '60px' }}
-                              onClick={() => {
-                                if (!activityAtHour) {
-                                  handleAddTask(member.id, hour);
-                                }
-                              }}
-                            >
-                              {isActivityStart && activityAtHour && (
-                                <div
-                                  className={`absolute inset-0 ${getActivityColor(activityAtHour.type)} rounded px-2 py-1 text-xs font-medium text-white overflow-hidden cursor-pointer hover:opacity-90 transition-opacity`}
-                                  style={{
-                                    width: `calc(${activityAtHour.duration * 100}% - 2px)`,
-                                  }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleViewTask(activityAtHour);
-                                  }}
-                                  title={activityAtHour.name}
-                                >
-                                  <div className="truncate">{activityAtHour.name}</div>
-                                </div>
-                              )}
-
-                              {!activityAtHour && (
-                                <button
-                                  className="absolute inset-0 w-full h-full flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleAddTask(member.id, hour);
-                                  }}
-                                >
-                                  <Plus className="h-4 w-4 text-slate-400" />
-                                </button>
-                              )}
-                            </td>
-                          );
-                        })}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
 
       <TaskForm
@@ -312,6 +250,16 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
           handleEditTask(task);
         }}
       />
+
+      <style>{`
+        .timeline-scroll-container::-webkit-scrollbar {
+          display: none;
+        }
+        .timeline-scroll-container {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
     </>
   );
 };
