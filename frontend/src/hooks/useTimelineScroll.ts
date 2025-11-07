@@ -30,7 +30,6 @@ export const useTimelineScroll = ({
 }: UseTimelineScrollProps): UseTimelineScrollReturn => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [isScrolling, setIsScrolling] = useState(false);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isNavigatingRef = useRef(false);
 
   const canNavigatePrevious = useCallback(() => {
@@ -65,29 +64,30 @@ export const useTimelineScroll = ({
     }, 300);
   }, [currentDate, canNavigateNext, onDateChange]);
 
-    const initializedRef = useRef(false);
+  const initializedRef = useRef(false);
 
     useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
-
     if (isNavigatingRef.current) return;
-
     if (initializedRef.current) return;
 
-    const dayWidth = container.scrollWidth / 3;
-    container.scrollLeft = dayWidth;
-
+    const totalDays = 1 + (canNavigatePrevious() ? 1 : 0) + (canNavigateNext() ? 1 : 0);
+    const dayWidth = container.scrollWidth / totalDays;
+    
+    const currentDayIndex = canNavigatePrevious() ? 1 : 0;
+    container.scrollLeft = dayWidth * currentDayIndex;
+    
     initializedRef.current = true;
-    }, [isNavigatingRef]);
+    }, [canNavigatePrevious, canNavigateNext]);
 
-    useEffect(() => {
+  useEffect(() => {
     if (isNavigatingRef.current) {
-        requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
         isNavigatingRef.current = false;
-        });
+      });
     }
-    }, [currentDate]);
+  }, [currentDate]);
 
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -96,28 +96,30 @@ export const useTimelineScroll = ({
     let scrollTimeout: NodeJS.Timeout;
 
     const handleScroll = () => {
-      if (isNavigatingRef.current) return;
-
-      setIsScrolling(true);
-
-      if (scrollTimeout) clearTimeout(scrollTimeout);
-
-      scrollTimeout = setTimeout(() => {
-        const dayWidth = container.scrollWidth / 3;
+    if (isNavigatingRef.current) return;
+    setIsScrolling(true);
+    
+    if (scrollTimeout) clearTimeout(scrollTimeout);
+    
+    scrollTimeout = setTimeout(() => {
+        const totalDays = 1 + (canNavigatePrevious() ? 1 : 0) + (canNavigateNext() ? 1 : 0);
+        const dayWidth = container.scrollWidth / totalDays;
+        const currentDayIndex = canNavigatePrevious() ? 1 : 0;
         const scrollPercentage = container.scrollLeft / dayWidth;
-
-        if (scrollPercentage < 0.5 && canNavigatePrevious()) {
-          handlePreviousDay();
-        } else if (scrollPercentage > 1.5 && canNavigateNext()) {
-          handleNextDay();
+        
+        if (scrollPercentage < currentDayIndex - 0.5 && canNavigatePrevious()) {
+        handlePreviousDay();
+        } 
+        else if (scrollPercentage > currentDayIndex + 0.5 && canNavigateNext()) {
+        handleNextDay();
         }
-
+        
         setIsScrolling(false);
-      }, 200);
+    }, 200);
     };
 
     container.addEventListener('scroll', handleScroll, { passive: true });
-    
+
     return () => {
       container.removeEventListener('scroll', handleScroll);
       if (scrollTimeout) clearTimeout(scrollTimeout);

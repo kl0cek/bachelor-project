@@ -1,4 +1,3 @@
-import React from 'react';
 import { Plus, Loader2 } from 'lucide-react';
 import { getActivityColor } from '../utils/activityUtils';
 import type { Mission, Activity } from '../types/types';
@@ -12,14 +11,13 @@ interface TimelineDayProps {
   onViewTask: (task: Activity) => void;
 }
 
-export const TimelineDay: React.FC<TimelineDayProps> = ({
-  date,
+export const TimelineDay = ({
   mission,
   activities,
   loading,
   onAddTask,
   onViewTask,
-}) => {
+}: TimelineDayProps) => {
   const hours = Array.from({ length: 24 }, (_, i) => i);
   const crewMembers = mission.crewMembers || [];
 
@@ -42,7 +40,7 @@ export const TimelineDay: React.FC<TimelineDayProps> = ({
           <table className="min-w-full">
             <thead>
               <tr>
-                <th className="sticky left-0 z-10 bg-slate-50 dark:bg-slate-900 px-4 py-3 text-left text-sm font-semibold text-slate-900 dark:text-slate-100 border-r border-slate-200 dark:border-slate-700">
+                <th className=" sticky left-0 z-10 bg-slate-50 dark:bg-slate-900 px-4 py-3 text-left text-sm font-semibold text-slate-900 dark:text-slate-100 border-r border-slate-200 dark:border-slate-700">
                   Crew Member
                 </th>
                 {hours.map((hour) => (
@@ -61,10 +59,7 @@ export const TimelineDay: React.FC<TimelineDayProps> = ({
                 const memberActivities = getActivitiesForCrewMember(member.id);
 
                 return (
-                  <tr
-                    key={member.id}
-                    className="border-t border-slate-200 dark:border-slate-700"
-                  >
+                  <tr key={member.id} className="border-t border-slate-200 dark:border-slate-700">
                     <td className="sticky left-0 z-10 bg-white dark:bg-slate-800 px-4 py-3 border-r border-slate-200 dark:border-slate-700">
                       <div>
                         <div className="font-medium text-slate-900 dark:text-slate-100">

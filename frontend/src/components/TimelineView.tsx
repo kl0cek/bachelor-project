@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/index';
 import { TaskForm } from './TaskForm';
 import { ActivityModal } from './ActivityModal';
-import { TimelineDay } from './TimelineDay';
+import { TimelineDayContent } from './TimelineDayContent';
 import { useActivities } from '../hooks/useActivities';
 import { useTimelineScroll } from '../hooks/useTimelineScroll';
 import type { Mission, Activity } from '../types/types';
@@ -46,6 +46,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   const [selectedCrewMemberId, setSelectedCrewMemberId] = useState<string>('');
   const [defaultStartTime, setDefaultStartTime] = useState<number>(6);
   const [viewingTask, setViewingTask] = useState<Activity | null>(null);
+  const [rowHeights, setRowHeights] = useState<number[]>([]);
 
   const crewMembers = mission.crewMembers || [];
 
@@ -62,27 +63,49 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     onDateChange: setCurrentDate,
   });
 
-  const dates = [
-    addDays(currentDate, -1),
-    currentDate,
-    addDays(currentDate, 1),
-  ];
+  const dates: string[] = [];
+  const prevDate = addDays(currentDate, -1);
+  const nextDate = addDays(currentDate, 1);
 
-  const prevDayActivities = useActivities(mission.id, dates[0]);
-  const currentDayActivities = useActivities(mission.id, dates[1]);
-  const nextDayActivities = useActivities(mission.id, dates[2]);
+  if (canNavigatePrevious) dates.push(prevDate);
+  dates.push(currentDate);
+  if (canNavigateNext) dates.push(nextDate);
 
-  const activitiesMap = {
-    [dates[0]]: prevDayActivities.activities,
-    [dates[1]]: currentDayActivities.activities,
-    [dates[2]]: nextDayActivities.activities,
-  };
+const prevDayActivities = useActivities(
+  mission.id, 
+  canNavigatePrevious ? prevDate : undefined
+);
+const currentDayActivities = useActivities(mission.id, currentDate);
+const nextDayActivities = useActivities(
+  mission.id, 
+  canNavigateNext ? nextDate : undefined
+);
 
-  const loadingMap = {
-    [dates[0]]: prevDayActivities.loading,
-    [dates[1]]: currentDayActivities.loading,
-    [dates[2]]: nextDayActivities.loading,
-  };
+const activitiesMap: Record<string, Activity[]> = {
+  [currentDate]: currentDayActivities.activities,
+};
+
+const loadingMap: Record<string, boolean> = {
+  [currentDate]: currentDayActivities.loading,
+};
+
+if (canNavigatePrevious) {
+  activitiesMap[prevDate] = prevDayActivities.activities;
+  loadingMap[prevDate] = prevDayActivities.loading;
+}
+
+if (canNavigateNext) {
+  activitiesMap[nextDate] = nextDayActivities.activities;
+  loadingMap[nextDate] = nextDayActivities.loading;
+}
+
+  const handleMeasureRow = useCallback((index: number, height: number) => {
+    setRowHeights((prev) => {
+      const newHeights = [...prev];
+      newHeights[index] = Math.max(newHeights[index] || 60, height);
+      return newHeights;
+    });
+  }, []);
 
   const handleAddTask = (crewMemberId: string, startTime: number) => {
     setSelectedCrewMemberId(crewMemberId);
@@ -170,7 +193,6 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   return (
     <>
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm overflow-hidden mb-6">
-        {/* Header with navigation */}
         <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
           <Button
             variant="outline"
@@ -195,35 +217,76 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
           </Button>
         </div>
 
-        <div
-          ref={scrollContainerRef}
-          className="overflow-x-scroll snap-x snap-mandatory scroll-smooth timeline-scroll-container"
-          style={{
-            scrollSnapType: 'x mandatory',
-            WebkitOverflowScrolling: 'touch',
-          }}
-        >
-          <div className="flex">
-            <AnimatePresence mode="sync" initial={false}>
-              {dates.map((date) => (
-                <motion.div
-                  key={date}
-                  initial={{ opacity: 0.8 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0.8 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <TimelineDay
-                    date={date}
-                    mission={mission}
-                    activities={activitiesMap[date] || []}
-                    loading={loadingMap[date] || false}
-                    onAddTask={handleAddTask}
-                    onViewTask={handleViewTask}
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
+        <div className="relative">
+          <div className="absolute left-0 top-0 z-20 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700" style={{ width: '200px' }}>
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className="left-0 z-10 bg-slate-50 dark:bg-slate-900 px-4 py-2.5 text-left text-sm font-semibold text-slate-900 dark:text-slate-100 border-r border-slate-200 dark:border-slate-700">
+                    Crew Member
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {crewMembers.map((member, index) => {
+                  const appliedHeight = rowHeights[index] || 60;
+                  return (
+                    <tr
+                      key={member.id}
+                      className="border-t border-slate-200 dark:border-slate-700"
+                      style={{ height: `${appliedHeight}px` }}
+                    >
+                      <td className="px-2 py-1 bg-white dark:bg-slate-800">
+                        <div>
+                          <div className="font-medium text-slate-900 dark:text-slate-100 text-sm">
+                            {member.name}
+                          </div>
+                          <div className="text-xs text-slate-500 dark:text-slate-400">
+                            {member.role}
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="overflow-hidden" style={{ paddingLeft: '200px' }}>
+            <div
+              ref={scrollContainerRef}
+              className="overflow-x-scroll snap-x snap-mandatory scroll-smooth timeline-scroll-container"
+              style={{
+                scrollSnapType: 'x mandatory',
+                WebkitOverflowScrolling: 'touch',
+              }}
+            >
+              <div className="flex">
+                <AnimatePresence mode="sync" initial={false}>
+                  {dates.map((date) => (
+                    <motion.div
+                      key={date}
+                      initial={{ opacity: 0.8 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0.8 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <TimelineDayContent
+                        date={date}
+                        mission={mission}
+                        activities={activitiesMap[date] || []}
+                        loading={loadingMap[date] || false}
+                        onAddTask={handleAddTask}
+                        onViewTask={handleViewTask}
+                        rowHeights={rowHeights}
+                        onMeasureRow={date === dates[1] ? handleMeasureRow : undefined}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+            </div>
           </div>
         </div>
       </div>

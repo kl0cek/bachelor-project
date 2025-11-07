@@ -1,4 +1,4 @@
-import type { ActivityType } from "../types/types";
+import type { ActivityType } from '../types/types';
 
 export function getDayOfYear(date: Date = new Date()): number {
   const start = new Date(date.getFullYear(), 0, 1);
