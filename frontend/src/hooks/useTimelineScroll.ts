@@ -66,7 +66,7 @@ export const useTimelineScroll = ({
 
   const initializedRef = useRef(false);
 
-    useEffect(() => {
+  useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
     if (isNavigatingRef.current) return;
@@ -74,12 +74,12 @@ export const useTimelineScroll = ({
 
     const totalDays = 1 + (canNavigatePrevious() ? 1 : 0) + (canNavigateNext() ? 1 : 0);
     const dayWidth = container.scrollWidth / totalDays;
-    
+
     const currentDayIndex = canNavigatePrevious() ? 1 : 0;
     container.scrollLeft = dayWidth * currentDayIndex;
-    
+
     initializedRef.current = true;
-    }, [canNavigatePrevious, canNavigateNext]);
+  }, [canNavigatePrevious, canNavigateNext]);
 
   useEffect(() => {
     if (isNavigatingRef.current) {
@@ -96,26 +96,25 @@ export const useTimelineScroll = ({
     let scrollTimeout: NodeJS.Timeout;
 
     const handleScroll = () => {
-    if (isNavigatingRef.current) return;
-    setIsScrolling(true);
-    
-    if (scrollTimeout) clearTimeout(scrollTimeout);
-    
-    scrollTimeout = setTimeout(() => {
+      if (isNavigatingRef.current) return;
+      setIsScrolling(true);
+
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+
+      scrollTimeout = setTimeout(() => {
         const totalDays = 1 + (canNavigatePrevious() ? 1 : 0) + (canNavigateNext() ? 1 : 0);
         const dayWidth = container.scrollWidth / totalDays;
         const currentDayIndex = canNavigatePrevious() ? 1 : 0;
         const scrollPercentage = container.scrollLeft / dayWidth;
-        
+
         if (scrollPercentage < currentDayIndex - 0.5 && canNavigatePrevious()) {
-        handlePreviousDay();
-        } 
-        else if (scrollPercentage > currentDayIndex + 0.5 && canNavigateNext()) {
-        handleNextDay();
+          handlePreviousDay();
+        } else if (scrollPercentage > currentDayIndex + 0.5 && canNavigateNext()) {
+          handleNextDay();
         }
-        
+
         setIsScrolling(false);
-    }, 200);
+      }, 200);
     };
 
     container.addEventListener('scroll', handleScroll, { passive: true });

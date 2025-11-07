@@ -71,33 +71,27 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   dates.push(currentDate);
   if (canNavigateNext) dates.push(nextDate);
 
-const prevDayActivities = useActivities(
-  mission.id, 
-  canNavigatePrevious ? prevDate : undefined
-);
-const currentDayActivities = useActivities(mission.id, currentDate);
-const nextDayActivities = useActivities(
-  mission.id, 
-  canNavigateNext ? nextDate : undefined
-);
+  const prevDayActivities = useActivities(mission.id, canNavigatePrevious ? prevDate : undefined);
+  const currentDayActivities = useActivities(mission.id, currentDate);
+  const nextDayActivities = useActivities(mission.id, canNavigateNext ? nextDate : undefined);
 
-const activitiesMap: Record<string, Activity[]> = {
-  [currentDate]: currentDayActivities.activities,
-};
+  const activitiesMap: Record<string, Activity[]> = {
+    [currentDate]: currentDayActivities.activities,
+  };
 
-const loadingMap: Record<string, boolean> = {
-  [currentDate]: currentDayActivities.loading,
-};
+  const loadingMap: Record<string, boolean> = {
+    [currentDate]: currentDayActivities.loading,
+  };
 
-if (canNavigatePrevious) {
-  activitiesMap[prevDate] = prevDayActivities.activities;
-  loadingMap[prevDate] = prevDayActivities.loading;
-}
+  if (canNavigatePrevious) {
+    activitiesMap[prevDate] = prevDayActivities.activities;
+    loadingMap[prevDate] = prevDayActivities.loading;
+  }
 
-if (canNavigateNext) {
-  activitiesMap[nextDate] = nextDayActivities.activities;
-  loadingMap[nextDate] = nextDayActivities.loading;
-}
+  if (canNavigateNext) {
+    activitiesMap[nextDate] = nextDayActivities.activities;
+    loadingMap[nextDate] = nextDayActivities.loading;
+  }
 
   const handleMeasureRow = useCallback((index: number, height: number) => {
     setRowHeights((prev) => {
@@ -207,18 +201,16 @@ if (canNavigateNext) {
             {formatDate(currentDate)}
           </h3>
 
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={handleNextDay} 
-            disabled={!canNavigateNext}
-          >
+          <Button variant="outline" size="sm" onClick={handleNextDay} disabled={!canNavigateNext}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
 
         <div className="relative">
-          <div className="absolute left-0 top-0 z-20 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700" style={{ width: '200px' }}>
+          <div
+            className="absolute left-0 top-0 z-20 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700"
+            style={{ width: '200px' }}
+          >
             <table className="w-full border-collapse">
               <thead>
                 <tr>
