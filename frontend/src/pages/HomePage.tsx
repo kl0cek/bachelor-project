@@ -12,6 +12,7 @@ import {
   User as UserIcon,
   Loader2,
   Edit,
+  UsersIcon,
 } from 'lucide-react';
 import { Card, Button, Badge } from '../components/ui/index';
 import { authService } from '../services/authService';
@@ -229,16 +230,28 @@ export const HomePage = () => {
                         {statusLabels[mission.status]}
                       </Badge>
                       {authService.hasPermission('edit_mission') && (
-                        <Link to={`/mission/${mission.id}/edit`}>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            title="Edit mission"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </Link>
+                        <>
+                          <Link to={`/mission/${mission.id}/edit`}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              title="Edit mission"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Link to={`/mission/${mission.id}/crew`}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              title="Manage crew"
+                            >
+                              <UsersIcon className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                        </>
                       )}
                     </div>
                   </div>
@@ -298,16 +311,28 @@ export const HomePage = () => {
                         {statusLabels[mission.status]}
                       </Badge>
                       {authService.hasPermission('edit_mission') && (
-                        <Link to={`/mission/${mission.id}/edit`}>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            title="Edit mission"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </Link>
+                        <>
+                          <Link to={`/mission/${mission.id}/edit`}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              title="Edit mission"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                          <Link to={`/mission/${mission.id}/crew`}>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              title="Manage crew"
+                            >
+                              <UsersIcon className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                        </>
                       )}
                     </div>
 
