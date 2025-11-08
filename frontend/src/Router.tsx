@@ -8,6 +8,7 @@ const CreateMission = lazy(() => import('./pages/CreateMission'));
 const CrewSelection = lazy(() => import('./pages/CrewSelection'));
 const MissionScheduler = lazy(() => import('./pages/MissionScheduler'));
 const UserManagement = lazy(() => import('./pages/UserManagement'));
+const EditMission = lazy(() => import('./pages/EditMission'));
 
 export const router = createBrowserRouter([
   {
@@ -28,6 +29,16 @@ export const router = createBrowserRouter([
           </LazyRoute>
         ),
       },
+        {
+          path: 'mission/:id/edit',
+          element: (
+            <LazyRoute>
+              <ProtectedRoute requiredPermission="edit_mission">
+                <EditMission />
+              </ProtectedRoute>
+            </LazyRoute>
+          )
+        },
       {
         path: 'mission/:id/crew',
         element: (

@@ -11,6 +11,7 @@ import {
   Clock,
   User as UserIcon,
   Loader2,
+  Edit,
 } from 'lucide-react';
 import { Card, Button, Badge } from '../components/ui/index';
 import { authService } from '../services/authService';
@@ -216,47 +217,61 @@ export const HomePage = () => {
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {activeMissions.map((mission) => (
                   <Card
-                    key={mission.id}
-                    className="p-6 hover:shadow-md transition-shadow duration-200 border-2 border-green-200 dark:border-green-800"
-                  >
-                    <div className="flex justify-between items-start mb-4">
-                      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                        {mission.name}
-                      </h3>
+                  key={mission.id}
+                  className="p-6 hover:shadow-md transition-shadow duration-200"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                      {mission.name}
+                    </h3>
+                    <div className="flex items-center gap-2">
                       <Badge className={statusColors[mission.status]}>
                         {statusLabels[mission.status]}
                       </Badge>
+                      {authService.hasPermission('edit_mission') && (
+                        <Link to={`/mission/${mission.id}/edit`}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            title="Edit mission"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                      )}
                     </div>
+                  </div>
 
-                    <p className="text-slate-600 dark:text-slate-400 mb-4 line-clamp-2">
-                      {mission.description}
-                    </p>
+                  <p className="text-slate-600 dark:text-slate-400 mb-4 line-clamp-2">
+                    {mission.description}
+                  </p>
 
-                    <div className="space-y-2 text-sm text-slate-500 dark:text-slate-400 mb-4">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4" />
-                        <span>
-                          {formatDate(mission.startDate)} → {formatDate(mission.endDate)}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4" />
-                        <span>{getDuration(mission.startDate, mission.endDate)}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4" />
-                        <span>{mission.crewMembers?.length || 0} Crew Members</span>
-                      </div>
+                  <div className="space-y-2 text-sm text-slate-500 dark:text-slate-400 mb-4">
+                    <div className="flex items-center gap-2">
+                      <Calendar className="h-4 w-4" />
+                      <span>
+                        {formatDate(mission.startDate)} → {formatDate(mission.endDate)}
+                      </span>
                     </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      <span>{getDuration(mission.startDate, mission.endDate)}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      <span>{mission.crewMembers?.length || 0} Crew Members</span>
+                    </div>
+                  </div>
 
-                    <Link
-                      to={`/mission/${mission.id}/scheduler`}
-                      className="flex items-center text-space-600 dark:text-space-400 hover:underline"
-                    >
-                      View Details
-                      <ArrowRight className="h-4 w-4 ml-1" />
-                    </Link>
-                  </Card>
+                  <Link
+                    to={`/mission/${mission.id}/scheduler`}
+                    className="flex items-center text-space-600 dark:text-space-400 hover:underline"
+                  >
+                    View Details
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </Link>
+                </Card>
                 ))}
               </div>
             </div>
@@ -282,6 +297,18 @@ export const HomePage = () => {
                       <Badge className={statusColors[mission.status]}>
                         {statusLabels[mission.status]}
                       </Badge>
+                      {authService.hasPermission('edit_mission') && (
+                        <Link to={`/mission/${mission.id}/edit`}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            title="Edit mission"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                      )}
                     </div>
 
                     <p className="text-slate-600 dark:text-slate-400 mb-4 line-clamp-2">
