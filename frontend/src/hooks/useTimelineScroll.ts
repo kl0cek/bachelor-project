@@ -61,7 +61,7 @@ export const useTimelineScroll = ({
     onDateChange(newDate);
     setTimeout(() => {
       isNavigatingRef.current = false;
-    }, 300);
+    }, 200);
   }, [currentDate, canNavigateNext, onDateChange]);
 
   const initializedRef = useRef(false);

@@ -248,9 +248,8 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
           <div className="overflow-hidden" style={{ paddingLeft: '200px' }}>
             <div
               ref={scrollContainerRef}
-              className="overflow-x-scroll snap-x snap-mandatory scroll-smooth timeline-scroll-container"
+              className="overflow-x-scroll scroll-smooth timeline-scroll-container"
               style={{
-                scrollSnapType: 'x mandatory',
                 WebkitOverflowScrolling: 'touch',
               }}
             >
