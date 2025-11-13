@@ -13,6 +13,7 @@ import { Mission } from './Mission.entity';
 import { CrewMember } from './CrewMember.entity';
 import { RefreshToken } from './RefreshToken.entity';
 import { AuditLog } from './AuditLog.entity';
+import { ActivityComment } from './ActivityComment.entity';
 
 export enum UserRole {
   ADMIN = 'admin',
@@ -33,9 +34,9 @@ export class User {
   password_hash!: string;
 
   @Column({
-    type: 'enum',
-    enum: UserRole,
-    default: UserRole.VIEWER,
+    type: 'varchar',
+    length: 20,
+    default: 'viewer',
   })
   role!: UserRole;
 
@@ -57,7 +58,6 @@ export class User {
   @Column({ type: 'timestamp with time zone', nullable: true })
   last_login?: Date;
 
-  // Relations
   @OneToMany(() => Mission, (mission) => mission.created_by_user)
   created_missions!: Mission[];
 
@@ -67,20 +67,22 @@ export class User {
   @OneToMany(() => RefreshToken, (token) => token.user)
   refresh_tokens!: RefreshToken[];
 
+  @OneToMany(() => ActivityComment, (comment) => comment.user)
+  activity_comments!: ActivityComment[];
+
   @OneToMany(() => AuditLog, (log) => log.user)
   audit_logs!: AuditLog[];
 
   // Virtual field for password (not stored in DB)
   password?: string;
 
-  // Hash password before insert/update
   @BeforeInsert()
   @BeforeUpdate()
   async hashPassword() {
     if (this.password) {
       const rounds = parseInt(process.env.BCRYPT_ROUNDS || '12');
       this.password_hash = await bcrypt.hash(this.password, rounds);
-      delete this.password; // Remove plain password but somehow not working idk xpp
+      delete this.password;
     }
   }
 
@@ -91,7 +93,12 @@ export class User {
   hasPermission(permission: string): boolean {
     const permissions: Record<UserRole, string[]> = {
       [UserRole.VIEWER]: ['view_schedule', 'view_mission'],
-      [UserRole.ASTRONAUT]: ['view_schedule', 'view_mission', 'update_own_activities'],
+      [UserRole.ASTRONAUT]: [
+        'view_schedule',
+        'view_mission',
+        'update_own_activities',
+        'add_comment',
+      ],
       [UserRole.OPERATOR]: [
         'view_schedule',
         'view_mission',

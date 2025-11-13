@@ -7,6 +7,7 @@ import { Activity } from '../entities/Activity.entity';
 import { RefreshToken } from '../entities/RefreshToken.entity';
 import { AuditLog } from '../entities/AuditLog.entity';
 import { ActivityHistory } from '../entities/ActivityHistory.entity';
+import { ActivityComment } from '../entities/ActivityComment.entity';
 
 dotenv.config();
 
@@ -25,7 +26,7 @@ export const AppDataSource = new DataSource({
 
   ssl: isProduction ? { rejectUnauthorized: false } : false,
 
-  entities: [User, Mission, CrewMember, Activity, RefreshToken, AuditLog, ActivityHistory],
+  entities: [User, Mission, CrewMember, Activity, RefreshToken, AuditLog, ActivityHistory, ActivityComment],
 
   migrations: ['src/migrations/**/*.ts'],
 
@@ -60,4 +61,4 @@ export const initializeDatabase = async (): Promise<void> => {
   }
 };
 
-export default AppDataSource;
+//export default AppDataSource;

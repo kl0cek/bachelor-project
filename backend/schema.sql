@@ -66,6 +66,15 @@ CREATE TABLE activities (
     CONSTRAINT valid_time_range CHECK (start_hour + duration <= 24)
 );
 
+CREATE TABLE activity_comments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    activity_id UUID NOT NULL REFERENCES activities(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    comment TEXT NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Refresh Tokens table (for JWT)
 CREATE TABLE refresh_tokens (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -141,6 +150,10 @@ CREATE INDEX idx_audit_created ON audit_logs(created_at);
 CREATE INDEX idx_activity_history_activity ON activity_history(activity_id);
 CREATE INDEX idx_activity_history_date ON activity_history(date);
 
+CREATE INDEX idx_activity_comments_activity ON activity_comments(activity_id);
+CREATE INDEX idx_activity_comments_user ON activity_comments(user_id);
+CREATE INDEX idx_activity_comments_created ON activity_comments(created_at DESC);
+
 -- Triggers for updated_at
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -207,6 +220,11 @@ CREATE TRIGGER archive_activities_trigger
     AFTER INSERT OR UPDATE OR DELETE ON activities
     FOR EACH ROW EXECUTE FUNCTION archive_activity_changes();
 
+CREATE TRIGGER update_activity_comments_updated_at 
+    BEFORE UPDATE ON activity_comments
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_updated_at_column();
+
 -- Views for common queries
 CREATE VIEW active_missions_view AS
 SELECT 
@@ -232,6 +250,21 @@ LEFT JOIN missions m ON cm.mission_id = m.id
 LEFT JOIN activities a ON cm.id = a.crew_member_id
 GROUP BY cm.id, m.name, m.status;
 
+CREATE VIEW activity_comments_with_users AS
+SELECT 
+    ac.id,
+    ac.activity_id,
+    ac.comment,
+    ac.created_at,
+    ac.updated_at,
+    u.id as user_id,
+    u.username,
+    u.full_name,
+    u.role
+FROM activity_comments ac
+JOIN users u ON ac.user_id = u.id
+ORDER BY ac.created_at ASC;
+
 -- Comments for documentation
 COMMENT ON TABLE users IS 'System users with role-based access control';
 COMMENT ON TABLE missions IS 'Space missions with crew and schedules';
@@ -240,3 +273,4 @@ COMMENT ON TABLE activities IS 'Scheduled activities for crew members';
 COMMENT ON TABLE refresh_tokens IS 'JWT refresh tokens for authentication';
 COMMENT ON TABLE audit_logs IS 'System audit trail for all operations';
 COMMENT ON TABLE activity_history IS 'Historical archive of all activity changes';
+COMMENT ON TABLE activity_comments IS 'Comments added by astronauts to activities';

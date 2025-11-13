@@ -185,3 +185,24 @@ export interface PaginationParams {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
+
+export interface BackendActivityComment {
+  id: string;
+  activity_id: string;
+  user_id: string;
+  comment: string;
+  created_at: string;
+  updated_at: string;
+  username?: string;
+  full_name?: string;
+  role?: string;
+}
+
+export interface CreateCommentBackendRequest {
+  activity_id: string;
+  comment: string;
+}
+
+export interface UpdateCommentBackendRequest {
+  comment: string;
+}

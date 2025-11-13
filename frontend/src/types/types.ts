@@ -414,3 +414,24 @@ export interface SystemStats {
   systemUptime: string;
   lastBackup?: string;
 }
+
+export interface ActivityComment {
+  id: string;
+  activityId: string;
+  userId: string;
+  username: string;
+  fullName: string;
+  role: UserRole;
+  comment: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateCommentRequest {
+  activityId: string;
+  comment: string;
+}
+
+export interface UpdateCommentRequest {
+  comment: string;
+}

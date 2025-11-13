@@ -4,13 +4,14 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
-
 import { Mission } from './Mission.entity';
 import { CrewMember } from './CrewMember.entity';
 import { User } from './User.entity';
+import { ActivityComment } from './ActivityComment.entity';
 
 export enum ActivityType {
   EXERCISE = 'exercise',
@@ -50,17 +51,10 @@ export class Activity {
   @Column({ type: 'decimal', precision: 4, scale: 2 })
   duration!: number;
 
-  @Column({
-    type: 'enum',
-    enum: ActivityType,
-  })
+  @Column({ type: 'varchar', length: 20 })
   type!: ActivityType;
 
-  @Column({
-    type: 'enum',
-    enum: Priority,
-    nullable: true,
-  })
+  @Column({ type: 'varchar', length: 20, nullable: true })
   priority?: Priority;
 
   @Column({ type: 'varchar', length: 200, nullable: true })
@@ -97,6 +91,9 @@ export class Activity {
   @JoinColumn({ name: 'created_by' })
   created_by_user?: User;
 
+  @OneToMany(() => ActivityComment, (comment) => comment.activity)
+  comments!: ActivityComment[];
+
   getEndHour(): number {
     return this.start_hour + this.duration;
   }
@@ -107,7 +104,6 @@ export class Activity {
 
     const thisEnd = this.getEndHour();
     const otherEnd = other.getEndHour();
-
     return this.start_hour < otherEnd && thisEnd > other.start_hour;
   }
 }
