@@ -13,6 +13,7 @@ export interface BackendActivity {
   crew_member_id: string;
   mission_id: string;
   date: string;
+  pdf_url: string;
   created_at: string;
   updated_at: string;
 }

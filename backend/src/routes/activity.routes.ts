@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { activityController } from '../controllers/activity.controller';
 import { authenticate } from '../middleware/auth.middleware';
 import { requirePermission } from '../middleware/rbac.middleware';
+import { uploadPDF } from '../middleware/upload.middleware';
 import { body, param, query } from 'express-validator';
 import { validate } from '../middleware/validator.middleware';
 
@@ -74,6 +75,23 @@ router.patch(
   updateActivityValidation,
   validate,
   activityController.update
+);
+
+router.post(
+  '/:id/upload-pdf',
+  requirePermission('manage_activities'),
+  param('id').isUUID(),
+  validate,
+  uploadPDF.single('pdf'),
+  activityController.uploadPDF
+);
+
+router.delete(
+  '/:id/pdf',
+  requirePermission('manage_activities'),
+  param('id').isUUID(),
+  validate,
+  activityController.deletePDF
 );
 
 router.delete(

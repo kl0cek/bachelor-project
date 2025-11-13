@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
-import { X, Plus, Trash2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, Plus, Trash2, FileText } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, Button, Badge } from './ui/index';
 import { cn } from '../utils/utils';
+import { activityService } from '../services/activityService';
 import type { Activity, ActivityType, Priority } from '../types/types';
 
 interface TaskFormProps {
@@ -35,6 +36,10 @@ export const TaskForm = ({
     priority: 'medium',
   });
   const [newEquipment, setNewEquipment] = useState('');
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [uploadingPdf, setUploadingPdf] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const isEditing = !!task;
 
@@ -53,9 +58,11 @@ export const TaskForm = ({
         priority: 'medium',
       });
     }
+    setPdfFile(null);
+    setIsDragging(false);
   }, [task, defaultStartTime]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.name?.trim()) return;
@@ -72,10 +79,89 @@ export const TaskForm = ({
       equipment: formData.equipment?.filter((item) => item.trim()) || [],
       priority: formData.priority || 'medium',
       date: new Date().toISOString().split('T')[0],
+      pdfUrl: formData.pdfUrl,
     };
 
     onSubmit(taskData);
+
+    if (pdfFile && task?.id) {
+      try {
+        setUploadingPdf(true);
+        await activityService.uploadPDF(task.id, pdfFile);
+      } catch (error) {
+        console.error('Failed to upload PDF:', error);
+        alert('Task saved but PDF upload failed. Please try again.');
+      } finally {
+        setUploadingPdf(false);
+      }
+    }
+
     onClose();
+  };
+
+  const validateAndSetPdfFile = (file: File) => {
+    if (file.type !== 'application/pdf') {
+      alert('Only PDF files are allowed');
+      return false;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      alert('PDF file size must be less than 10MB');
+      return false;
+    }
+    setPdfFile(file);
+    return true;
+  };
+
+  const handlePdfSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      validateAndSetPdfFile(file);
+    }
+  };
+
+  const handleFileInputClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      validateAndSetPdfFile(file);
+    }
+  };
+
+  const handleRemovePdf = async () => {
+    if (task?.id && task?.pdfUrl) {
+      if (!confirm('Are you sure you want to remove this PDF?')) return;
+
+      try {
+        await activityService.deletePDF(task.id);
+        setFormData((prev) => ({ ...prev, pdfUrl: undefined }));
+      } catch (error) {
+        console.error('Failed to delete PDF:', error);
+        alert('Failed to delete PDF');
+      }
+    }
+    setPdfFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleAddEquipment = () => {
@@ -123,7 +209,7 @@ export const TaskForm = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-[95vw] sm:max-w-xl md:max-w-2xl">
+      <DialogContent className="max-w-[95vw] sm:max-w-xl md:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between gap-3">
             <DialogTitle>{isEditing ? 'Edit Task' : 'Create New Task'}</DialogTitle>
@@ -306,13 +392,78 @@ export const TaskForm = ({
             )}
           </div>
 
+          <div className="space-y-2 sm:space-y-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+            <label className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">
+              Attach PDF Document
+            </label>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,application/pdf"
+              onChange={handlePdfSelect}
+              className="hidden"
+            />
+
+            {!pdfFile && !formData.pdfUrl ? (
+              <div
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={handleFileInputClick}
+                className={cn(
+                  'border-2 border-dashed rounded-lg p-4 sm:p-6 text-center cursor-pointer transition-all',
+                  isDragging
+                    ? 'border-sky-500 bg-sky-50 dark:bg-sky-950/20'
+                    : 'border-slate-300 dark:border-slate-600 hover:border-sky-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                )}
+              >
+                <FileText
+                  className={cn(
+                    'h-8 w-8 sm:h-10 sm:w-10 mx-auto mb-2 transition-colors',
+                    isDragging ? 'text-sky-500' : 'text-slate-400'
+                  )}
+                />
+                <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-3">
+                  {isDragging
+                    ? 'Drop PDF file here'
+                    : 'Click to select or drag & drop PDF file here'}
+                </p>
+                <p className="text-xs text-slate-500 dark:text-slate-500">Max 10MB</p>
+              </div>
+            ) : (
+              <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3 sm:p-4 flex items-center justify-between">
+                <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                  <FileText className="h-5 w-5 text-sky-600 dark:text-sky-400 shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-slate-900 dark:text-slate-100 truncate">
+                      {pdfFile?.name || 'Attached PDF'}
+                    </p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      {pdfFile ? `${(pdfFile.size / 1024 / 1024).toFixed(2)} MB` : 'Click to view'}
+                    </p>
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleRemovePdf}
+                  className="shrink-0 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+          </div>
+
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 sm:pt-6 border-t border-slate-200 dark:border-slate-800">
             <Button type="button" variant="ghost" onClick={onClose} className="w-full sm:w-auto">
               <span className="dark:text-white text-sky-950">Cancel</span>
             </Button>
-            <Button type="submit" className="w-full sm:w-auto">
+            <Button type="submit" className="w-full sm:w-auto" disabled={uploadingPdf}>
               <span className="dark:text-white text-sky-950">
-                {isEditing ? 'Update Task' : 'Create Task'}
+                {uploadingPdf ? 'Uploading...' : isEditing ? 'Update Task' : 'Create Task'}
               </span>
             </Button>
           </div>

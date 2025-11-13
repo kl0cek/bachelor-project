@@ -29,6 +29,7 @@ export interface UpdateActivityDto {
   mission?: string;
   description?: string;
   equipment?: string[];
+  pdf_url?: string | null;
 }
 
 export interface ActivityFilters {

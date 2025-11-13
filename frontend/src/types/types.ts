@@ -35,6 +35,7 @@ export interface Activity {
   crewMemberId?: string;
   missionId?: string;
   date?: string;
+  pdfUrl?: string;
   createdAt?: string;
   updatedAt?: string;
 }

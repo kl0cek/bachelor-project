@@ -5,13 +5,19 @@ import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import routes from './routes';
+import path from 'path';
 import { errorHandler } from './middleware/error.middleware';
 import { requestLogger } from './middleware/logger.middleware';
 import { NotFoundError } from './utils/errors';
 
 const app: Application = express();
 
-app.use(helmet());
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    crossOriginEmbedderPolicy: false,
+  })
+);
 app.use(cookieParser());
 
 const corsOptions = {
@@ -23,13 +29,12 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'),
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '200'),
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
 });
-app.use('/api/', limiter);
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -37,6 +42,8 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(compression());
 
 app.use(requestLogger);
+
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 app.get('/health', (req: Request, res: Response) => {
   res.json({
@@ -48,6 +55,7 @@ app.get('/health', (req: Request, res: Response) => {
 });
 
 const apiPrefix = process.env.API_PREFIX || '/api';
+app.use('/api/', limiter);
 app.use(apiPrefix, routes);
 
 app.use((req: Request, res: Response, next: NextFunction) => {

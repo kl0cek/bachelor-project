@@ -94,6 +94,43 @@ class ActivityService {
     }
   }
 
+  async uploadPDF(activityId: string, file: File): Promise<Activity> {
+    try {
+      const formData = new FormData();
+      formData.append('pdf', file);
+
+      const response = await apiClient.post<ApiResponse<BackendActivity>>(
+        `/activities/${activityId}/upload-pdf`,
+        formData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+
+      const rawActivity = response.data.data;
+      return this.mapActivityToFrontend(rawActivity);
+    } catch (error) {
+      console.error('Error uploading PDF:', error);
+      throw error;
+    }
+  }
+
+  async deletePDF(activityId: string): Promise<Activity> {
+    try {
+      const response = await apiClient.delete<ApiResponse<BackendActivity>>(
+        `/activities/${activityId}/pdf`
+      );
+
+      const rawActivity = response.data.data;
+      return this.mapActivityToFrontend(rawActivity);
+    } catch (error) {
+      console.error('Error deleting PDF:', error);
+      throw error;
+    }
+  }
+
   private mapActivityToFrontend(activity: BackendActivity): Activity {
     if (!activity) {
       console.warn('Attempted to map null/undefined activity');
@@ -113,6 +150,7 @@ class ActivityService {
       crewMemberId: activity.crew_member_id,
       missionId: activity.mission_id,
       date: activity.date,
+      pdfUrl: activity.pdf_url,
       createdAt: activity.created_at,
       updatedAt: activity.updated_at,
     };

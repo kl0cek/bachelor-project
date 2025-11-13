@@ -69,6 +69,9 @@ export class Activity {
   @Column({ type: 'uuid', nullable: true })
   created_by?: string;
 
+  @Column({ type: 'varchar', length: 500, nullable: true })
+  pdf_url?: string;
+
   @CreateDateColumn({ type: 'timestamp with time zone' })
   created_at!: Date;
 
