@@ -15,9 +15,12 @@ interface ActivityModalProps {
 
 export const ActivityModal = ({ activity, onClose, onEdit }: ActivityModalProps) => {
   const { user, hasRole } = useAuth();
-  const { comments, loading: commentsLoading, addComment, deleteComment } = useComments(
-    activity?.id || null
-  );
+  const {
+    comments,
+    loading: commentsLoading,
+    addComment,
+    deleteComment,
+  } = useComments(activity?.id || null);
   const [newComment, setNewComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
 

@@ -29,16 +29,16 @@ export const router = createBrowserRouter([
           </LazyRoute>
         ),
       },
-        {
-          path: 'mission/:id/edit',
-          element: (
-            <LazyRoute>
-              <ProtectedRoute requiredPermission="edit_mission">
-                <EditMission />
-              </ProtectedRoute>
-            </LazyRoute>
-          )
-        },
+      {
+        path: 'mission/:id/edit',
+        element: (
+          <LazyRoute>
+            <ProtectedRoute requiredPermission="edit_mission">
+              <EditMission />
+            </ProtectedRoute>
+          </LazyRoute>
+        ),
+      },
       {
         path: 'mission/:id/crew',
         element: (

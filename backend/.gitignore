@@ -29,5 +29,6 @@ coverage/
 # Production
 uploads/
 backups/
+prod/
 
 .env

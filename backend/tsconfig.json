@@ -4,7 +4,7 @@
     "target": "es2022",
     "module": "commonJS",
     "rootDir": "./src",
-    "outDir": "./backend",
+    "outDir": "prod",
     "types": ["node"],
     "esModuleInterop": true,
     "strict": true,

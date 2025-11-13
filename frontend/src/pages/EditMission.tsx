@@ -33,7 +33,7 @@ export const EditMission = () => {
       try {
         setIsLoading(true);
         const mission = await getMissionById(id);
-        
+
         setFormData({
           name: mission.name,
           description: mission.description,

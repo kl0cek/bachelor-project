@@ -19,7 +19,13 @@ export const CrewSelection = () => {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { getMissionById } = useMissions();
-  const { crew, createCrewMember, updateCrewMember, deleteCrewMember, loading: crewLoading } = useCrew(id);
+  const {
+    crew,
+    createCrewMember,
+    updateCrewMember,
+    deleteCrewMember,
+    loading: crewLoading,
+  } = useCrew(id);
 
   const [mission, setMission] = useState<Mission | null>(null);
   const [loading, setLoading] = useState(true);
@@ -77,7 +83,10 @@ export const CrewSelection = () => {
 
   const addCrewMember = () => {
     const newId = `temp-${Date.now()}`;
-    setCrewMembers([...crewMembers, { id: newId, name: '', role: '', email: '', isNew: true, isModified: false }]);
+    setCrewMembers([
+      ...crewMembers,
+      { id: newId, name: '', role: '', email: '', isNew: true, isModified: false },
+    ]);
   };
 
   const removeCrewMember = async (memberId: string, isNew: boolean) => {
@@ -102,10 +111,8 @@ export const CrewSelection = () => {
 
   const updateCrewMemberField = (memberId: string, field: keyof CrewMemberForm, value: string) => {
     setCrewMembers(
-      crewMembers.map((member) => 
-        member.id === memberId 
-          ? { ...member, [field]: value, isModified: !member.isNew } 
-          : member
+      crewMembers.map((member) =>
+        member.id === memberId ? { ...member, [field]: value, isModified: !member.isNew } : member
       )
     );
   };
@@ -323,7 +330,9 @@ export const CrewSelection = () => {
                         <input
                           type="email"
                           value={member.email}
-                          onChange={(e) => updateCrewMemberField(member.id, 'email', e.target.value)}
+                          onChange={(e) =>
+                            updateCrewMemberField(member.id, 'email', e.target.value)
+                          }
                           placeholder="email@example.com"
                           className="w-full px-4 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-space-500"
                           disabled={isSubmitting}
@@ -371,7 +380,7 @@ export const CrewSelection = () => {
               >
                 Cancel
               </Button>
-              
+
               {hasExistingCrew && (
                 <Button
                   type="button"
@@ -393,7 +402,7 @@ export const CrewSelection = () => {
                   )}
                 </Button>
               )}
-              
+
               <Button type="submit" disabled={isSubmitting} className="flex-1">
                 {isSubmitting ? (
                   <>

@@ -6,7 +6,7 @@ class CommentController {
     try {
       const { activityId } = req.params;
       const comments = await commentService.getByActivity(activityId);
-      
+
       res.json({
         success: true,
         data: comments,

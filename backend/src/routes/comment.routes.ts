@@ -10,12 +10,20 @@ const router = Router();
 router.use(authenticate);
 
 const createCommentValidation = [
-  body('comment').notEmpty().trim().isLength({ min: 1, max: 2000 }).withMessage('Comment must be 1-2000 characters'),
+  body('comment')
+    .notEmpty()
+    .trim()
+    .isLength({ min: 1, max: 2000 })
+    .withMessage('Comment must be 1-2000 characters'),
 ];
 
 const updateCommentValidation = [
   param('id').isUUID().withMessage('Valid comment ID required'),
-  body('comment').notEmpty().trim().isLength({ min: 1, max: 2000 }).withMessage('Comment must be 1-2000 characters'),
+  body('comment')
+    .notEmpty()
+    .trim()
+    .isLength({ min: 1, max: 2000 })
+    .withMessage('Comment must be 1-2000 characters'),
 ];
 
 router.get(

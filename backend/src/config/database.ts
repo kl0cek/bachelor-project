@@ -26,7 +26,16 @@ export const AppDataSource = new DataSource({
 
   ssl: isProduction ? { rejectUnauthorized: false } : false,
 
-  entities: [User, Mission, CrewMember, Activity, RefreshToken, AuditLog, ActivityHistory, ActivityComment],
+  entities: [
+    User,
+    Mission,
+    CrewMember,
+    Activity,
+    RefreshToken,
+    AuditLog,
+    ActivityHistory,
+    ActivityComment,
+  ],
 
   migrations: ['src/migrations/**/*.ts'],
 

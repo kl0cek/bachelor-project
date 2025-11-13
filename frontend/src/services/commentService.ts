@@ -1,5 +1,5 @@
 import { apiClient } from '../api/client';
-import type { ActivityComment } from '../types/types';
+import type { ActivityComment, UserRole } from '../types/types';
 import type { BackendActivityComment, ApiResponse } from '../types/apiTypes';
 
 class CommentService {
@@ -61,7 +61,7 @@ class CommentService {
       userId: comment.user_id,
       username: comment.username || '',
       fullName: comment.full_name || '',
-      role: comment.role as any,
+      role: comment.role as UserRole,
       comment: comment.comment,
       createdAt: comment.created_at,
       updatedAt: comment.updated_at,

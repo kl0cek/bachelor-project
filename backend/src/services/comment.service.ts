@@ -126,7 +126,7 @@ class CommentService {
 
   async delete(commentId: string) {
     const result = await this.commentRepository.delete(commentId);
-    
+
     if (result.affected === 0) {
       throw new Error('Comment not found');
     }
