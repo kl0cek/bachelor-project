@@ -4,9 +4,9 @@ import { ExternalLink, Loader2 } from 'lucide-react';
 import { Button } from './ui/index';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
+import workerSrc from 'pdfjs-dist/build/pdf.worker.mjs?url';
 
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
-
+pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
 interface PDFViewerProps {
   pdfUrl: string;
   maxPages?: number;
@@ -53,7 +53,7 @@ export const PDFViewer = ({ pdfUrl, maxPages = 3 }: PDFViewerProps) => {
       <div className="flex items-center justify-between">
         <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
           {loading ? (
-            'Loading PDF preview... u can see full zpdf clicking button - > '
+            'feature not working yet u can see full zpdf by clicking button - > '
           ) : numPages ? (
             <>
               Showing {pagesToShow} of {numPages} page{numPages > 1 ? 's' : ''}
