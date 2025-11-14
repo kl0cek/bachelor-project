@@ -5,7 +5,7 @@ export { LoginModal } from './header/LoginModal';
 export { MainHeader } from './header/MainHeader';
 export { PlaybookHeader } from './PlaybookHeader';
 export { QuickActions } from './QuickActions';
-export { TaskForm } from './TaskForm';
+export { TaskForm } from './taskForm/TaskForm';
 export { TimelineView } from './TimelineView';
 export { DayHeader } from './DayHeader';
 export { AuthGuard } from './AuthGuard';
