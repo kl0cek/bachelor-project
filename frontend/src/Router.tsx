@@ -1,0 +1,74 @@
+import { lazy } from 'react';
+import { createBrowserRouter } from 'react-router';
+import { HomePage, LazyRoute } from './pages/index';
+import { RootLayout } from './layout/RootLayout';
+import { ProtectedRoute } from './components/ProtectedRoute';
+
+const CreateMission = lazy(() => import('./pages/CreateMission'));
+const CrewSelection = lazy(() => import('./pages/CrewSelection'));
+const MissionScheduler = lazy(() => import('./pages/MissionScheduler'));
+const UserManagement = lazy(() => import('./pages/UserManagement'));
+const EditMission = lazy(() => import('./pages/EditMission'));
+
+export const router = createBrowserRouter([
+  {
+    path: '/*',
+    element: <RootLayout />,
+    children: [
+      {
+        index: true,
+        element: <HomePage />,
+      },
+      {
+        path: 'create-mission',
+        element: (
+          <LazyRoute>
+            <ProtectedRoute requiredPermission="create_mission">
+              <CreateMission />
+            </ProtectedRoute>
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'mission/:id/edit',
+        element: (
+          <LazyRoute>
+            <ProtectedRoute requiredPermission="edit_mission">
+              <EditMission />
+            </ProtectedRoute>
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'mission/:id/crew',
+        element: (
+          <LazyRoute>
+            <ProtectedRoute requiredPermission="manage_crew">
+              <CrewSelection />
+            </ProtectedRoute>
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'mission/:id/scheduler',
+        element: (
+          <LazyRoute>
+            <ProtectedRoute requiredPermission="view_schedule">
+              <MissionScheduler />
+            </ProtectedRoute>
+          </LazyRoute>
+        ),
+      },
+      {
+        path: 'admin/users',
+        element: (
+          <LazyRoute>
+            <ProtectedRoute requiredRole="admin">
+              <UserManagement />
+            </ProtectedRoute>
+          </LazyRoute>
+        ),
+      },
+    ],
+  },
+]);
