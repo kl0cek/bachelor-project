@@ -23,7 +23,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     return missionStart.toISOString().split('T')[0];
   });
 
-  const { activities, loading, createActivity, updateActivity, deleteActivity } = useActivities(
+  const { activities, setActivities, loading, createActivity, updateActivity, deleteActivity } = useActivities(
     mission.id,
     currentDate
   );
@@ -76,7 +76,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     setViewingTask(task);
   };
 
-  const handleFormSubmit = async (taskData: Activity) => {
+  const handleFormSubmit = async (taskData: Activity): Promise<Activity | void> => {
     if (!taskData.crewMemberId) {
       console.error('Crew member ID is required');
       return;
@@ -84,7 +84,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
 
     try {
       if (selectedTask) {
-        await updateActivity(selectedTask.id!, {
+        const updated = await updateActivity(selectedTask.id!, {
           crew_member_id: taskData.crewMemberId,
           mission_id: mission.id,
           name: taskData.name,
@@ -97,8 +97,9 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
           description: taskData.description,
           equipment: taskData.equipment,
         });
+        return updated;
       } else {
-        await createActivity({
+        const newActivity = await createActivity({
           crew_member_id: taskData.crewMemberId,
           mission_id: mission.id,
           name: taskData.name,
@@ -111,11 +112,11 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
           description: taskData.description,
           equipment: taskData.equipment,
         });
+        return newActivity;
       }
-      setIsFormOpen(false);
-      setSelectedTask(null);
     } catch (error) {
       console.error('Error saving activity:', error);
+      throw error;
     }
   };
 
@@ -128,6 +129,12 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
       console.error('Error deleting activity:', error);
     }
   };
+
+  const handlePdfUploaded = (updatedActivity: Activity) => {
+    setActivities(prev =>
+      prev.map(a => (a.id === updatedActivity.id ? updatedActivity : a))
+    );
+};
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -300,6 +307,8 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
         crewMemberId={selectedCrewMemberId}
         defaultStartTime={defaultStartTime}
         date={currentDate}
+        key={selectedTask?.id || 'new'}
+        onPdfUploaded={handlePdfUploaded}
       />
 
       <ActivityModal
