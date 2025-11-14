@@ -1,8 +1,8 @@
 export { ActivityLegend } from './ActivityLegend';
 export { ActivityModal } from './ActivityModal';
 export { ISSStatus } from './ISSStatus';
-export { LoginModal } from './LoginModal';
-export { MainHeader } from './MainHeader';
+export { LoginModal } from './header/LoginModal';
+export { MainHeader } from './header/MainHeader';
 export { PlaybookHeader } from './PlaybookHeader';
 export { QuickActions } from './QuickActions';
 export { TaskForm } from './TaskForm';

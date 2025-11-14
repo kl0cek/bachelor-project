@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Lock, User as UserIcon, Eye, EyeOff, ShieldAlert } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, Button } from './ui/index';
-import { authService } from '../services/authService';
-import type { User } from '../types/types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, Button } from '../ui/index';
+import { authService } from '../../services/authService';
+import type { User } from '../../types/types';
 
 interface LoginModalProps {
   isOpen: boolean;
