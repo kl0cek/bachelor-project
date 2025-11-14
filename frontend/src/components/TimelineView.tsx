@@ -245,20 +245,18 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
                               className="relative border-r border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer"
                               style={{ height: '60px', minWidth: '60px' }}
                               onClick={() => {
-                                if (!activityAtHour) {
+                                if (activityAtHour) {
+                                  handleViewTask(activityAtHour);
+                                } else {
                                   handleAddTask(member.id, hour);
                                 }
                               }}
                             >
                               {isActivityStart && activityAtHour && (
                                 <div
-                                  className={`absolute inset-0 ${getActivityColor(activityAtHour.type)} rounded px-2 py-1 text-xs font-medium text-white overflow-hidden cursor-pointer hover:opacity-90 transition-opacity`}
+                                  className={`absolute inset-0 ${getActivityColor(activityAtHour.type)} rounded px-2 py-1 text-xs font-medium text-white overflow-hidden cursor-pointer hover:opacity-90 transition-opacity pointer-events-none`}
                                   style={{
                                     width: `calc(${activityAtHour.duration * 100}% - 2px)`,
-                                  }}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleViewTask(activityAtHour);
                                   }}
                                   title={activityAtHour.name}
                                 >
