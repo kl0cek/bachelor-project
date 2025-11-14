@@ -59,7 +59,8 @@ CREATE TABLE activities (
     priority VARCHAR(20) CHECK (priority IN ('high', 'medium', 'low')),
     mission VARCHAR(200),
     description TEXT,
-    equipment TEXT[], -- PostgreSQL array type
+    equipment TEXT[],
+    pdf_url VARCHAR(500),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     created_by UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -138,6 +139,7 @@ CREATE INDEX idx_activities_mission ON activities(mission_id);
 CREATE INDEX idx_activities_date ON activities(date);
 CREATE INDEX idx_activities_type ON activities(type);
 CREATE INDEX idx_activities_mission_date ON activities(mission_id, date);
+CREATE INDEX idx_activities_pdf_url ON activities(pdf_url);
 
 CREATE INDEX idx_refresh_tokens_user ON refresh_tokens(user_id);
 CREATE INDEX idx_refresh_tokens_token ON refresh_tokens(token);
