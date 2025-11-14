@@ -2,11 +2,8 @@ import { useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { ExternalLink, Loader2, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from './ui/index';
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
-import workerSrc from 'pdfjs-dist/build/pdf.worker.mjs?url';
 
-pdfjs.GlobalWorkerOptions.workerSrc = workerSrc;
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 interface PDFViewerProps {
   pdfUrl: string;
   maxPages?: number;
