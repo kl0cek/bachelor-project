@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, Button, Badge } from './ui/index';
 import { cn } from '../utils/utils';
-import { PDFViewer } from './PDFViewer';
+import { PDFViewer } from './PDFViewer/PDFViewer';
 import { formatTime } from '../utils/dateUtils';
 import { useAuth } from '../hooks/useAuth';
 import { useComments } from '../hooks/useComment';
