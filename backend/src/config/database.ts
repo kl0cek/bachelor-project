@@ -37,9 +37,9 @@ export const AppDataSource = new DataSource({
     ActivityComment,
   ],
 
-  migrations: ['src/migrations/**/*.ts'],
-
-  subscribers: ['src/subscribers/**/*.ts'],
+  migrations: [isProduction ? 'dist/migrations/**/*.js' : 'src/migrations/**/*.ts'],
+  
+  subscribers: [isProduction ? 'dist/subscribers/**/*.js' : 'src/subscribers/**/*.ts'],
 
   synchronize: process.env.DB_SYNC === 'true' && !isProduction,
 
