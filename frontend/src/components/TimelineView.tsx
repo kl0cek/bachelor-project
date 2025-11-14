@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight, Plus, Loader2 } from 'lucide-react';
 import { Button } from './ui/index';
 import { TaskForm } from './taskForm/TaskForm';
-import { ActivityModal } from './ActivityModal';
+import { ActivityModal } from './activityModal/ActivityModal';
 import { useActivities } from '../hooks/useActivities';
 import { getActivityColor } from '../utils/activityUtils';
 import type { Mission, Activity } from '../types/types';

@@ -1,5 +1,5 @@
 export { ActivityLegend } from './ActivityLegend';
-export { ActivityModal } from './ActivityModal';
+export { ActivityModal } from './activityModal/ActivityModal';
 export { ISSStatus } from './ISSStatus';
 export { LoginModal } from './header/LoginModal';
 export { MainHeader } from './header/MainHeader';
