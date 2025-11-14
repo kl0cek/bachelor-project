@@ -6,7 +6,7 @@ export { MainHeader } from './header/MainHeader';
 export { PlaybookHeader } from './PlaybookHeader';
 export { QuickActions } from './QuickActions';
 export { TaskForm } from './taskForm/TaskForm';
-export { TimelineView } from './TimelineView';
+export { TimelineView } from './timelineView/TimelineView';
 export { DayHeader } from './DayHeader';
 export { AuthGuard } from './AuthGuard';
 export { ErrorBoundary } from './ErrorBoundry';
