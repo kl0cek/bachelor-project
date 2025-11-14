@@ -86,13 +86,13 @@ export const TaskForm = ({
 
     try {
       const savedActivity = await onSubmit(taskData);
-      
+
       const activityWithId = savedActivity || taskData;
 
       if (pdfFile && activityWithId.id) {
         setUploadingPdf(true);
         const updatedActivity = await activityService.uploadPDF(activityWithId.id, pdfFile);
-        
+
         onPdfUploaded?.(updatedActivity);
 
         setUploadingPdf(false);
@@ -161,7 +161,7 @@ export const TaskForm = ({
       try {
         const updatedActivity = await activityService.deletePDF(task.id);
         setFormData((prev) => ({ ...prev, pdfUrl: undefined }));
-        
+
         onSubmit(updatedActivity);
       } catch (error) {
         console.error('Failed to delete PDF:', error);

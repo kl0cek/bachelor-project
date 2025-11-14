@@ -1,5 +1,5 @@
-import { Button } from "../ui";
-import { ChevronUp, ChevronDown, ExternalLink  } from "lucide-react";
+import { Button } from '../ui';
+import { ChevronUp, ChevronDown, ExternalLink } from 'lucide-react';
 
 export const Header = ({
   isPreviewVisible,
@@ -30,7 +30,7 @@ export const Header = ({
 
       {numPages && (
         <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
-          {numPages} page{numPages > 1 ? "s" : ""}
+          {numPages} page{numPages > 1 ? 's' : ''}
         </p>
       )}
     </div>

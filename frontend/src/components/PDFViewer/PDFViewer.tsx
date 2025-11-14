@@ -1,6 +1,13 @@
-import { useState, useMemo } from "react";
-import { Document, Page, pdfjs } from "react-pdf";
-import { Header, PreviewContainer, LoadingState, ErrorState, PageWrapper, MorePagesInfo } from "./index";
+import { useState, useMemo } from 'react';
+import { Document, Page, pdfjs } from 'react-pdf';
+import {
+  Header,
+  PreviewContainer,
+  LoadingState,
+  ErrorState,
+  PageWrapper,
+  MorePagesInfo,
+} from './index';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -18,11 +25,7 @@ export const PDFViewer = ({ pdfUrl, maxPages = 3 }: PDFViewerProps) => {
   const fullPdfUrl = useMemo(() => {
     if (/^https?:\/\//.test(pdfUrl)) return pdfUrl;
 
-    const base =
-      (import.meta.env.VITE_API_URL ?? "http://localhost:3000").replace(
-        /\/api$/,
-        ""
-      );
+    const base = (import.meta.env.VITE_API_URL ?? 'http://localhost:3000').replace(/\/api$/, '');
 
     return `${base}${pdfUrl}`;
   }, [pdfUrl]);
@@ -36,11 +39,11 @@ export const PDFViewer = ({ pdfUrl, maxPages = 3 }: PDFViewerProps) => {
   };
 
   const handleLoadError = () => {
-    setError("Failed to load PDF");
+    setError('Failed to load PDF');
     setLoading(false);
   };
 
-  const openInNewTab = () => window.open(fullPdfUrl, "_blank");
+  const openInNewTab = () => window.open(fullPdfUrl, '_blank');
 
   return (
     <div className="space-y-4">
@@ -78,15 +81,10 @@ export const PDFViewer = ({ pdfUrl, maxPages = 3 }: PDFViewerProps) => {
           )}
 
           {hasMorePages && !loading && !error && (
-            <MorePagesInfo
-              remaining={numPages! - maxPages}
-              openInNewTab={openInNewTab}
-            />
+            <MorePagesInfo remaining={numPages! - maxPages} openInNewTab={openInNewTab} />
           )}
         </PreviewContainer>
       )}
     </div>
   );
 };
-
-

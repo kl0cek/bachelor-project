@@ -4,20 +4,20 @@ import { HomePage, LazyRoute } from './pages/index';
 import { RootLayout } from './layout/RootLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
-const CreateMission = lazy(() => 
-  import(/* webpackChunkName: "create-mission" */ './pages/CreateMission')
+const CreateMission = lazy(
+  () => import(/* webpackChunkName: "create-mission" */ './pages/CreateMission')
 );
-const CrewSelection = lazy(() => 
-  import(/* webpackChunkName: "crew-selection" */ './pages/CrewSelection')
+const CrewSelection = lazy(
+  () => import(/* webpackChunkName: "crew-selection" */ './pages/CrewSelection')
 );
-const MissionScheduler = lazy(() => 
-  import(/* webpackChunkName: "mission-scheduler" */ './pages/MissionScheduler')
+const MissionScheduler = lazy(
+  () => import(/* webpackChunkName: "mission-scheduler" */ './pages/MissionScheduler')
 );
-const UserManagement = lazy(() => 
-  import(/* webpackChunkName: "user-management" */ './pages/UserManagement')
+const UserManagement = lazy(
+  () => import(/* webpackChunkName: "user-management" */ './pages/UserManagement')
 );
-const EditMission = lazy(() => 
-  import(/* webpackChunkName: "edit-mission" */ './pages/EditMission')
+const EditMission = lazy(
+  () => import(/* webpackChunkName: "edit-mission" */ './pages/EditMission')
 );
 
 export const router = createBrowserRouter([

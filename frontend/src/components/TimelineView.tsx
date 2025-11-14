@@ -23,10 +23,8 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     return missionStart.toISOString().split('T')[0];
   });
 
-  const { activities, setActivities, loading, createActivity, updateActivity, deleteActivity } = useActivities(
-    mission.id,
-    currentDate
-  );
+  const { activities, setActivities, loading, createActivity, updateActivity, deleteActivity } =
+    useActivities(mission.id, currentDate);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Activity | null>(null);
@@ -131,10 +129,8 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   };
 
   const handlePdfUploaded = (updatedActivity: Activity) => {
-    setActivities(prev =>
-      prev.map(a => (a.id === updatedActivity.id ? updatedActivity : a))
-    );
-};
+    setActivities((prev) => prev.map((a) => (a.id === updatedActivity.id ? updatedActivity : a)));
+  };
 
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
