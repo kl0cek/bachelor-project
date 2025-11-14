@@ -1,15 +1,83 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+import { visualizer } from 'rollup-plugin-visualizer';
 import tailwindcss from '@tailwindcss/vite'
 
-
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    visualizer({
+      open: false,
+      filename: 'dist/stats.html',
+      gzipSize: true,
+      brotliSize: true,
+      template: 'treemap',
+    }),
   ],
+  
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  
   build: {
     outDir: 'dist',
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes('node_modules/react/') || 
+              id.includes('node_modules/react-dom/')) {
+            return 'react-core';
+          }
+          
+          if (id.includes('node_modules/react-router')) {
+            return 'react-router';
+          }
+          
+          if (id.includes('node_modules/framer-motion')) {
+            return 'framer-motion';
+          }
+          
+          if (id.includes('node_modules/react-pdf') || 
+              id.includes('node_modules/pdfjs-dist')) {
+            return 'pdf-viewer';
+          }
+          
+          if (id.includes('node_modules/tailwind-merge')) {
+            return 'tailwind-utils';
+          }
+          
+          if (id.includes('node_modules/lucide-react')) {
+            return 'icons';
+          }
+          
+          if (id.includes('node_modules/@radix-ui')) {
+            return 'radix-ui';
+          }
+          
+          if (id.includes('node_modules/axios')) {
+            return 'axios';
+          }
+          
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
+        },
+      },
+    },
+    chunkSizeWarningLimit: 500,
+    
+    minify: 'esbuild',
   },
-})
+  
+  optimizeDeps: {
+    include: [
+      'react', 
+      'react-dom', 
+      'react-router',
+    ],
+  },
+});

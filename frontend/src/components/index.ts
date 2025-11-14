@@ -9,3 +9,6 @@ export { TaskForm } from './TaskForm';
 export { TimelineView } from './TimelineView';
 export { DayHeader } from './DayHeader';
 export { AuthGuard } from './AuthGuard';
+export { ErrorBoundary } from './ErrorBoundry';
+export { PDFViewer } from './PDFViewer/PDFViewer';
+export { ProtectedRoute } from './ProtectedRoute';

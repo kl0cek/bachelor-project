@@ -8,8 +8,9 @@ import type { Activity, ActivityType, Priority } from '../types/types';
 interface TaskFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (task: Activity) => void;
+  onSubmit: (task: Activity) => Promise<Activity | void>;
   onDelete?: (taskId: string) => void;
+  onPdfUploaded?: (updated: Activity) => void;
   task?: Activity | null;
   crewMemberId: string;
   defaultStartTime?: number;
@@ -21,6 +22,7 @@ export const TaskForm = ({
   onClose,
   onSubmit,
   onDelete,
+  onPdfUploaded,
   task,
   crewMemberId,
   defaultStartTime = 6,
@@ -82,21 +84,27 @@ export const TaskForm = ({
       pdfUrl: formData.pdfUrl,
     };
 
-    onSubmit(taskData);
+    try {
+      const savedActivity = await onSubmit(taskData);
 
-    if (pdfFile && task?.id) {
-      try {
+      const activityWithId = savedActivity || taskData;
+
+      if (pdfFile && activityWithId.id) {
         setUploadingPdf(true);
-        await activityService.uploadPDF(task.id, pdfFile);
-      } catch (error) {
-        console.error('Failed to upload PDF:', error);
-        alert('Task saved but PDF upload failed. Please try again.');
-      } finally {
+        const updatedActivity = await activityService.uploadPDF(activityWithId.id, pdfFile);
+
+        onPdfUploaded?.(updatedActivity);
+
         setUploadingPdf(false);
       }
-    }
 
-    onClose();
+      onClose();
+    } catch (error) {
+      console.error('Failed to save task:', error);
+      alert('Failed to save task. Please try again.');
+    } finally {
+      setUploadingPdf(false);
+    }
   };
 
   const validateAndSetPdfFile = (file: File) => {
@@ -151,8 +159,10 @@ export const TaskForm = ({
       if (!confirm('Are you sure you want to remove this PDF?')) return;
 
       try {
-        await activityService.deletePDF(task.id);
+        const updatedActivity = await activityService.deletePDF(task.id);
         setFormData((prev) => ({ ...prev, pdfUrl: undefined }));
+
+        onSubmit(updatedActivity);
       } catch (error) {
         console.error('Failed to delete PDF:', error);
         alert('Failed to delete PDF');
