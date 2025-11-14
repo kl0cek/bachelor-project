@@ -35,10 +35,9 @@
     "multer": "^2.0.2",
     "pg": "^8.16.3",
     "typeorm": "^0.3.27",
-    "winston": "^3.18.3"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.39.0",
+    "winston": "^3.18.3",
+    "typescript": "^5.9.3",
+    "ts-node": "^10.9.2",
     "@types/bcrypt": "^6.0.0",
     "@types/compression": "^1.8.1",
     "@types/cookie-parser": "^1.4.10",
@@ -46,11 +45,12 @@
     "@types/express": "^5.0.5",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/morgan": "^1.9.10",
-    "@types/multer": "^2.0.0",
+    "@types/multer": "^2.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
     "eslint": "^9.39.0",
     "nodemon": "^3.1.10",
-    "prettier": "^3.6.2",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+    "prettier": "^3.6.2"
   }
 }
