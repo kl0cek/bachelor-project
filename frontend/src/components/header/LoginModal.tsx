@@ -29,15 +29,11 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
     setIsLoading(true);
 
     try {
-      const user = await authService.login({
+      await authService.login({
         username: username.trim(),
         password: password.trim(),
       });
-
-      onLogin(user);
-      setUsername('');
-      setPassword('');
-      setError('');
+      window.location.reload();
     } catch (err) {
       if (err && typeof err === 'object' && 'response' in err) {
         const response = (err as { response?: { data?: { message?: string } } }).response;
