@@ -11,7 +11,7 @@ export const MainHeader = () => {
 
   return (
     <>
-      <header className="border-b bg-white dark:bg-slate-800 shadow-sm">
+      <header className="border-b border-white dark:border-slate-800 bg-white dark:bg-slate-800 shadow-sm">
         <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <div className="flex items-center justify-between gap-3">
             <Link to="/" className="flex items-center gap-4 -ml-2">
