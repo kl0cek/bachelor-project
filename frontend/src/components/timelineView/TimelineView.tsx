@@ -29,6 +29,8 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     handleEditTask,
     handleViewTask,
     closeForm,
+    setIsFormOpen,
+    setSelectedTask,
     closeViewModal,
     handlePdfUploaded,
   } = useTimelineState(mission);
@@ -56,9 +58,11 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
           description: taskData.description,
           equipment: taskData.equipment,
         });
+        setIsFormOpen(false);
+        setSelectedTask(null);
         return updated;
       } else {
-        const newActivity = await createActivity({
+        const created = await createActivity({
           crew_member_id: taskData.crewMemberId,
           mission_id: mission.id,
           name: taskData.name,
@@ -71,7 +75,9 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
           description: taskData.description,
           equipment: taskData.equipment,
         });
-        return newActivity;
+        setIsFormOpen(false);
+        setSelectedTask(null);
+        return created;
       }
     } catch (error) {
       console.error('Error saving activity:', error);

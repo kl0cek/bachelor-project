@@ -105,6 +105,8 @@ export const useTimelineState = (mission: Mission) => {
     handleEditTask,
     handleViewTask,
     closeForm,
+    setIsFormOpen,
+    setSelectedTask,
     closeViewModal,
     handlePdfUploaded,
   };

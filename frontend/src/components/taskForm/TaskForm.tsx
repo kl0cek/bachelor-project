@@ -49,26 +49,35 @@ export const TaskForm = ({
 
     if (!formData.name?.trim()) return;
 
+    let savedActivity: Activity | void;
+
     try {
       const taskData = buildTaskData();
-      const savedActivity = await onSubmit(taskData);
+      savedActivity = await onSubmit(taskData);
+    } catch (error) {
+      console.error('Failed to save task:', error);
+      alert('Failed to save task. Please try again.');
+      return;
+    }
 
-      const activityWithId = savedActivity || taskData;
+    const activityWithId = savedActivity || buildTaskData();
 
-      if (pdfFile && activityWithId && 'id' in activityWithId) {
+    if (pdfFile && activityWithId && 'id' in activityWithId && activityWithId.id) {
+      try {
         setUploadingPdf(true);
         const updated = await activityService.uploadPDF(activityWithId.id, pdfFile);
         onPdfUploaded?.(updated);
+      } catch (error) {
+        console.error('Failed to upload PDF:', error);
+        alert(
+          'Task saved successfully, but PDF upload failed. You can try uploading again by editing the task.'
+        );
+      } finally {
         setUploadingPdf(false);
       }
-
-      onClose();
-    } catch (error) {
-      console.error('Failed to save task:', error);
-      alert('Task saved but PDF upload failed. Please try again.');
-    } finally {
-      setUploadingPdf(false);
     }
+
+    onClose();
   };
 
   const handlePdfSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,7 +105,7 @@ export const TaskForm = ({
         await onSubmit(updatedActivity);
       } catch (error) {
         console.error('Failed to delete PDF:', error);
-        alert('Failed to delete PDF');
+        alert('Failed to delete PDF. Please try again.');
       }
     }
     setPdfFile(null);
@@ -174,7 +183,7 @@ export const TaskForm = ({
             </Button>
             <Button type="submit" className="w-full sm:w-auto" disabled={uploadingPdf}>
               <span className="dark:text-white text-sky-950">
-                {uploadingPdf ? 'Uploading...' : isEditing ? 'Update Task' : 'Create Task'}
+                {uploadingPdf ? 'Uploading PDF...' : isEditing ? 'Update Task' : 'Create Task'}
               </span>
             </Button>
           </div>

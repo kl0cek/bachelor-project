@@ -181,7 +181,7 @@ class ActivityService {
 
     Object.assign(activity, {
       ...data,
-      ...(data.date && { date: new Date(data.date) }),
+      ...(data.date && { date: data.date }),
     });
 
     const updated = await this.activityRepository.save(activity);
@@ -231,30 +231,32 @@ class ActivityService {
   }
 
   private async checkTimeConflict(
-    crewMemberId: string,
-    date: string,
-    startHour: number,
-    duration: number,
-    excludeActivityId?: string
-  ): Promise<boolean> {
-    const endHour = startHour + duration;
+  crewMemberId: string,
+  date: string,
+  startHour: number,
+  duration: number,
+  excludeActivityId?: string
+): Promise<boolean> {
+  const endHour = startHour + duration;
 
-    const query = this.activityRepository
-      .createQueryBuilder('activity')
-      .where('activity.crew_member_id = :crewMemberId', { crewMemberId })
-      .andWhere('activity.date = :date', { date: new Date(date) })
-      .andWhere(
-        '(activity.start_hour < :endHour AND (activity.start_hour + activity.duration) > :startHour)',
-        { startHour, endHour }
-      );
+  const normalizedDate = date.split('T')[0];
 
-    if (excludeActivityId) {
-      query.andWhere('activity.id != :excludeActivityId', { excludeActivityId });
-    }
+  const query = this.activityRepository
+    .createQueryBuilder('activity')
+    .where('activity.crew_member_id = :crewMemberId', { crewMemberId })
+    .andWhere('activity.date = :date', { date: normalizedDate })  // ✔ FIX
+    .andWhere(
+      '(activity.start_hour < :endHour AND (activity.start_hour + activity.duration) > :startHour)',
+      { startHour, endHour }
+    );
 
-    const conflictCount = await query.getCount();
-    return conflictCount > 0;
+  if (excludeActivityId) {
+    query.andWhere('activity.id != :excludeActivityId', { excludeActivityId });
   }
+
+  const conflictCount = await query.getCount();
+  return conflictCount > 0;
+}
 
   async getAvailableTimeSlots(
     crewMemberId: string,
