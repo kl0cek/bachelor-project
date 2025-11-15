@@ -49,23 +49,26 @@ export const TaskForm = ({
 
     if (!formData.name?.trim()) return;
 
-    const taskData = buildTaskData();
-    const savedActivity = await onSubmit(taskData);
+    try {
+      const taskData = buildTaskData();
+      const savedActivity = await onSubmit(taskData);
 
-    if (pdfFile && savedActivity && 'id' in savedActivity) {
-      try {
+      const activityWithId = savedActivity || taskData;
+
+      if (pdfFile && activityWithId && 'id' in activityWithId) {
         setUploadingPdf(true);
-        const updated = await activityService.uploadPDF(savedActivity.id, pdfFile);
+        const updated = await activityService.uploadPDF(activityWithId.id, pdfFile);
         onPdfUploaded?.(updated);
-      } catch (error) {
-        console.error('Failed to upload PDF:', error);
-        alert('Task saved but PDF upload failed. Please try again.');
-      } finally {
         setUploadingPdf(false);
       }
-    }
 
-    onClose();
+      onClose();
+    } catch (error) {
+      console.error('Failed to save task:', error);
+      alert('Task saved but PDF upload failed. Please try again.');
+    } finally {
+      setUploadingPdf(false);
+    }
   };
 
   const handlePdfSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,8 +91,9 @@ export const TaskForm = ({
       if (!confirm('Are you sure you want to remove this PDF?')) return;
 
       try {
-        await activityService.deletePDF(task.id);
+        const updatedActivity = await activityService.deletePDF(task.id);
         setFormData((prev) => ({ ...prev, pdfUrl: undefined }));
+        await onSubmit(updatedActivity);
       } catch (error) {
         console.error('Failed to delete PDF:', error);
         alert('Failed to delete PDF');

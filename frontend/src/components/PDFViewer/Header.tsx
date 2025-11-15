@@ -14,7 +14,12 @@ export const Header = ({
 }) => (
   <div className="flex items-center justify-between gap-2">
     <div className="flex items-center gap-2">
-      <Button variant="outline" size="sm" onClick={togglePreview} className="flex items-center gap-2">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={togglePreview}
+        className="flex items-center gap-2"
+      >
         {isPreviewVisible ? (
           <>
             <ChevronUp className="h-3.5 w-3.5" />

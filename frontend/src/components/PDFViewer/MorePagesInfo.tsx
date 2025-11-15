@@ -12,7 +12,12 @@ export const MorePagesInfo = ({
     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-2">
       {remaining} more page{remaining > 1 ? 's' : ''}...
     </p>
-    <Button variant="outline" size="sm" onClick={openInNewTab} className="flex items-center gap-2 mx-auto">
+    <Button
+      variant="outline"
+      size="sm"
+      onClick={openInNewTab}
+      className="flex items-center gap-2 mx-auto"
+    >
       <ExternalLink className="h-3.5 w-3.5" />
       View Full Document
     </Button>

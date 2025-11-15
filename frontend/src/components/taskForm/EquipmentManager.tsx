@@ -5,7 +5,7 @@ import type { Activity } from '../../types/types';
 interface EquipmentManagerProps {
   formData: Partial<Activity>;
   newEquipment: string;
-  setNewEquipment: (value: string) => void;
+  setNewEquipment: React.Dispatch<React.SetStateAction<string>>;
   onAddEquipment: () => void;
   onRemoveEquipment: (index: number) => void;
 }

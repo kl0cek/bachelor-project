@@ -1,6 +1,7 @@
-import { useRef } from 'react';
-import { FileText, Upload, X } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { FileText, X } from 'lucide-react';
 import { Button } from '../ui/index';
+import { cn } from '../../utils/utils';
 import type { Activity } from '../../types/types';
 
 interface PDFUploadSectionProps {
@@ -17,6 +18,46 @@ export const PDFUploadSection = ({
   onRemovePdf,
 }: PDFUploadSectionProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleFileInputClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      if (file.type !== 'application/pdf') {
+        alert('Only PDF files are allowed');
+        return;
+      }
+      if (file.size > 10 * 1024 * 1024) {
+        alert('PDF file size must be less than 10MB');
+        return;
+      }
+
+      const fakeEvent = {
+        target: { files: [file] },
+      } as unknown as React.ChangeEvent<HTMLInputElement>;
+      onPdfSelect(fakeEvent);
+    }
+  };
 
   return (
     <div className="space-y-2 sm:space-y-3 pt-4 border-t border-slate-200 dark:border-slate-700">
@@ -24,28 +65,37 @@ export const PDFUploadSection = ({
         Attach PDF Document
       </label>
 
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".pdf,application/pdf"
+        onChange={onPdfSelect}
+        className="hidden"
+      />
+
       {!pdfFile && !formData.pdfUrl ? (
-        <div className="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg p-4 sm:p-6 text-center">
-          <FileText className="h-8 w-8 sm:h-10 sm:w-10 mx-auto mb-2 text-slate-400" />
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-3">
-            Upload a PDF document (max 10MB)
-          </p>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".pdf,application/pdf"
-            onChange={onPdfSelect}
-            className="hidden"
-            id="pdf-upload"
+        <div
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+          onClick={handleFileInputClick}
+          className={cn(
+            'border-2 border-dashed rounded-lg p-4 sm:p-6 text-center cursor-pointer transition-all',
+            isDragging
+              ? 'border-sky-500 bg-sky-50 dark:bg-sky-950/20'
+              : 'border-slate-300 dark:border-slate-600 hover:border-sky-400 hover:bg-slate-50 dark:hover:bg-slate-800/50'
+          )}
+        >
+          <FileText
+            className={cn(
+              'h-8 w-8 sm:h-10 sm:w-10 mx-auto mb-2 transition-colors',
+              isDragging ? 'text-sky-500' : 'text-slate-400'
+            )}
           />
-          <label htmlFor="pdf-upload">
-            <Button type="button" variant="outline" size="sm">
-              <span className="cursor-pointer flex items-center gap-2">
-                <Upload className="h-4 w-4" />
-                Choose PDF
-              </span>
-            </Button>
-          </label>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-3">
+            {isDragging ? 'Drop PDF file here' : 'Click to select or drag & drop PDF file here'}
+          </p>
+          <p className="text-xs text-slate-500 dark:text-slate-500">Max 10MB</p>
         </div>
       ) : (
         <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-3 sm:p-4 flex items-center justify-between">

@@ -18,6 +18,7 @@ export const useTaskForm = ({ task, defaultStartTime, crewMemberId }: UseTaskFor
     equipment: [],
     priority: 'medium',
   });
+
   const [newEquipment, setNewEquipment] = useState('');
   const [pdfFile, setPdfFile] = useState<File | null>(null);
 
