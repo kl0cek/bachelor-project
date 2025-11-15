@@ -19,6 +19,7 @@ app.use(
   })
 );
 app.use(cookieParser());
+app.set('trust proxy', 1);
 
 const corsOptions = {
   origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:5173'],
