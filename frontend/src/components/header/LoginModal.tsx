@@ -10,7 +10,7 @@ interface LoginModalProps {
   onLogin: (user: User) => void;
 }
 
-export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
+export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
