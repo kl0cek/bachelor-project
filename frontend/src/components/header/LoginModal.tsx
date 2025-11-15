@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Lock, User as UserIcon, Eye, EyeOff, ShieldAlert } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, Button } from './ui/index';
-import { authService } from '../services/authService';
-import type { User } from '../types/types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, Button } from '../ui/index';
+import { authService } from '../../services/authService';
+import type { User } from '../../types/types';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -29,15 +29,11 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
     setIsLoading(true);
 
     try {
-      const user = await authService.login({
+      await authService.login({
         username: username.trim(),
         password: password.trim(),
       });
-
-      onLogin(user);
-      setUsername('');
-      setPassword('');
-      setError('');
+      window.location.reload();
     } catch (err) {
       if (err && typeof err === 'object' && 'response' in err) {
         const response = (err as { response?: { data?: { message?: string } } }).response;

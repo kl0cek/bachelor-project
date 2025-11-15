@@ -1,48 +1,13 @@
 import { Link } from 'react-router';
 import { ArrowLeft, Calendar } from 'lucide-react';
 import { ISSStatus } from '../components/index';
-import type { Mission, MissionStatus } from '../types/types';
+import type { Mission } from '../types/types';
+import { formatDate } from '../utils/dateUtils';
+import { statusStyles, getStatusColor } from '../utils/headerUtils';
 
 interface PlaybookHeaderProps {
   mission: Mission;
 }
-
-const formatDate = (dateStr: string, short: boolean = false) => {
-  const date = new Date(dateStr);
-  if (short) {
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: '2-digit',
-    });
-  }
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-};
-
-const statusStyles: Record<MissionStatus, string> = {
-  active:
-    'bg-green-50 dark:bg-green-950 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300',
-  completed:
-    'bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300',
-  planning:
-    'bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-800 text-yellow-700 dark:text-yellow-300',
-  cancelled:
-    'bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300',
-};
-
-const getStatusColor = (status: MissionStatus) => {
-  const colors = {
-    active: 'bg-green-500',
-    completed: 'bg-blue-500',
-    planning: 'bg-yellow-500',
-    cancelled: 'bg-red-500',
-  };
-  return colors[status];
-};
 
 export const PlaybookHeader = ({ mission }: PlaybookHeaderProps) => {
   return (
@@ -71,7 +36,8 @@ export const PlaybookHeader = ({ mission }: PlaybookHeaderProps) => {
                     {formatDate(mission.startDate)} - {formatDate(mission.endDate)}
                   </span>
                   <span className="sm:hidden">
-                    {formatDate(mission.startDate, true)} - {formatDate(mission.endDate, true)}
+                    {formatDate(mission.startDate, 'short')} -{' '}
+                    {formatDate(mission.endDate, 'short')}
                   </span>
                 </p>
               </div>
