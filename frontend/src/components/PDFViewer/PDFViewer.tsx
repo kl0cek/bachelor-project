@@ -8,6 +8,8 @@ import {
   PageWrapper,
   MorePagesInfo,
 } from './index';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -38,7 +40,8 @@ export const PDFViewer = ({ pdfUrl, maxPages = 3 }: PDFViewerProps) => {
     setLoading(false);
   };
 
-  const handleLoadError = () => {
+  const handleLoadError = (error: Error) => {
+    console.error('Error loading PDF:', error);
     setError('Failed to load PDF');
     setLoading(false);
   };
@@ -46,7 +49,7 @@ export const PDFViewer = ({ pdfUrl, maxPages = 3 }: PDFViewerProps) => {
   const openInNewTab = () => window.open(fullPdfUrl, '_blank');
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       <Header
         isPreviewVisible={isPreviewVisible}
         togglePreview={() => setIsPreviewVisible(!isPreviewVisible)}
@@ -73,6 +76,7 @@ export const PDFViewer = ({ pdfUrl, maxPages = 3 }: PDFViewerProps) => {
                     pageNumber={i + 1}
                     renderTextLayer={false}
                     renderAnnotationLayer={false}
+                    className="max-w-full"
                     width={Math.min(window.innerWidth - 100, 600)}
                   />
                 </PageWrapper>

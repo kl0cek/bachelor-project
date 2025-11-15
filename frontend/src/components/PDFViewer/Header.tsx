@@ -14,16 +14,16 @@ export const Header = ({
 }) => (
   <div className="flex items-center justify-between gap-2">
     <div className="flex items-center gap-2">
-      <Button variant="outline" size="sm" onClick={togglePreview}>
+      <Button variant="outline" size="sm" onClick={togglePreview} className="flex items-center gap-2">
         {isPreviewVisible ? (
           <>
             <ChevronUp className="h-3.5 w-3.5" />
-            Hide Preview
+            <span>Hide Preview</span>
           </>
         ) : (
           <>
             <ChevronDown className="h-3.5 w-3.5" />
-            Show Preview
+            <span>Show Preview</span>
           </>
         )}
       </Button>
@@ -35,7 +35,7 @@ export const Header = ({
       )}
     </div>
 
-    <Button variant="outline" size="sm" onClick={openInNewTab}>
+    <Button variant="outline" size="sm" onClick={openInNewTab} className="flex items-center gap-2">
       <ExternalLink className="h-3.5 w-3.5" />
       <span className="hidden sm:inline">Open Full PDF</span>
     </Button>
