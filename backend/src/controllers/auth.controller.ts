@@ -17,14 +17,14 @@ export class AuthController {
       res.cookie('accessToken', result.accessToken, {
         httpOnly: true,
         secure: isProduction,
-        sameSite: isProduction ? 'none' : 'lax',
+        sameSite: "strict",
         maxAge: result.expiresIn * 1000,
       });
 
       res.cookie('refreshToken', result.refreshToken, {
         httpOnly: true,
         secure: isProduction,
-        sameSite: isProduction ? 'none' : 'lax',
+        sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
@@ -73,7 +73,7 @@ export class AuthController {
       res.cookie('accessToken', result.accessToken, {
         httpOnly: true,
         secure: isProduction,
-        sameSite: isProduction ? 'none' : 'lax',
+        sameSite: "strict",
         maxAge: result.expiresIn * 1000,
       });
 
