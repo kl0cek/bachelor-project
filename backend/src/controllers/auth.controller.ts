@@ -19,7 +19,6 @@ export class AuthController {
         secure: isProduction,
         sameSite: isProduction ? 'none' : 'lax',
         maxAge: result.expiresIn * 1000,
-        domain: '.onrender.com',
       });
 
       res.cookie('refreshToken', result.refreshToken, {
@@ -27,7 +26,6 @@ export class AuthController {
         secure: isProduction,
         sameSite: isProduction ? 'none' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        domain: '.onrender.com',
       });
 
       const { accessToken, refreshToken, ...responseData } = result;
@@ -77,7 +75,6 @@ export class AuthController {
         secure: isProduction,
         sameSite: isProduction ? 'none' : 'lax',
         maxAge: result.expiresIn * 1000,
-        domain: '.onrender.com',
       });
 
       res.json(successResponse({ expiresIn: result.expiresIn }, 'Token refreshed'));
