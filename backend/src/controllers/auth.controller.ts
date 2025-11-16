@@ -17,7 +17,7 @@ export class AuthController {
       res.cookie('accessToken', result.accessToken, {
         httpOnly: true,
         secure: isProduction,
-        sameSite: isProduction ? 'strict' : 'lax',
+        sameSite: isProduction ? 'none' : 'lax',
         maxAge: result.expiresIn * 1000,
         domain: '.onrender.com',
       });
@@ -25,7 +25,7 @@ export class AuthController {
       res.cookie('refreshToken', result.refreshToken, {
         httpOnly: true,
         secure: isProduction,
-        sameSite: isProduction ? 'strict' : 'lax',
+        sameSite: isProduction ? 'none' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
         domain: '.onrender.com',
       });
@@ -75,7 +75,7 @@ export class AuthController {
       res.cookie('accessToken', result.accessToken, {
         httpOnly: true,
         secure: isProduction,
-        sameSite: isProduction ? 'strict' : 'lax',
+        sameSite: isProduction ? 'none' : 'lax',
         maxAge: result.expiresIn * 1000,
         domain: '.onrender.com',
       });
