@@ -24,8 +24,8 @@ app.set('trust proxy', 1);
 const corsOptions = {
   origin: '.onrender.com',
   credentials: true,
-  //methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-  //allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 app.use(cors(corsOptions));
 
