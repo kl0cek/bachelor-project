@@ -22,10 +22,10 @@ app.use(cookieParser());
 app.set('trust proxy', 1);
 
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:5173'],
+  origin: '.onrender.com',
   credentials: true,
-  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  //methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  //allowedHeaders: ['Content-Type', 'Authorization'],
 };
 app.use(cors(corsOptions));
 
