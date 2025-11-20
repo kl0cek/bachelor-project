@@ -9,6 +9,7 @@
   "scripts": {
     "start": "vite",
     "dev": "vite",
+    "devh": "vite --host 0.0.0.0 --port 5173",
     "build": "tsc -b && vite build",
     "build:analyze": "vite build --mode analyze",
     "lint": "eslint .",
@@ -17,6 +18,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",
+    "@types/simple-peer": "^9.11.9",
     "amqplib": "^0.10.9",
     "axios": "^1.13.1",
     "clsx": "^2.1.1",
@@ -29,6 +31,8 @@
     "react-dom": "^19.1.1",
     "react-pdf": "^10.2.0",
     "react-router": "^7.9.4",
+    "simple-peer": "^9.11.1",
+    "socket.io-client": "^4.8.1",
     "tailwind-merge": "^3.3.1",
     "uuid": "^13.0.0",
     "zustand": "^5.0.8"

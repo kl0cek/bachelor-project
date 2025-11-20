@@ -22,6 +22,11 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+
+  define: {
+    global: 'globalThis',
+    'process.env': {},
+  },
   
   build: {
     outDir: 'dist',
@@ -78,6 +83,7 @@ export default defineConfig({
       'react', 
       'react-dom', 
       'react-router',
+      'simple-peer',
     ],
   },
 });

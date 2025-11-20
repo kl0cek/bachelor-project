@@ -1,11 +1,13 @@
 import dotenv from 'dotenv';
+import { createServer } from 'http';
 import app from './index';
 import { initializeDatabase } from './config/database';
+import { initializeSocket } from './config/socket';
 import { logger } from './config/logger';
 
 dotenv.config();
 
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 async function startServer() {
@@ -13,9 +15,15 @@ async function startServer() {
     await initializeDatabase();
     logger.info('✅ Database initialized successfully');
 
-    app.listen(PORT, () => {
+    const httpServer = createServer(app);
+
+    initializeSocket(httpServer);
+    logger.info('✅ Socket.io initialized successfully');
+
+  httpServer.listen(PORT, () => {
       logger.info(`Server running in ${NODE_ENV} mode on port ${PORT}`);
       logger.info(`API available at http://localhost:${PORT}${process.env.API_PREFIX || '/api'}`);
+      logger.info(`WebSocket available at ws://localhost:${PORT}`);
       logger.info(`Health check at http://localhost:${PORT}/health`);
     });
   } catch (error) {

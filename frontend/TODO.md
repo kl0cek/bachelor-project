@@ -2,7 +2,6 @@ thigs to add/change ideas
 
 TODO:
 
-DEPLOY DEPLOY 
 
 opcja dodania cyklicznosci taskow
 lokalizacja taska np gym / kuchnia itd + ile ludzi w danym pomieszczeniu na dole grida nad legenda na przyklad obciazenei resource (opcjonalne)
@@ -10,7 +9,7 @@ w taksu variant name ktory task np first task (time)
 
 
 Opcja autorobienia misji 
-plus audio plus kamerka 
+plus audio plus kamerka  dodaac do localhosta https'a i bedzie git 
 automatyczne przejscie przez dzien
 
 A I do optymalizacji schedulera 
@@ -25,3 +24,4 @@ logo WTK / AGH
 astrounauta moze dodac do taska tylko notatki
 opcja do dodania przez astronaute komentarza w tasku gdzies na dole button przy klikaniu w taska
 w bazie danych pdf z taskiem - pan dr ma dac pdf z 'przykladem'
+DEPLOY DEPLOY 
