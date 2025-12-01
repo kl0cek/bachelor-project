@@ -1,7 +1,7 @@
 thigs to add/change ideas
 
 TODO:
-
+Gdy jest sie logout i link jest po /mission itd - przekierowac na strone glowna 
 
 opcja dodania cyklicznosci taskow
 lokalizacja taska np gym / kuchnia itd + ile ludzi w danym pomieszczeniu na dole grida nad legenda na przyklad obciazenei resource (opcjonalne)

@@ -86,7 +86,7 @@ export const VideoRoom = () => {
               autoPlay
               muted
               playsInline
-              className="w-full h-full object-cover mirror"
+              className="w-full h-full object-cover transform scale-x-[-1]"
             />
             <div className="absolute bottom-4 left-4 bg-slate-900/80 px-3 py-1 rounded-lg">
               <p className="text-white text-sm font-medium">You</p>
