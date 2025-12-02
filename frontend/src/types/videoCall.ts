@@ -1,3 +1,5 @@
+import type SimplePeer from "simple-peer";
+
 export interface VideoRoom {
   id: string;
   mission_id: string;
@@ -24,7 +26,7 @@ export interface Participant {
   username: string;
   fullName: string;
   stream?: MediaStream;
-  peer?: any; // SimplePeer.Instance
+  peer?: SimplePeer.Instance;
   audioEnabled: boolean;
   videoEnabled: boolean;
 }

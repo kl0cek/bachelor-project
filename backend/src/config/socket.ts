@@ -35,7 +35,10 @@ export const initializeSocket = (httpServer: HTTPServer): Server => {
 
   io.use(async (socket: AuthenticatedSocket, next) => {
     try {
-      const token = socket.handshake.auth.token || socket.handshake.headers.cookie?.split('accessToken=')[1]?.split(';')[0];
+      const token = socket.handshake.headers.cookie
+        ?.split(';')
+        .find(c => c.trim().startsWith('accessToken='))
+        ?.split('=')[1];
 
       if (!token) {
         return next(new Error('Authentication error: No token provided'));
@@ -91,28 +94,41 @@ export const initializeSocket = (httpServer: HTTPServer): Server => {
         }));
 
       socket.emit('existing-users', existingUsers);
+      
+      logger.info(`Sent ${existingUsers.length} existing users to ${socket.userId}`);
     });
 
     socket.on('send-signal', (data: SignalData) => {
       const { signal, targetUserId, roomId } = data;
       
-      io!.to(roomId).emit('user-signal', {
-        signal,
-        userId: socket.userId,
-        username: socket.user?.username,
-        fullName: socket.user?.full_name,
-        targetUserId,
-      });
+      const sockets = Array.from(io!.sockets.sockets.values());
+      const targetSocket = sockets.find((s: any) => s.userId === targetUserId);
+      
+      if (targetSocket) {
+        targetSocket.emit('user-signal', {
+          signal,
+          userId: socket.userId,
+          username: socket.user?.username,
+          fullName: socket.user?.full_name,
+        });
+      }
     });
 
     socket.on('return-signal', (data: SignalData) => {
       const { signal, targetUserId, roomId } = data;
-      
-      io!.to(roomId).emit('receiving-returned-signal', {
-        signal,
-        userId: socket.userId,
-        targetUserId,
-      });
+
+      // find target socket and emit only to them
+      const sockets = Array.from(io!.sockets.sockets.values());
+      const targetSocket = sockets.find((s: any) => s.userId === targetUserId);
+
+      if (targetSocket) {
+        targetSocket.emit('receiving-returned-signal', {
+          signal,
+          userId: socket.userId,
+        });
+      } else {
+        logger.warn(`Could not find target socket for return-signal: ${targetUserId}`);
+      }
     });
 
     socket.on('leave-room', (roomId: string) => {
@@ -131,6 +147,19 @@ export const initializeSocket = (httpServer: HTTPServer): Server => {
             userId: socket.userId,
           });
         }
+      });
+    });
+    socket.on('toggle-audio', (data: { roomId: string; enabled: boolean }) => {
+      socket.to(data.roomId).emit('user-toggled-audio', {
+        userId: socket.userId,
+        enabled: data.enabled,
+      });
+    });
+
+    socket.on('toggle-video', (data: { roomId: string; enabled: boolean }) => {
+      socket.to(data.roomId).emit('user-toggled-video', {
+        userId: socket.userId,
+        enabled: data.enabled,
       });
     });
   });

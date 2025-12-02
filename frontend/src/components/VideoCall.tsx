@@ -10,26 +10,43 @@ export const VideoRoom = () => {
   const { state, joinRoom, leaveRoom, toggleAudio, toggleVideo } = useVideoCall();
   const localVideoRef = useRef<HTMLVideoElement>(null);
 
+  const hasJoinedRef = useRef(false);
+
   useEffect(() => {
-    if (missionId) {
+    if (missionId && !hasJoinedRef.current) {
+      hasJoinedRef.current = true;
       const roomId = `mission-${missionId}`;
       joinRoom(roomId, missionId);
     }
 
     return () => {
+      hasJoinedRef.current = false;
       leaveRoom();
     };
   }, [missionId]);
 
   useEffect(() => {
     if (localVideoRef.current && state.localStream) {
-      console.log('Setting local stream:', state.localStream);
+      console.log('🎥 Setting localVideoRef.current.srcObject');
+      console.log('Stream:', state.localStream);
       console.log('Video tracks:', state.localStream.getVideoTracks());
-      console.log('Audio tracks:', state.localStream.getAudioTracks());
+      console.log('Video element:', localVideoRef.current);
+      
+      // defensive: only set if there are tracks
+      if (state.localStream.getVideoTracks().length === 0) {
+        console.warn('⚠️ No video tracks on localStream');
+      }
+
       localVideoRef.current.srcObject = state.localStream;
 
       localVideoRef.current.play().catch((err) => {
-        console.error('Error playing video:', err);
+        console.error('❌ Error playing video:', err);
+      });
+    } else {
+      console.log('⚠️ Missing:', {
+        ref: !!localVideoRef.current,
+        stream: !!state.localStream,
+        streamTracks: state.localStream ? state.localStream.getVideoTracks().length : 0,
       });
     }
   }, [state.localStream]);
@@ -65,18 +82,17 @@ export const VideoRoom = () => {
 
   return (
     <div className="min-h-screen bg-slate-900 flex flex-col">
-      {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <h1 className="text-xl font-semibold text-white">Mission Video Call</h1>
-          <div className="flex items-center gap-2 text-sm text-slate-400">
-            <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse" />
-            <span>{state.participants.size + 1} participants</span>
+      {/* Loading overlay */}
+      {state.isConnecting && (
+        <div className="absolute inset-0 bg-slate-900 z-50 flex items-center justify-center">
+          <div className="text-center">
+            <Loader2 className="h-12 w-12 animate-spin text-space-400 mx-auto mb-4" />
+            <p className="text-slate-300">Connecting to video call...</p>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Video Grid */}
+      {/* Video Grid - always mounted */}
       <div className="flex-1 p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 h-full">
           {/* Local Video */}
