@@ -1,5 +1,4 @@
-import type { User } from '../types/auth';
-//import { DEFAULT_USERS } from '../mock/user';
+import type { User, UserRole as Role } from '../types/auth';
 
 export const ROLE_PERMISSIONS = {
   astronaut: {
@@ -29,6 +28,17 @@ export const ROLE_PERMISSIONS = {
     description: 'Full system access including user management',
     permissions: ['all'],
   },
+};
+
+export const getRoleBadgeColor = (role: Role) => {
+  const colors: Record<Role, string> = {
+    admin: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
+    operator: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
+    astronaut: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
+    viewer: 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300',
+  };
+
+  return colors[role];
 };
 
 export const hasPermission = (user: User | null, permission: string): boolean => {

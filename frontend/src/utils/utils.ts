@@ -71,7 +71,6 @@ export const validationUtils = {
       suggestions.push('Include numbers');
     }
 
-    // Fixed: removed unnecessary escapes
     if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password)) {
       suggestions.push('Include special characters');
     }

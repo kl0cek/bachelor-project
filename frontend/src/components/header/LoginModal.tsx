@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Lock, User as UserIcon, Eye, EyeOff, ShieldAlert } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, Button } from './ui/index';
-import { authService } from '../services/authService';
-import type { User } from '../types/types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, Button } from '../ui/index';
+import { authService } from '../../services/authService';
+import type { User } from '../../types/types';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -10,7 +10,7 @@ interface LoginModalProps {
   onLogin: (user: User) => void;
 }
 
-export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
+export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -29,15 +29,11 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
     setIsLoading(true);
 
     try {
-      const user = await authService.login({
+      await authService.login({
         username: username.trim(),
         password: password.trim(),
       });
-
-      onLogin(user);
-      setUsername('');
-      setPassword('');
-      setError('');
+      window.location.reload();
     } catch (err) {
       if (err && typeof err === 'object' && 'response' in err) {
         const response = (err as { response?: { data?: { message?: string } } }).response;
@@ -65,41 +61,6 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
       handleSubmit(e);
     }
   };
-
-  type Role = 'admin' | 'operator' | 'astronaut' | 'viewer';
-
-  const getRoleBadgeColor = (role: Role) => {
-    const colors: Record<Role, string> = {
-      admin: 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300',
-      operator: 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
-      astronaut: 'bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300',
-      viewer: 'bg-gray-100 text-gray-700 dark:bg-gray-900 dark:text-gray-300',
-    };
-
-    return colors[role];
-  };
-
-  const demoAccounts = [
-    {
-      role: 'admin' as Role,
-      label: 'Administrator',
-      username: 'admindemo',
-      password: 'admindemo123',
-    },
-    {
-      role: 'operator' as Role,
-      label: 'Mission Operator',
-      username: 'operator1',
-      password: 'operator123',
-    },
-    {
-      role: 'astronaut' as Role,
-      label: 'Astronaut',
-      username: 'astronaut1',
-      password: 'astronaut123',
-    },
-    { role: 'viewer' as Role, label: 'Viewer', username: 'viewer1', password: 'viewer123' },
-  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -167,26 +128,6 @@ export const LoginModal = ({ isOpen, onClose, onLogin }: LoginModalProps) => {
                 <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
               </div>
             )}
-          </div>
-
-          <div className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 space-y-3">
-            <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Demo Credentials:
-            </p>
-            <div className="space-y-2">
-              {demoAccounts.map((account) => (
-                <div key={account.role} className="flex items-center justify-between text-xs">
-                  <span
-                    className={`px-2 py-1 rounded font-medium ${getRoleBadgeColor(account.role)}`}
-                  >
-                    {account.label}
-                  </span>
-                  <span className="font-mono text-slate-600 dark:text-slate-400">
-                    {account.username}/{account.password}
-                  </span>
-                </div>
-              ))}
-            </div>
           </div>
 
           <div className="flex justify-end gap-3">

@@ -83,7 +83,7 @@ export function validateActivityTime(
 export function getActivityColor(type: ActivityType): string {
   const colors: Record<ActivityType, string> = {
     exercise:
-      'bg-space-400 dark:bg-sky-800 text-sky-950 dark:text-white shadow-space border-space-600 dark:border-space-400',
+      'bg-blue-500 dark:bg-sky-800 text-sky-950 dark:text-white shadow-space border-space-600 dark:border-space-400',
     meal: 'bg-slate-400 dark:text-gray-900 text-sky-950 dark:bg-slate-500 dark:text-white border-slate-500 dark:border-slate-400',
     sleep:
       'bg-slate-400 dark:text-gray-900 text-sky-950 dark:bg-slate-500 dark:text-white border-slate-500 dark:border-slate-400',

@@ -90,6 +90,7 @@ export const useActivities = (missionId?: string, date?: string) => {
 
   return {
     activities,
+    setActivities,
     loading,
     error,
     refetch: () => fetchActivities(true),

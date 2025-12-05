@@ -106,7 +106,7 @@ class AuthService {
       this.clearAuth();
       this.isLoggingOut = false;
       this.isInitialized = false;
-      window.location.href = '/login';
+      window.location.href = '/';
     }
   }
 

@@ -12,17 +12,19 @@ export class AuthController {
 
       const result = await authService.login({ username, password }, ipAddress, userAgent);
 
+      const isProduction = process.env.NODE_ENV === 'production';
+
       res.cookie('accessToken', result.accessToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
         maxAge: result.expiresIn * 1000,
       });
 
       res.cookie('refreshToken', result.refreshToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
@@ -66,10 +68,12 @@ export class AuthController {
 
       const result = await authService.refreshAccessToken(refreshToken, ipAddress);
 
+      const isProduction = process.env.NODE_ENV === 'production';
+
       res.cookie('accessToken', result.accessToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'lax',
         maxAge: result.expiresIn * 1000,
       });
 

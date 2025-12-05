@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router';
-import { Users, Loader2, AlertCircle } from 'lucide-react';
+import { Users, Loader2, AlertCircle, Video } from 'lucide-react';
 import { TimelineView, ActivityLegend, PlaybookHeader } from '../components/index';
 import { Button } from '../components/ui/index';
 import { useMissions } from '../hooks/useMissions';
@@ -70,6 +70,12 @@ export const MissionScheduler = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      <Link to={`/mission/${mission.id}/video-call`}>
+        <Button className="flex items-center gap-2">
+          <Video className="h-4 w-4" />
+          Join Video Call
+        </Button>
+      </Link>
       <PlaybookHeader mission={mission} />
 
       <main className="container mx-auto px-6 py-8">

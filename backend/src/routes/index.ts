@@ -5,6 +5,7 @@ import missionRoutes from './mission.routes';
 import crewRoutes from './crew.routes';
 import activityRoutes from './activity.routes';
 import commentRoutes from './comment.routes';
+import videoRoomRoutes from './videoRoom.routes';
 
 const router = Router();
 
@@ -14,5 +15,6 @@ router.use('/missions', missionRoutes);
 router.use('/crew', crewRoutes);
 router.use('/activities', activityRoutes);
 router.use('/comments', commentRoutes);
+router.use('/video-rooms', videoRoomRoutes);
 
 export default router;

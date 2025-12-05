@@ -181,7 +181,7 @@ class ActivityService {
 
     Object.assign(activity, {
       ...data,
-      ...(data.date && { date: new Date(data.date) }),
+      ...(data.date && { date: data.date }),
     });
 
     const updated = await this.activityRepository.save(activity);
@@ -239,10 +239,12 @@ class ActivityService {
   ): Promise<boolean> {
     const endHour = startHour + duration;
 
+    const normalizedDate = date.split('T')[0];
+
     const query = this.activityRepository
       .createQueryBuilder('activity')
       .where('activity.crew_member_id = :crewMemberId', { crewMemberId })
-      .andWhere('activity.date = :date', { date: new Date(date) })
+      .andWhere('activity.date = :date', { date: normalizedDate })
       .andWhere(
         '(activity.start_hour < :endHour AND (activity.start_hour + activity.duration) > :startHour)',
         { startHour, endHour }
