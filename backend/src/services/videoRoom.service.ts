@@ -56,7 +56,7 @@ export class VideoRoomService {
 
   async getOrCreateRoomForMission(missionId: string, userId: string): Promise<VideoRoom> {
     const existingRoom = await this.getRoomByMissionId(missionId);
-    
+
     if (existingRoom) {
       return existingRoom;
     }
@@ -66,7 +66,7 @@ export class VideoRoomService {
 
   async endRoom(roomId: string): Promise<VideoRoom> {
     const room = await this.getRoomById(roomId);
-    
+
     room.is_active = false;
     room.ended_at = new Date();
 

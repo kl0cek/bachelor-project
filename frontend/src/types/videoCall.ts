@@ -1,4 +1,4 @@
-import type SimplePeer from "simple-peer";
+import type SimplePeer from 'simple-peer';
 
 export interface VideoRoom {
   id: string;
@@ -41,3 +41,45 @@ export interface VideoCallState {
   isConnecting: boolean;
   error: string | null;
 }
+
+export interface SocketUserPayload {
+  userId: string;
+  username: string;
+  fullName: string;
+}
+
+export interface SocketSignalPayload {
+  signal: SimplePeer.SignalData;
+  targetUserId: string;
+  roomId: string;
+}
+
+export interface SocketUserSignalPayload extends SocketUserPayload {
+  signal: SimplePeer.SignalData;
+}
+
+export interface SocketReturnedSignalPayload {
+  signal: SimplePeer.SignalData;
+  userId: string;
+}
+
+export interface SocketMediaTogglePayload {
+  userId: string;
+  enabled: boolean;
+}
+
+export interface VideoRoomResponse {
+  success: boolean;
+  data: VideoRoom;
+}
+
+export interface VideoSessionsResponse {
+  success: boolean;
+  data: VideoSession[];
+}
+
+export interface VideoRoomHistoryResponse {
+  success: boolean;
+  data: VideoRoom[];
+}
+

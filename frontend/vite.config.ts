@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import fs from 'fs'
 import { visualizer } from 'rollup-plugin-visualizer';
 import tailwindcss from '@tailwindcss/vite'
 
@@ -16,10 +17,28 @@ export default defineConfig({
       template: 'treemap',
     }),
   ],
+
+  server: {
+    host: "0.0.0.0",
+    port: 5173,
+    https: {
+      key: fs.readFileSync('./localhost+1-key.pem'),
+      cert: fs.readFileSync('./localhost+1.pem'),
+    },
+    proxy: {
+    '/api': {
+      target: process.env.VITE_SERVER_URL || 'https://192.168.0.100:3000',
+      changeOrigin: true,
+      secure: false,
+    }
+  }
+  },
   
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      stream: 'stream-browserify',
+      buffer: 'buffer',
     },
   },
 
@@ -83,7 +102,8 @@ export default defineConfig({
       'react', 
       'react-dom', 
       'react-router',
-      'simple-peer',
+      'buffer',
+      'process',
     ],
   },
 });

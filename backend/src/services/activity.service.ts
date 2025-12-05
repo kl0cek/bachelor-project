@@ -231,32 +231,32 @@ class ActivityService {
   }
 
   private async checkTimeConflict(
-  crewMemberId: string,
-  date: string,
-  startHour: number,
-  duration: number,
-  excludeActivityId?: string
-): Promise<boolean> {
-  const endHour = startHour + duration;
+    crewMemberId: string,
+    date: string,
+    startHour: number,
+    duration: number,
+    excludeActivityId?: string
+  ): Promise<boolean> {
+    const endHour = startHour + duration;
 
-  const normalizedDate = date.split('T')[0];
+    const normalizedDate = date.split('T')[0];
 
-  const query = this.activityRepository
-    .createQueryBuilder('activity')
-    .where('activity.crew_member_id = :crewMemberId', { crewMemberId })
-    .andWhere('activity.date = :date', { date: normalizedDate })  // ✔ FIX
-    .andWhere(
-      '(activity.start_hour < :endHour AND (activity.start_hour + activity.duration) > :startHour)',
-      { startHour, endHour }
-    );
+    const query = this.activityRepository
+      .createQueryBuilder('activity')
+      .where('activity.crew_member_id = :crewMemberId', { crewMemberId })
+      .andWhere('activity.date = :date', { date: normalizedDate })
+      .andWhere(
+        '(activity.start_hour < :endHour AND (activity.start_hour + activity.duration) > :startHour)',
+        { startHour, endHour }
+      );
 
-  if (excludeActivityId) {
-    query.andWhere('activity.id != :excludeActivityId', { excludeActivityId });
+    if (excludeActivityId) {
+      query.andWhere('activity.id != :excludeActivityId', { excludeActivityId });
+    }
+
+    const conflictCount = await query.getCount();
+    return conflictCount > 0;
   }
-
-  const conflictCount = await query.getCount();
-  return conflictCount > 0;
-}
 
   async getAvailableTimeSlots(
     crewMemberId: string,

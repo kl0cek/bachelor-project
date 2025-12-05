@@ -1,90 +1,292 @@
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, memo } from 'react';
 import { useParams, useNavigate } from 'react-router';
-import { Loader2, AlertCircle, Phone, Mic, MicOff, Video, VideoOff } from 'lucide-react';
+import {
+  Loader2,
+  AlertCircle,
+  Phone,
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  Eye,
+  EyeOff,
+} from 'lucide-react';
 import { useVideoCall } from '../context/VideoCallContext';
 import { Button } from './ui';
+import type { Participant } from '../types/videoCall';
 
-export const VideoRoom = () => {
-  const { missionId } = useParams<{ missionId: string }>();
-  const navigate = useNavigate();
-  const { state, joinRoom, leaveRoom, toggleAudio, toggleVideo } = useVideoCall();
-  const localVideoRef = useRef<HTMLVideoElement>(null);
+// ============ Constants ============
+const ROOM_PREFIX = 'mission-';
 
-  const hasJoinedRef = useRef(false);
+// ============ Participant Video Component ============
+interface ParticipantVideoProps {
+  participant: Participant;
+}
+
+const ParticipantVideo = memo(({ participant }: ParticipantVideoProps) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (missionId && !hasJoinedRef.current) {
-      hasJoinedRef.current = true;
-      const roomId = `mission-${missionId}`;
-      joinRoom(roomId, missionId);
-    }
+    const videoElement = videoRef.current;
+    if (!videoElement || !participant.stream) return;
+
+    videoElement.srcObject = participant.stream;
 
     return () => {
-      hasJoinedRef.current = false;
-      leaveRoom();
+      if (videoElement) {
+        videoElement.srcObject = null;
+      }
     };
-  }, [missionId]);
+  }, [participant.stream]);
+
+  const displayName = participant.fullName || participant.username || 'Unknown';
+  const initials = displayName.charAt(0).toUpperCase();
+
+  return (
+    <div className="relative bg-slate-800 rounded-lg overflow-hidden aspect-video">
+      {participant.stream ? (
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          className="w-full h-full object-covertransform scale-x-[-1]"
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center bg-slate-700">
+          <div className="text-center">
+            <div className="h-16 w-16 bg-slate-600 rounded-full flex items-center justify-center mx-auto mb-2">
+              <span className="text-2xl font-bold text-white">{initials}</span>
+            </div>
+            <Loader2 className="h-6 w-6 animate-spin text-slate-400 mx-auto" />
+          </div>
+        </div>
+      )}
+
+      <div className="absolute bottom-4 left-4 bg-slate-900/80 px-3 py-1 rounded-lg">
+        <p className="text-white text-sm font-medium">{displayName}</p>
+      </div>
+
+      {!participant.videoEnabled && participant.stream && (
+        <div className="absolute inset-0 flex items-center justify-center bg-slate-700">
+          <div className="text-center">
+            <div className="h-16 w-16 bg-slate-600 rounded-full flex items-center justify-center mx-auto mb-2">
+              <span className="text-2xl font-bold text-white">{initials}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="absolute top-4 right-4 flex gap-2">
+        {!participant.audioEnabled && (
+          <div className="bg-red-600/80 p-1.5 rounded-full">
+            <MicOff className="h-3 w-3 text-white" />
+          </div>
+        )}
+        {!participant.videoEnabled && (
+          <div className="bg-red-600/80 p-1.5 rounded-full">
+            <VideoOff className="h-3 w-3 text-white" />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+});
+
+ParticipantVideo.displayName = 'ParticipantVideo';
+
+// ============ Local Video Component ============
+interface LocalVideoProps {
+  stream: MediaStream | null;
+  isVideoEnabled: boolean;
+  isVisible: boolean;
+  onToggleVisibility: () => void;
+}
+
+const LocalVideo = ({ stream, isVideoEnabled, isVisible, onToggleVisibility }: LocalVideoProps) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    if (localVideoRef.current && state.localStream) {
-      console.log('🎥 Setting localVideoRef.current.srcObject');
-      console.log('Stream:', state.localStream);
-      console.log('Video tracks:', state.localStream.getVideoTracks());
-      console.log('Video element:', localVideoRef.current);
-      
-      // defensive: only set if there are tracks
-      if (state.localStream.getVideoTracks().length === 0) {
-        console.warn('⚠️ No video tracks on localStream');
-      }
-
-      localVideoRef.current.srcObject = state.localStream;
-
-      localVideoRef.current.play().catch((err) => {
-        console.error('❌ Error playing video:', err);
-      });
-    } else {
-      console.log('⚠️ Missing:', {
-        ref: !!localVideoRef.current,
-        stream: !!state.localStream,
-        streamTracks: state.localStream ? state.localStream.getVideoTracks().length : 0,
-      });
+    const videoElement = videoRef.current;
+    if (!videoElement || !stream) {
+      if (videoElement) videoElement.srcObject = null;
+      return;
     }
-  }, [state.localStream]);
 
-  const handleLeave = () => {
-    leaveRoom();
-    navigate(`/mission/${missionId}/scheduler`);
-  };
+    console.log('Setting local video stream');
 
-  if (state.isConnecting) {
+    let isMounted = true;
+    videoElement.srcObject = stream;
+
+    const timeoutId = setTimeout(() => {
+      if (!isMounted || !videoElement) return;
+
+      videoElement
+        .play()
+        .then(() => {
+          if (isMounted) {
+            console.log('Video playing successfully');
+          }
+        })
+        .catch((err) => {
+          if (!isMounted) return;
+
+          if (err.name === 'NotAllowedError') {
+            console.warn('Video autoplay blocked by browser policy');
+            return;
+          }
+          console.error('Video play error:', err);
+        });
+    }, 0);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+
+      if (videoElement) {
+        videoElement.pause();
+        videoElement.srcObject = null;
+      }
+    };
+  }, [stream]);
+
+  if (!isVisible) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="h-12 w-12 animate-spin text-space-400 mx-auto mb-4" />
-          <p className="text-slate-300">Connecting to video call...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (state.error) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Connection Error</h2>
-          <p className="text-slate-300 mb-6">{state.error}</p>
-          <Button onClick={handleLeave}>Return to Mission</Button>
-        </div>
-      </div>
+      <button
+        onClick={onToggleVisibility}
+        className="bg-slate-800 rounded-lg p-4 flex items-center justify-center hover:bg-slate-700 transition-colors"
+        title="Pokaż podgląd kamery"
+      >
+        <Eye className="h-6 w-6 text-slate-400" />
+      </button>
     );
   }
 
   return (
+    <div className="relative bg-slate-800 rounded-lg overflow-hidden aspect-video">
+      <video
+        ref={videoRef}
+        autoPlay
+        muted
+        playsInline
+        className="w-full h-full object-cover transform scale-x-[-1]"
+      />
+
+      <button
+        onClick={onToggleVisibility}
+        className="absolute top-4 left-4 bg-slate-900/80 p-2 rounded-lg hover:bg-slate-700/80"
+        title="Ukryj podgląd"
+      >
+        <EyeOff className="h-4 w-4 text-white" />
+      </button>
+
+      <div className="absolute bottom-4 left-4 bg-slate-900/80 px-3 py-1 rounded-lg">
+        <p className="text-white text-sm font-medium">You</p>
+      </div>
+
+      {!isVideoEnabled && (
+        <div className="absolute inset-0 flex items-center justify-center bg-slate-700">
+          <VideoOff className="h-12 w-12 text-slate-400" />
+        </div>
+      )}
+    </div>
+  );
+};
+
+LocalVideo.displayName = 'LocalVideo';
+
+// ============ Control Button Component ============
+interface ControlButtonProps {
+  onClick: () => void;
+  isEnabled: boolean;
+  enabledIcon: React.ReactNode;
+  disabledIcon: React.ReactNode;
+  danger?: boolean;
+}
+
+const ControlButton = memo(
+  ({ onClick, isEnabled, enabledIcon, disabledIcon, danger = false }: ControlButtonProps) => (
+    <Button
+      onClick={onClick}
+      variant={isEnabled && !danger ? 'default' : 'outline'}
+      size="lg"
+      className={`rounded-full ${!isEnabled || danger ? 'bg-red-600 hover:bg-red-700 text-white border-none' : ''}`}
+    >
+      {isEnabled ? enabledIcon : disabledIcon}
+    </Button>
+  )
+);
+
+ControlButton.displayName = 'ControlButton';
+
+// ============ Loading State ============
+const LoadingState = () => (
+  <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+    <div className="text-center">
+      <Loader2 className="h-12 w-12 animate-spin text-space-400 mx-auto mb-4" />
+      <p className="text-slate-300">Connecting to video call...</p>
+    </div>
+  </div>
+);
+
+// ============ Error State ============
+interface ErrorStateProps {
+  error: string;
+  onReturn: () => void;
+}
+
+const ErrorState = ({ error, onReturn }: ErrorStateProps) => (
+  <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+    <div className="text-center">
+      <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+      <h2 className="text-2xl font-bold text-white mb-2">Connection Error</h2>
+      <p className="text-slate-300 mb-6">{error}</p>
+      <Button onClick={onReturn}>Return to Mission</Button>
+    </div>
+  </div>
+);
+
+// ============ Main Component ============
+export const VideoRoom = () => {
+  const { missionId } = useParams<{ missionId: string }>();
+  const navigate = useNavigate();
+  const { state, joinRoom, leaveRoom, toggleAudio, toggleVideo } = useVideoCall();
+  const [showSelfView, setShowSelfView] = useState(true);
+
+  const hasJoinedRef = useRef(false);
+
+  useEffect(() => {
+    if (!missionId) return;
+
+    if (hasJoinedRef.current) {
+      console.log('Already joined, skipping');
+      return;
+    }
+
+    hasJoinedRef.current = true;
+    const roomId = `${ROOM_PREFIX}${missionId}`;
+    joinRoom(roomId, missionId);
+  }, [missionId, joinRoom]);
+
+  const handleLeave = useCallback(() => {
+    hasJoinedRef.current = false;
+    leaveRoom();
+    navigate(`/mission/${missionId}/scheduler`);
+  }, [leaveRoom, navigate, missionId]);
+
+  if (state.isConnecting && !state.localStream) {
+    return <LoadingState />;
+  }
+
+  if (state.error && !state.isConnected && !state.isConnecting) {
+    return <ErrorState error={state.error} onReturn={handleLeave} />;
+  }
+
+  const participants = Array.from(state.participants.values());
+
+  return (
     <div className="min-h-screen bg-slate-900 flex flex-col">
-      {/* Loading overlay */}
-      {state.isConnecting && (
-        <div className="absolute inset-0 bg-slate-900 z-50 flex items-center justify-center">
+      {state.isConnecting && state.localStream && (
+        <div className="absolute inset-0 bg-slate-900/80 z-50 flex items-center justify-center">
           <div className="text-center">
             <Loader2 className="h-12 w-12 animate-spin text-space-400 mx-auto mb-4" />
             <p className="text-slate-300">Connecting to video call...</p>
@@ -92,114 +294,47 @@ export const VideoRoom = () => {
         </div>
       )}
 
-      {/* Video Grid - always mounted */}
       <div className="flex-1 p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 h-full">
-          {/* Local Video */}
-          <div className="relative bg-slate-800 rounded-lg overflow-hidden aspect-video">
-            <video
-              ref={localVideoRef}
-              autoPlay
-              muted
-              playsInline
-              className="w-full h-full object-cover transform scale-x-[-1]"
-            />
-            <div className="absolute bottom-4 left-4 bg-slate-900/80 px-3 py-1 rounded-lg">
-              <p className="text-white text-sm font-medium">You</p>
-            </div>
-            {!state.isVideoEnabled && (
-              <div className="absolute inset-0 flex items-center justify-center bg-slate-700">
-                <VideoOff className="h-12 w-12 text-slate-400" />
-              </div>
-            )}
-          </div>
+          <LocalVideo
+            key={state.localStream?.id}
+            stream={state.localStream}
+            isVideoEnabled={state.isVideoEnabled}
+            isVisible={showSelfView}
+            onToggleVisibility={() => setShowSelfView(!showSelfView)}
+          />
 
-          {/* Remote Participants */}
-          {Array.from(state.participants.values()).map((participant) => (
+          {participants.map((participant) => (
             <ParticipantVideo key={participant.userId} participant={participant} />
           ))}
         </div>
       </div>
 
-      {/* Controls */}
       <div className="bg-slate-800 border-t border-slate-700 px-6 py-4">
         <div className="flex items-center justify-center gap-4">
-          <Button
+          <ControlButton
             onClick={toggleAudio}
-            variant={state.isAudioEnabled ? 'default' : 'outline'}
-            size="lg"
-            className={`rounded-full ${!state.isAudioEnabled ? 'bg-red-600 hover:bg-red-700' : ''}`}
-          >
-            {state.isAudioEnabled ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
-          </Button>
+            isEnabled={state.isAudioEnabled}
+            enabledIcon={<Mic className="h-5 w-5" />}
+            disabledIcon={<MicOff className="h-5 w-5" />}
+          />
 
-          <Button
+          <ControlButton
             onClick={toggleVideo}
-            variant={state.isVideoEnabled ? 'default' : 'outline'}
-            size="lg"
-            className={`rounded-full ${!state.isVideoEnabled ? 'bg-red-600 hover:bg-red-700' : ''}`}
-          >
-            {state.isVideoEnabled ? (
-              <Video className="h-5 w-5" />
-            ) : (
-              <VideoOff className="h-5 w-5" />
-            )}
-          </Button>
+            isEnabled={state.isVideoEnabled}
+            enabledIcon={<Video className="h-5 w-5" />}
+            disabledIcon={<VideoOff className="h-5 w-5" />}
+          />
 
-          <Button
+          <ControlButton
             onClick={handleLeave}
-            variant="outline"
-            size="lg"
-            className="rounded-full bg-red-600 hover:bg-red-700 text-white border-none"
-          >
-            <Phone className="h-5 w-5 rotate-135" />
-          </Button>
+            isEnabled={true}
+            enabledIcon={<Phone className="h-5 w-5 rotate-135" />}
+            disabledIcon={<Phone className="h-5 w-5 rotate-135" />}
+            danger
+          />
         </div>
       </div>
-    </div>
-  );
-};
-
-// Participant Video Component
-interface ParticipantVideoProps {
-  participant: any;
-}
-
-const ParticipantVideo = ({ participant }: ParticipantVideoProps) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    if (videoRef.current && participant.stream) {
-      videoRef.current.srcObject = participant.stream;
-    }
-  }, [participant.stream]);
-
-  return (
-    <div className="relative bg-slate-800 rounded-lg overflow-hidden aspect-video">
-      {participant.stream ? (
-        <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center bg-slate-700">
-          <div className="text-center">
-            <div className="h-16 w-16 bg-slate-600 rounded-full flex items-center justify-center mx-auto mb-2">
-              <span className="text-2xl font-bold text-white">
-                {participant.fullName?.[0] || participant.username?.[0] || '?'}
-              </span>
-            </div>
-            <Loader2 className="h-6 w-6 animate-spin text-slate-400 mx-auto" />
-          </div>
-        </div>
-      )}
-      <div className="absolute bottom-4 left-4 bg-slate-900/80 px-3 py-1 rounded-lg">
-        <p className="text-white text-sm font-medium">
-          {participant.fullName || participant.username}
-        </p>
-      </div>
-      {!participant.videoEnabled && (
-        <div className="absolute inset-0 flex items-center justify-center bg-slate-700">
-          <VideoOff className="h-12 w-12 text-slate-400" />
-        </div>
-      )}
     </div>
   );
 };

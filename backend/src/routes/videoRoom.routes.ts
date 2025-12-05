@@ -16,6 +16,9 @@ router.patch('/:roomId/end', videoRoomController.endRoom.bind(videoRoomControlle
 
 router.get('/:roomId/sessions', videoRoomController.getActiveSessions.bind(videoRoomController));
 
-router.get('/mission/:missionId/history', videoRoomController.getRoomHistory.bind(videoRoomController));
+router.get(
+  '/mission/:missionId/history',
+  videoRoomController.getRoomHistory.bind(videoRoomController)
+);
 
 export default router;

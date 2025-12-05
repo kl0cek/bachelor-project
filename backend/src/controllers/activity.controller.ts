@@ -6,7 +6,6 @@ import { BadRequestError } from '../utils/errors';
 import path from 'path';
 import fs from 'fs';
 
-// Helper to delete file
 const deleteFile = (filePath: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     const fullPath = path.join(process.cwd(), filePath);
@@ -128,7 +127,6 @@ export class ActivityController {
     }
   }
 
-  // NEW: Upload PDF
   async uploadPDF(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -139,17 +137,14 @@ export class ActivityController {
         throw new BadRequestError('No PDF file provided');
       }
 
-      // Get activity to check if it has old PDF
       const activity = await activityService.getActivityById(id);
 
-      // Delete old PDF if exists
       if (activity.pdf_url) {
         await deleteFile(activity.pdf_url).catch((err) =>
           console.error('Error deleting old PDF:', err)
         );
       }
 
-      // Update activity with new PDF URL
       const pdfUrl = `/uploads/activities/${file.filename}`;
       const updated = await activityService.updateActivity(id, { pdf_url: pdfUrl }, userId);
 
@@ -159,7 +154,6 @@ export class ActivityController {
     }
   }
 
-  // NEW: Delete PDF
   async deletePDF(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -171,10 +165,8 @@ export class ActivityController {
         throw new BadRequestError('Activity has no PDF attached');
       }
 
-      // Delete file from filesystem
       await deleteFile(activity.pdf_url);
 
-      // Update activity
       const updated = await activityService.updateActivity(id, { pdf_url: null }, userId);
 
       res.json(successResponse(updated, 'PDF deleted successfully'));
