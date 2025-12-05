@@ -83,3 +83,33 @@ export interface VideoRoomHistoryResponse {
   data: VideoRoom[];
 }
 
+export type ConnectionState = 'idle' | 'connecting' | 'connected' | 'error';
+
+export interface SignalPayload {
+  signal: SimplePeer.SignalData;
+  targetUserId: string;
+  roomId: string;
+}
+
+export interface UserPayload {
+  userId: string;
+  username: string;
+  fullName: string;
+}
+
+export interface UserSignalPayload extends UserPayload {
+  signal: SimplePeer.SignalData;
+}
+
+export interface ReturnedSignalPayload {
+  signal: SimplePeer.SignalData;
+  userId: string;
+}
+
+export interface VideoCallContextType {
+  state: VideoCallState;
+  joinRoom: (roomId: string, missionId: string) => Promise<void>;
+  leaveRoom: () => void;
+  toggleAudio: () => void;
+  toggleVideo: () => void;
+}

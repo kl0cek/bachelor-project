@@ -4,16 +4,20 @@ TODO:
 opinia osoby kompetentej cyz dobrze robie kod : D
 intuicyjne UI C:
 Gdy jest sie logout i link jest po /mission itd a nie permisji ( user jest logout ) - przekierowac na strone glowna
+automatyczne przejscie przez dzien
+Kamerka: buttony widoczne zawsze
+Misja sie odpala po wcisnieciu name
 
 opcja dodania cyklicznosci taskow
 lokalizacja taska np gym / kuchnia itd + ile ludzi w danym pomieszczeniu na dole grida nad legenda na przyklad obciazenei resource (opcjonalne)
 w taksu variant name ktory task np first task (time)
 
 Opcja autorobienia misji
-automatyczne przejscie przez dzien
 
 A I do optymalizacji schedulera
 przypisanie misji do uzytkownika (spytac sie czy potrzebne)
+updateCrew: buttony zostaja grid z crew rozwija sie
+ADMIN PANEL edit nad emotka edit
 
 DONE:
 API DB DONE WORKS FINE ON LOCALHOST

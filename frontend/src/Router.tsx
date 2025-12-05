@@ -3,7 +3,7 @@ import { createBrowserRouter } from 'react-router';
 import { HomePage, LazyRoute } from './pages/index';
 import { RootLayout } from './layout/RootLayout';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { VideoCallProvider } from './context/VideoCallContext';
+import { VideoCallProvider } from './context/VideoCallProvider';
 
 const CreateMission = lazy(
   () => import(/* webpackChunkName: "create-mission" */ './pages/CreateMission')
@@ -20,7 +20,7 @@ const UserManagement = lazy(
 const EditMission = lazy(
   () => import(/* webpackChunkName: "edit-mission" */ './pages/EditMission')
 );
-const VideoRoom = lazy(() => import(/* webpackChunkName: "video-call" */ './components/VideoCall'));
+const VideoRoom = lazy(() => import(/* webpackChunkName: "video-call" */ './pages/VideoRoom'));
 
 export const router = createBrowserRouter([
   {

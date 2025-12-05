@@ -5,7 +5,6 @@ import { AppDataSource } from './database';
 import { User } from '../entities/User.entity';
 import { logger } from './logger';
 
-// ============ Types ============
 interface AuthenticatedSocket extends Socket {
   userId: string;
   user: User;
@@ -32,27 +31,18 @@ interface JWTPayload {
   exp?: number;
 }
 
-// Type guard for authenticated socket
 function isAuthenticatedSocket(socket: Socket): socket is AuthenticatedSocket {
   return 'userId' in socket && 'user' in socket;
 }
 
-// ============ State ============
 let io: Server | null = null;
 
-// ============ Helpers ============
-/**
- * Extract token from socket handshake
- * Supports both cookie-based and auth-based tokens
- */
 function extractToken(socket: Socket): string | null {
-  // First try auth object (preferred)
   const authToken = socket.handshake.auth?.token;
   if (authToken && typeof authToken === 'string') {
     return authToken;
   }
 
-  // Fallback to cookies
   const cookieHeader = socket.handshake.headers.cookie;
   if (cookieHeader) {
     const accessTokenCookie = cookieHeader
@@ -67,9 +57,6 @@ function extractToken(socket: Socket): string | null {
   return null;
 }
 
-/**
- * Get all sockets in a room except the sender
- */
 function getOtherSocketsInRoom(roomId: string, excludeSocketId: string): AuthenticatedSocket[] {
   if (!io) return [];
 
@@ -90,9 +77,6 @@ function getOtherSocketsInRoom(roomId: string, excludeSocketId: string): Authent
   return sockets;
 }
 
-/**
- * Find a specific socket by user ID
- */
 function findSocketByUserId(userId: string): AuthenticatedSocket | null {
   if (!io) return null;
 
@@ -105,7 +89,6 @@ function findSocketByUserId(userId: string): AuthenticatedSocket | null {
   return null;
 }
 
-// ============ Socket Initialization ============
 export const initializeSocket = (httpServer: HTTPServer): Server => {
   io = new Server(httpServer, {
     cors: {
@@ -116,7 +99,6 @@ export const initializeSocket = (httpServer: HTTPServer): Server => {
     transports: ['websocket', 'polling'],
   });
 
-  // Authentication middleware
   io.use(async (socket, next) => {
     try {
       const token = extractToken(socket);
@@ -150,7 +132,6 @@ export const initializeSocket = (httpServer: HTTPServer): Server => {
         return next(new Error('Authentication error: Invalid user'));
       }
 
-      // Attach user info to socket
       (socket as AuthenticatedSocket).userId = user.id;
       (socket as AuthenticatedSocket).user = user;
 
@@ -161,7 +142,6 @@ export const initializeSocket = (httpServer: HTTPServer): Server => {
     }
   });
 
-  // Connection handler
   io.on('connection', (rawSocket: Socket) => {
     if (!isAuthenticatedSocket(rawSocket)) {
       logger.error('Socket connected but not authenticated');
@@ -172,21 +152,18 @@ export const initializeSocket = (httpServer: HTTPServer): Server => {
     const socket = rawSocket;
     logger.info(`User connected: ${socket.userId} (${socket.user.username})`);
 
-    // ---- Join Room ----
     socket.on('join-room', async (data: JoinRoomData) => {
       const { roomId } = data;
 
       socket.join(roomId);
       logger.info(`User ${socket.userId} (${socket.user.username}) joined room ${roomId}`);
 
-      // Notify others in the room
       socket.to(roomId).emit('user-joined', {
         userId: socket.userId,
         username: socket.user.username,
         fullName: socket.user.full_name,
       });
 
-      // Send existing users to the new joiner
       const existingUsers = getOtherSocketsInRoom(roomId, socket.id).map((s) => ({
         userId: s.userId,
         username: s.user.username,
@@ -197,7 +174,6 @@ export const initializeSocket = (httpServer: HTTPServer): Server => {
       logger.info(`Sent ${existingUsers.length} existing users to ${socket.userId}`);
     });
 
-    // ---- Send Signal (initiator -> target) ----
     socket.on('send-signal', (data: SignalData) => {
       const { signal, targetUserId } = data;
 
@@ -215,7 +191,6 @@ export const initializeSocket = (httpServer: HTTPServer): Server => {
       }
     });
 
-    // ---- Return Signal (target -> initiator) ----
     socket.on('return-signal', (data: SignalData) => {
       const { signal, targetUserId } = data;
 
@@ -231,14 +206,12 @@ export const initializeSocket = (httpServer: HTTPServer): Server => {
       }
     });
 
-    // ---- Leave Room ----
     socket.on('leave-room', (roomId: string) => {
       socket.leave(roomId);
       socket.to(roomId).emit('user-left', { userId: socket.userId });
       logger.info(`User ${socket.userId} left room ${roomId}`);
     });
 
-    // ---- Toggle Audio ----
     socket.on('toggle-audio', (data: ToggleMediaData) => {
       socket.to(data.roomId).emit('user-toggled-audio', {
         userId: socket.userId,
@@ -246,7 +219,6 @@ export const initializeSocket = (httpServer: HTTPServer): Server => {
       });
     });
 
-    // ---- Toggle Video ----
     socket.on('toggle-video', (data: ToggleMediaData) => {
       socket.to(data.roomId).emit('user-toggled-video', {
         userId: socket.userId,
@@ -254,11 +226,9 @@ export const initializeSocket = (httpServer: HTTPServer): Server => {
       });
     });
 
-    // ---- Disconnect ----
     socket.on('disconnect', (reason) => {
       logger.info(`User disconnected: ${socket.userId}, reason: ${reason}`);
 
-      // Notify all rooms this socket was in
       socket.rooms.forEach((roomId) => {
         if (roomId !== socket.id) {
           socket.to(roomId).emit('user-left', { userId: socket.userId });
@@ -266,7 +236,6 @@ export const initializeSocket = (httpServer: HTTPServer): Server => {
       });
     });
 
-    // ---- Error handling ----
     socket.on('error', (error) => {
       logger.error(`Socket error for user ${socket.userId}:`, error);
     });
@@ -275,7 +244,6 @@ export const initializeSocket = (httpServer: HTTPServer): Server => {
   return io;
 };
 
-// ============ Getters ============
 export const getIO = (): Server => {
   if (!io) {
     throw new Error('Socket.io not initialized. Call initializeSocket first.');

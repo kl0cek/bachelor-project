@@ -56,11 +56,11 @@ process.on('uncaughtException', (error: Error) => {
 
 process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
   logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  
+
   if (reason instanceof Error) {
     logger.error('Error stack:', reason.stack);
   }
-  
+
   process.exit(1);
 });
 
