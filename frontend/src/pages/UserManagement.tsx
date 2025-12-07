@@ -268,8 +268,11 @@ export const UserManagement = () => {
                   <th className="text-left py-3 px-4 text-sm font-semibold text-slate-900 dark:text-slate-100">
                     Last Login
                   </th>
-                  <th className="text-right py-3 px-4 text-sm font-semibold text-slate-900 dark:text-slate-100">
-                    Actions
+                  <th className="py-3 px-4 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                    <div className="flex justify-end gap-5">
+                      <span className="text-center">Edit</span>
+                      <span className="text-center">Delete</span>
+                    </div>
                   </th>
                 </tr>
               </thead>

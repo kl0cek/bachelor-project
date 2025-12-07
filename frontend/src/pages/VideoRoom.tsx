@@ -64,13 +64,15 @@ export function VideoRoom() {
         participants={participants}
       />
 
-      <ControlsBar
-        isAudioEnabled={state.isAudioEnabled}
-        isVideoEnabled={state.isVideoEnabled}
-        onToggleAudio={toggleAudio}
-        onToggleVideo={toggleVideo}
-        onLeave={handleLeave}
-      />
+      <div className="fixed bottom-0 left-0 right-0 z-50">
+        <ControlsBar
+          isAudioEnabled={state.isAudioEnabled}
+          isVideoEnabled={state.isVideoEnabled}
+          onToggleAudio={toggleAudio}
+          onToggleVideo={toggleVideo}
+          onLeave={handleLeave}
+        />
+      </div>
     </div>
   );
 }

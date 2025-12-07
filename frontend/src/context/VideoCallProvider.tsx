@@ -41,7 +41,11 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
     console.log('Full cleanup called');
 
     if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach((track) => track.stop());
+      console.log('Stopping local stream tracks');
+      localStreamRef.current.getTracks().forEach((track) => {
+        console.log(`Stopping ${track.kind} track`);
+        track.stop();
+      });
       localStreamRef.current = null;
     }
 
@@ -65,6 +69,11 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
       if (connectionStateRef.current !== 'idle') {
         console.warn('Already connecting or connected, state:', connectionStateRef.current);
         return;
+      }
+
+      if (localStreamRef.current || socketRef.current) {
+        console.log('Cleaning up existing connection before joining');
+        fullCleanup();
       }
 
       connectionStateRef.current = 'connecting';
@@ -110,6 +119,7 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
   );
 
   const leaveRoom = useCallback(() => {
+    console.log('Leave room called');
     fullCleanup();
     setState(INITIAL_STATE);
   }, [fullCleanup]);
@@ -159,6 +169,7 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
 
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
+      fullCleanup();
     };
   }, [fullCleanup]);
 
