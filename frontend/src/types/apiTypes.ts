@@ -99,6 +99,13 @@ export interface CreateActivityBackendRequest {
   mission?: string;
   description?: string;
   equipment?: string[];
+  is_recurring?: boolean;
+  recurrence?: {
+    type: 'daily' | 'weekly' | 'custom';
+    interval?: number;
+    daysOfWeek?: number[];
+    endDate?: string;
+  };
 }
 
 export interface UpdateActivityBackendRequest {

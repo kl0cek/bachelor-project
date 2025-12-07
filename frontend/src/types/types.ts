@@ -22,6 +22,15 @@ export type ActivityType = 'exercise' | 'meal' | 'sleep' | 'work' | 'eva' | 'opt
 export type Priority = 'high' | 'medium' | 'low';
 export type MissionStatus = 'planning' | 'active' | 'completed' | 'cancelled';
 
+export type RecurrenceType = 'daily' | 'weekly' | 'custom';
+
+export interface RecurrenceConfig {
+  type: RecurrenceType;
+  interval?: number; 
+  daysOfWeek?: number[]; 
+  endDate?: string; 
+}
+
 export interface Activity {
   id: string;
   name: string;
@@ -38,6 +47,9 @@ export interface Activity {
   pdfUrl?: string;
   createdAt?: string;
   updatedAt?: string;
+  isRecurring?: boolean;
+  parentActivityId?: string;
+  recurrence?: RecurrenceConfig;
 }
 
 export interface CrewMember {
@@ -243,6 +255,8 @@ export interface CreateActivityRequest {
   crewMemberId: string;
   missionId: string;
   date: string;
+  isRecurring?: boolean;
+  recurrence?: RecurrenceConfig;
 }
 
 export interface UpdateActivityRequest {

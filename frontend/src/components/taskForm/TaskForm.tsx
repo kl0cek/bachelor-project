@@ -1,10 +1,16 @@
 import { useRef, useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, Button } from '../ui/index';
-import { TaskFormBasicFields, PrioritySelector, EquipmentManager, PDFUploadSection } from './index';
+import {
+  TaskFormBasicFields,
+  PrioritySelector,
+  EquipmentManager,
+  PDFUploadSection,
+  RecurrenceSettings,
+} from './index';
 import { useTaskForm } from '../../hooks/useTaskForm';
 import { activityService } from '../../services/activityService';
-import type { Activity } from '../../types/types';
+import type { Activity, RecurrenceConfig } from '../../types/types';
 
 interface TaskFormProps {
   isOpen: boolean;
@@ -15,6 +21,7 @@ interface TaskFormProps {
   crewMemberId: string;
   defaultStartTime?: number;
   date: string;
+  missionEndDate?: string;
   onPdfUploaded?: (activity: Activity) => void;
 }
 
@@ -26,6 +33,7 @@ export const TaskForm = ({
   task,
   crewMemberId,
   defaultStartTime = 6,
+  missionEndDate,
   onPdfUploaded,
 }: TaskFormProps) => {
   const {
@@ -44,15 +52,36 @@ export const TaskForm = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingPdf, setUploadingPdf] = useState(false);
 
+  // Recurring state
+  const [isRecurring, setIsRecurring] = useState(task?.isRecurring || false);
+  const [recurrence, setRecurrence] = useState<RecurrenceConfig | undefined>(
+    task?.recurrence || {
+      type: 'daily',
+      interval: 1,
+    }
+  );
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.name?.trim()) return;
 
+    // Validate recurrence if enabled
+    if (isRecurring) {
+      if (recurrence?.type === 'weekly' && (!recurrence.daysOfWeek || recurrence.daysOfWeek.length === 0)) {
+        alert('Please select at least one day of the week for weekly recurrence');
+        return;
+      }
+    }
+
     let savedActivity: Activity | void;
 
     try {
-      const taskData = buildTaskData();
+      const taskData = {
+        ...buildTaskData(),
+        isRecurring,
+        recurrence: isRecurring ? recurrence : undefined,
+      };
       savedActivity = await onSubmit(taskData);
     } catch (error) {
       console.error('Failed to save task:', error);
@@ -170,6 +199,26 @@ export const TaskForm = ({
             onRemoveEquipment={handleRemoveEquipment}
           />
 
+          {/* Recurrence Settings - only show for new tasks or non-recurring tasks */}
+          {(!isEditing || !task?.parentActivityId) && (
+            <RecurrenceSettings
+              isRecurring={isRecurring}
+              recurrence={recurrence}
+              missionEndDate={missionEndDate}
+              onRecurringChange={setIsRecurring}
+              onRecurrenceChange={setRecurrence}
+            />
+          )}
+
+          {/* Show info if editing a recurring instance */}
+          {isEditing && task?.parentActivityId && (
+            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <p className="text-xs text-blue-800 dark:text-blue-200">
+                ℹ️ This is part of a recurring series. Changes will only affect this instance.
+              </p>
+            </div>
+          )}
+
           <PDFUploadSection
             formData={formData}
             pdfFile={pdfFile}
@@ -183,7 +232,13 @@ export const TaskForm = ({
             </Button>
             <Button type="submit" className="w-full sm:w-auto" disabled={uploadingPdf}>
               <span className="dark:text-white text-sky-950">
-                {uploadingPdf ? 'Uploading PDF...' : isEditing ? 'Update Task' : 'Create Task'}
+                {uploadingPdf
+                  ? 'Uploading PDF...'
+                  : isRecurring && !isEditing
+                  ? 'Create Recurring Tasks'
+                  : isEditing
+                  ? 'Update Task'
+                  : 'Create Task'}
               </span>
             </Button>
           </div>

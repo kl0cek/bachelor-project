@@ -61,9 +61,23 @@ export class ActivityController {
   async create(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.userId!;
-      const activity = await activityService.createActivity(req.body, userId);
+      const result = await activityService.createActivity(req.body, userId);
 
-      res.status(201).json(successResponse(activity, 'Activity created'));
+      if (Array.isArray(result)) {
+        const [parent, ...instances] = result;
+        res.status(201).json(
+          successResponse(
+            {
+              parent,
+              instances,
+              totalCreated: result.length,
+            },
+            `Recurring activity created with ${instances.length} instances`
+          )
+        );
+      } else {
+        res.status(201).json(successResponse(result, 'Activity created'));
+      }
     } catch (error) {
       next(error);
     }
@@ -82,6 +96,24 @@ export class ActivityController {
     }
   }
 
+  async updateRecurring(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { parentId } = req.params;
+      const userId = req.userId!;
+
+      const result = await activityService.updateRecurringActivities(parentId, req.body, userId);
+
+      res.json(
+        successResponse(
+          result,
+          `Updated ${result.updated} activities, skipped ${result.skipped}`
+        )
+      );
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async delete(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -90,6 +122,19 @@ export class ActivityController {
       await activityService.deleteActivity(id, userId);
 
       res.json(successResponse(null, 'Activity deleted'));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteRecurring(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { parentId } = req.params;
+      const userId = req.userId!;
+
+      const deletedCount = await activityService.deleteRecurringActivities(parentId, userId);
+
+      res.json(successResponse({ deletedCount }, `Deleted ${deletedCount} activities`));
     } catch (error) {
       next(error);
     }

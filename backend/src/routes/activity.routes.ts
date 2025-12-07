@@ -22,6 +22,12 @@ const createActivityValidation = [
   body('mission').optional().isString(),
   body('description').optional().isString(),
   body('equipment').optional().isArray(),
+  body('is_recurring').optional().isBoolean(),
+  body('recurrence').optional().isObject(),
+  body('recurrence.type').optional().isIn(['daily', 'weekly', 'custom']),
+  body('recurrence.interval').optional().isInt({ min: 1 }),
+  body('recurrence.daysOfWeek').optional().isArray(),
+  body('recurrence.endDate').optional().isISO8601(),
 ];
 
 const updateActivityValidation = [
@@ -75,6 +81,23 @@ router.patch(
   updateActivityValidation,
   validate,
   activityController.update
+);
+
+router.patch(
+  '/recurring/:parentId/all',
+  requirePermission('manage_activities'),
+  param('parentId').isUUID(),
+  updateActivityValidation,
+  validate,
+  activityController.updateRecurring
+);
+
+router.delete(
+  '/recurring/:parentId/all',
+  requirePermission('manage_activities'),
+  param('parentId').isUUID(),
+  validate,
+  activityController.deleteRecurring
 );
 
 router.post(

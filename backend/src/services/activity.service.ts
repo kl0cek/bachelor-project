@@ -1,9 +1,17 @@
-import { Between, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { Between, IsNull } from 'typeorm';
 import { AppDataSource } from '../config/database';
-import { Activity, ActivityType, Priority } from '../entities/Activity.entity';
+import { Activity, ActivityType, Priority, RecurrenceType } from '../entities/Activity.entity';
 import { CrewMember } from '../entities/CrewMember.entity';
+import { Mission } from '../entities/Mission.entity';
 import { NotFoundError, BadRequestError, ConflictError } from '../utils/errors';
 import { auditService } from './audit.service';
+
+export interface RecurrenceConfig {
+  type: RecurrenceType;
+  interval?: number; 
+  daysOfWeek?: number[]; 
+  endDate?: string; 
+}
 
 export interface CreateActivityDto {
   crew_member_id: string;
@@ -17,6 +25,8 @@ export interface CreateActivityDto {
   mission?: string;
   description?: string;
   equipment?: string[];
+  is_recurring?: boolean;
+  recurrence?: RecurrenceConfig;
 }
 
 export interface UpdateActivityDto {
@@ -32,18 +42,10 @@ export interface UpdateActivityDto {
   pdf_url?: string | null;
 }
 
-export interface ActivityFilters {
-  type?: ActivityType;
-  priority?: Priority;
-  mission?: string;
-  startHour?: number;
-  endHour?: number;
-  equipment?: string;
-}
-
 class ActivityService {
   private activityRepository = AppDataSource.getRepository(Activity);
   private crewRepository = AppDataSource.getRepository(CrewMember);
+  private missionRepository = AppDataSource.getRepository(Mission);
 
   async getActivitiesByMissionAndDate(missionId: string, date: string): Promise<Activity[]> {
     return await this.activityRepository.find({
@@ -71,26 +73,7 @@ class ActivityService {
     });
   }
 
-  async getActivitiesByDateRange(
-    missionId: string,
-    startDate: string,
-    endDate: string
-  ): Promise<Activity[]> {
-    return await this.activityRepository.find({
-      where: {
-        mission_id: missionId,
-        date: Between(new Date(startDate), new Date(endDate)),
-      },
-      relations: ['crew_member'],
-      order: {
-        date: 'ASC',
-        crew_member_id: 'ASC',
-        start_hour: 'ASC',
-      },
-    });
-  }
-
-  async createActivity(data: CreateActivityDto, userId: string): Promise<Activity> {
+  async createActivity(data: CreateActivityDto, userId: string): Promise<Activity | Activity[]> {
     const crewMember = await this.crewRepository.findOne({
       where: { id: data.crew_member_id },
       relations: ['mission'],
@@ -104,6 +87,14 @@ class ActivityService {
       throw new BadRequestError('Crew member does not belong to this mission');
     }
 
+    const mission = await this.missionRepository.findOne({
+      where: { id: data.mission_id },
+    });
+
+    if (!mission) {
+      throw new NotFoundError('Mission not found');
+    }
+
     if (data.start_hour < 0 || data.start_hour >= 24) {
       throw new BadRequestError('Start hour must be between 0 and 24');
     }
@@ -112,6 +103,17 @@ class ActivityService {
       throw new BadRequestError('Invalid activity duration');
     }
 
+    if (!data.is_recurring) {
+      return await this.createSingleActivity(data, userId);
+    }
+
+    return await this.createRecurringActivities(data, mission, userId);
+  }
+
+  private async createSingleActivity(
+    data: CreateActivityDto,
+    userId: string
+  ): Promise<Activity> {
     const hasConflict = await this.checkTimeConflict(
       data.crew_member_id,
       data.date,
@@ -127,6 +129,7 @@ class ActivityService {
       ...data,
       date: new Date(data.date),
       created_by: userId,
+      is_recurring: false,
     });
 
     const saved = await this.activityRepository.save(activity);
@@ -142,6 +145,159 @@ class ActivityService {
     return saved;
   }
 
+  private async createRecurringActivities(
+    data: CreateActivityDto,
+    mission: Mission,
+    userId: string
+  ): Promise<Activity[]> {
+    if (!data.recurrence) {
+      throw new BadRequestError('Recurrence configuration required for recurring activities');
+    }
+
+    const { type, interval, daysOfWeek, endDate } = data.recurrence;
+
+    const recurEndDate = endDate ? new Date(endDate) : new Date(mission.end_date);
+    const startDate = new Date(data.date);
+
+    if (recurEndDate <= startDate) {
+      throw new BadRequestError('Recurrence end date must be after start date');
+    }
+
+    const dates = this.generateRecurringDates(startDate, recurEndDate, type, interval, daysOfWeek);
+
+    if (dates.length === 0) {
+      throw new BadRequestError('No valid dates generated for recurrence pattern');
+    }
+
+    if (dates.length > 365) {
+      throw new BadRequestError('Too many recurrence instances (max 365)');
+    }
+
+    const parentActivity = this.activityRepository.create({
+      crew_member_id: data.crew_member_id,
+      mission_id: data.mission_id,
+      name: data.name,
+      date: startDate,
+      start_hour: data.start_hour,
+      duration: data.duration,
+      type: data.type,
+      priority: data.priority,
+      mission: data.mission,
+      description: data.description,
+      equipment: data.equipment,
+      created_by: userId,
+      is_recurring: true,
+      recurrence_type: type,
+      recurrence_interval: interval,
+      recurrence_days_of_week: daysOfWeek,
+      recurrence_end_date: recurEndDate,
+    });
+
+    const savedParent = await this.activityRepository.save(parentActivity);
+
+    const instances: Activity[] = [];
+    const conflictDates: string[] = [];
+
+    for (const date of dates) {
+      const dateStr = date.toISOString().split('T')[0];
+      
+      const hasConflict = await this.checkTimeConflict(
+        data.crew_member_id,
+        dateStr,
+        data.start_hour,
+        data.duration
+      );
+
+      if (hasConflict) {
+        conflictDates.push(dateStr);
+        continue; 
+      }
+
+      const instance = this.activityRepository.create({
+        crew_member_id: data.crew_member_id,
+        mission_id: data.mission_id,
+        name: data.name,
+        date: date,
+        start_hour: data.start_hour,
+        duration: data.duration,
+        type: data.type,
+        priority: data.priority,
+        mission: data.mission,
+        description: data.description,
+        equipment: data.equipment,
+        created_by: userId,
+        is_recurring: false,
+        parent_activity_id: savedParent.id,
+      });
+
+      instances.push(instance);
+    }
+
+    const savedInstances = await this.activityRepository.save(instances);
+
+    await auditService.log({
+      userId,
+      action: 'create_recurring_activity',
+      resourceType: 'activity',
+      resourceId: savedParent.id,
+      changes: {
+        ...data,
+        instancesCreated: savedInstances.length,
+        conflictsSkipped: conflictDates.length,
+        conflictDates,
+      },
+    });
+
+    return [savedParent, ...savedInstances];
+  }
+
+  private generateRecurringDates(
+    startDate: Date,
+    endDate: Date,
+    type: RecurrenceType,
+    interval?: number,
+    daysOfWeek?: number[]
+  ): Date[] {
+    const dates: Date[] = [];
+    const current = new Date(startDate);
+
+    switch (type) {
+      case RecurrenceType.DAILY:
+        const dailyInterval = interval || 1;
+        while (current <= endDate) {
+          dates.push(new Date(current));
+          current.setDate(current.getDate() + dailyInterval);
+        }
+        break;
+
+      case RecurrenceType.WEEKLY:
+        if (!daysOfWeek || daysOfWeek.length === 0) {
+          throw new BadRequestError('Days of week required for weekly recurrence');
+        }
+        
+        while (current <= endDate) {
+          const dayOfWeek = current.getDay();
+          if (daysOfWeek.includes(dayOfWeek)) {
+            dates.push(new Date(current));
+          }
+          current.setDate(current.getDate() + 1);
+        }
+        break;
+
+      case RecurrenceType.CUSTOM:
+        if (!interval || interval < 1) {
+          throw new BadRequestError('Interval required for custom recurrence');
+        }
+        while (current <= endDate) {
+          dates.push(new Date(current));
+          current.setDate(current.getDate() + interval);
+        }
+        break;
+    }
+
+    return dates;
+  }
+
   async updateActivity(id: string, data: UpdateActivityDto, userId: string): Promise<Activity> {
     const activity = await this.activityRepository.findOne({
       where: { id },
@@ -149,6 +305,12 @@ class ActivityService {
 
     if (!activity) {
       throw new NotFoundError('Activity not found');
+    }
+
+    if (activity.isRecurringParent()) {
+      throw new BadRequestError(
+        'Cannot update recurring parent activity. Use updateRecurringActivities instead.'
+      );
     }
 
     const originalData = { ...activity };
@@ -181,7 +343,7 @@ class ActivityService {
 
     Object.assign(activity, {
       ...data,
-      ...(data.date && { date: data.date }),
+      ...(data.date && { date: new Date(data.date) }),
     });
 
     const updated = await this.activityRepository.save(activity);
@@ -195,6 +357,50 @@ class ActivityService {
     });
 
     return updated;
+  }
+
+  async updateRecurringActivities(
+    parentId: string,
+    data: UpdateActivityDto,
+    userId: string
+  ): Promise<{ updated: number; skipped: number }> {
+    const parent = await this.activityRepository.findOne({
+      where: { id: parentId },
+    });
+
+    if (!parent || !parent.isRecurringParent()) {
+      throw new NotFoundError('Recurring parent activity not found');
+    }
+
+    const instances = await this.activityRepository.find({
+      where: { parent_activity_id: parentId },
+    });
+
+    let updated = 0;
+    let skipped = 0;
+
+    for (const instance of instances) {
+      try {
+        await this.updateActivity(instance.id, data, userId);
+        updated++;
+      } catch (error) {
+        skipped++;
+        console.error(`Failed to update instance ${instance.id}:`, error);
+      }
+    }
+
+    Object.assign(parent, data);
+    await this.activityRepository.save(parent);
+
+    await auditService.log({
+      userId,
+      action: 'update_recurring_activities',
+      resourceType: 'activity',
+      resourceId: parentId,
+      changes: { updated, skipped, data },
+    });
+
+    return { updated, skipped };
   }
 
   async deleteActivity(id: string, userId: string): Promise<void> {
@@ -217,10 +423,38 @@ class ActivityService {
     });
   }
 
+  async deleteRecurringActivities(parentId: string, userId: string): Promise<number> {
+    const parent = await this.activityRepository.findOne({
+      where: { id: parentId },
+    });
+
+    if (!parent || !parent.isRecurringParent()) {
+      throw new NotFoundError('Recurring parent activity not found');
+    }
+
+    const result = await this.activityRepository.delete({
+      parent_activity_id: parentId,
+    });
+
+    await this.activityRepository.remove(parent);
+
+    const deletedCount = (result.affected || 0) + 1;
+
+    await auditService.log({
+      userId,
+      action: 'delete_recurring_activities',
+      resourceType: 'activity',
+      resourceId: parentId,
+      changes: { deletedCount },
+    });
+
+    return deletedCount;
+  }
+
   async getActivityById(id: string): Promise<Activity> {
     const activity = await this.activityRepository.findOne({
       where: { id },
-      relations: ['crew_member', 'mission_ref', 'created_by_user'],
+      relations: ['crew_member', 'mission_ref', 'created_by_user', 'parent_activity'],
     });
 
     if (!activity) {
@@ -238,7 +472,6 @@ class ActivityService {
     excludeActivityId?: string
   ): Promise<boolean> {
     const endHour = startHour + duration;
-
     const normalizedDate = date.split('T')[0];
 
     const query = this.activityRepository
@@ -293,60 +526,6 @@ class ActivityService {
     }
 
     return slots;
-  }
-
-  filterActivities(activities: Activity[], filters: ActivityFilters): Activity[] {
-    return activities.filter((activity) => {
-      if (filters.type && activity.type !== filters.type) return false;
-      if (filters.priority && activity.priority !== filters.priority) return false;
-      if (filters.mission && activity.mission !== filters.mission) return false;
-      if (filters.startHour !== undefined && activity.start_hour < filters.startHour) return false;
-      if (
-        filters.endHour !== undefined &&
-        activity.start_hour + activity.duration > filters.endHour
-      )
-        return false;
-      if (
-        filters.equipment &&
-        activity.equipment &&
-        !activity.equipment.some((eq) => eq.includes(filters.equipment!))
-      )
-        return false;
-
-      return true;
-    });
-  }
-
-  async getActivityStats(
-    missionId: string,
-    startDate: string,
-    endDate: string
-  ): Promise<Record<string, any>> {
-    const activities = await this.getActivitiesByDateRange(missionId, startDate, endDate);
-
-    const stats = {
-      total: activities.length,
-      byType: {} as Record<ActivityType, number>,
-      byPriority: {} as Record<Priority, number>,
-      totalHours: 0,
-      averagePerDay: 0,
-    };
-
-    activities.forEach((activity) => {
-      stats.byType[activity.type] = (stats.byType[activity.type] || 0) + 1;
-
-      if (activity.priority) {
-        stats.byPriority[activity.priority] = (stats.byPriority[activity.priority] || 0) + 1;
-      }
-
-      stats.totalHours += activity.duration;
-    });
-
-    const daysDiff =
-      (new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24);
-    stats.averagePerDay = stats.total / Math.max(daysDiff, 1);
-
-    return stats;
   }
 }
 
