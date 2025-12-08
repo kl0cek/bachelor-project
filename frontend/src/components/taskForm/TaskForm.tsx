@@ -52,7 +52,6 @@ export const TaskForm = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingPdf, setUploadingPdf] = useState(false);
 
-  // Recurring state
   const [isRecurring, setIsRecurring] = useState(task?.isRecurring || false);
   const [recurrence, setRecurrence] = useState<RecurrenceConfig | undefined>(
     task?.recurrence || {
@@ -66,7 +65,6 @@ export const TaskForm = ({
 
     if (!formData.name?.trim()) return;
 
-    // Validate recurrence if enabled
     if (isRecurring) {
       if (recurrence?.type === 'weekly' && (!recurrence.daysOfWeek || recurrence.daysOfWeek.length === 0)) {
         alert('Please select at least one day of the week for weekly recurrence');
@@ -214,7 +212,7 @@ export const TaskForm = ({
           {isEditing && task?.parentActivityId && (
             <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
               <p className="text-xs text-blue-800 dark:text-blue-200">
-                ℹ️ This is part of a recurring series. Changes will only affect this instance.
+                This is part of a recurring series. Changes will only affect this instance.
               </p>
             </div>
           )}

@@ -74,6 +74,8 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
           mission: taskData.mission,
           description: taskData.description,
           equipment: taskData.equipment,
+          is_recurring: taskData.isRecurring,
+          recurrence: taskData.recurrence,
         });
         setIsFormOpen(false);
         setSelectedTask(null);
@@ -138,6 +140,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
         date={currentDate}
         key={selectedTask?.id || 'new'}
         onPdfUploaded={handlePdfUploaded}
+        missionEndDate={mission.endDate}
       />
 
       <ActivityModal

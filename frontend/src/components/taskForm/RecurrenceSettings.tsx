@@ -33,7 +33,6 @@ export const RecurrenceSettings = ({
     const newConfig: RecurrenceConfig = {
       ...recurrence,
       type,
-      // Set defaults based on type
       interval: type === 'custom' ? recurrence?.interval || 2 : undefined,
       daysOfWeek: type === 'weekly' ? recurrence?.daysOfWeek || [1, 2, 3, 4, 5] : undefined,
     };
