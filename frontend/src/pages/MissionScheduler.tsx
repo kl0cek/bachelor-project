@@ -70,12 +70,6 @@ export const MissionScheduler = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <Link to={`/mission/${mission.id}/video-call`}>
-        <Button className="flex items-center gap-2">
-          <Video className="h-4 w-4" />
-          Join Video Call
-        </Button>
-      </Link>
       <PlaybookHeader mission={mission} />
 
       <main className="container mx-auto px-6 py-8">
@@ -99,9 +93,17 @@ export const MissionScheduler = () => {
             </div>
           </div>
 
-          <div className="text-sm text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-lg p-4">
-            <p className="font-medium mb-2">Mission Description:</p>
-            <p>{mission.description}</p>
+          <div className="flex justify-between text-sm text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-lg p-4">
+            <span>
+              <p className="font-medium mb-2">Mission Description:</p>
+              <p>{mission.description}</p>
+            </span>
+              <Link to={`/mission/${mission.id}/video-call`}>
+                <Button className="flex items-center gap-2">
+                  <Video className="h-4 w-4" />
+                  Join Video Call
+                </Button>
+              </Link>
           </div>
         </div>
 

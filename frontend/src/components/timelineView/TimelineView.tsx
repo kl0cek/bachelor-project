@@ -1,7 +1,8 @@
-import { TimelineNavigation, TimelineTable } from './index';
 import { TaskForm } from '../taskForm/TaskForm';
 import { ActivityModal } from '../activityModal/ActivityModal';
 import { useTimelineState } from '../../hooks/useTimelineState';
+import { useTimelineScroll } from '../../hooks/useTimelineScroll';
+import { ScrollableTimelineTable } from './index';
 import type { Mission, Activity } from '../../types/types';
 
 interface TimelineViewProps {
@@ -21,10 +22,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     createActivity,
     updateActivity,
     deleteActivity,
-    handlePreviousDay,
-    handleNextDay,
-    canNavigatePrevious,
-    canNavigateNext,
+    setCurrentDate,
     handleAddTask,
     handleEditTask,
     handleViewTask,
@@ -34,6 +32,12 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     closeViewModal,
     handlePdfUploaded,
   } = useTimelineState(mission);
+
+  const {
+    allDates,
+    scrollContainerRef,
+    getDayNumber,
+  } = useTimelineScroll(mission);
 
   const crewMembers = mission.crewMembers || [];
 
@@ -112,20 +116,18 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   return (
     <>
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm overflow-hidden mb-6">
-        <TimelineNavigation
-          currentDate={currentDate}
-          onPrevious={handlePreviousDay}
-          onNext={handleNextDay}
-          canNavigatePrevious={canNavigatePrevious()}
-          canNavigateNext={canNavigateNext()}
-        />
 
-        <TimelineTable
+        <ScrollableTimelineTable
           crewMembers={crewMembers}
+          allDates={allDates}
           activities={activities}
           loading={loading}
           onAddTask={handleAddTask}
           onViewTask={handleViewTask}
+          scrollContainerRef={scrollContainerRef}
+          currentDate={currentDate}
+          setCurrentDate={setCurrentDate}
+          getDayNumber={getDayNumber}
         />
       </div>
 

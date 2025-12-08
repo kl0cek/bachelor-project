@@ -2,7 +2,6 @@
 
 TODO:
 intuicyjne UI C:
-automatyczne przejscie przez dzien
 
 opcja dodania cyklicznosci taskow
 lokalizacja taska np gym / kuchnia itd + ile ludzi w danym pomieszczeniu na dole grida nad legenda na przyklad obciazenei resource (opcjonalne)
@@ -25,6 +24,7 @@ w bazie danych pdf z taskiem - pan dr ma dac pdf z 'przykladem'
 DEPLOY DEPLOY
 plus audio plus kamerka  dodaac do localhosta https'a i bedzie git
 user musi sam siebei w kamerce
+automatyczne przejscie przez dzien
 
 FIXING UI:
 ADMIN PANEL edit nad emotka edit

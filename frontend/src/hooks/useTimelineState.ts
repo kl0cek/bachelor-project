@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useActivities } from './useActivities';
+import { useAllMissionActivities } from './useAllMissionActivities';
 import type { Mission, Activity } from '../types/types';
 
 export const useTimelineState = (mission: Mission) => {
@@ -7,7 +7,6 @@ export const useTimelineState = (mission: Mission) => {
     const today = new Date();
     const missionStart = new Date(mission.startDate);
     const missionEnd = new Date(mission.endDate);
-
     if (today >= missionStart && today <= missionEnd) {
       return today.toISOString().split('T')[0];
     }
@@ -15,7 +14,7 @@ export const useTimelineState = (mission: Mission) => {
   });
 
   const { activities, setActivities, loading, createActivity, updateActivity, deleteActivity } =
-    useActivities(mission.id, currentDate);
+    useAllMissionActivities(mission.id, mission.startDate, mission.endDate);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Activity | null>(null);
@@ -87,6 +86,7 @@ export const useTimelineState = (mission: Mission) => {
 
   return {
     currentDate,
+    setCurrentDate,
     activities,
     loading,
     isFormOpen,
