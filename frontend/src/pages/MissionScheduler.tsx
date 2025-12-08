@@ -94,16 +94,18 @@ export const MissionScheduler = () => {
           </div>
 
           <div className="flex justify-between text-sm text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-lg p-4">
-            <span>
+            <div>
               <p className="font-medium mb-2">Mission Description:</p>
               <p>{mission.description}</p>
-            </span>
+            </div>
+            <div className="flex flex-col items-end gap-2">
               <Link to={`/mission/${mission.id}/video-call`}>
                 <Button className="flex items-center gap-2">
                   <Video className="h-4 w-4" />
                   Join Video Call
                 </Button>
               </Link>
+            </div>
           </div>
         </div>
 
