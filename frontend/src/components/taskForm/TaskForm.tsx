@@ -1,4 +1,3 @@
-import { useRef, useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, Button } from '../ui/index';
 import {
@@ -8,9 +7,9 @@ import {
   PDFUploadSection,
   RecurrenceSettings,
 } from './index';
-import { useTaskForm } from '../../hooks/useTaskForm';
-import { activityService } from '../../services/activityService';
-import type { Activity, RecurrenceConfig } from '../../types/types';
+import { useTaskForm, useRecurrence, usePdfUpload } from '../../hooks/index';
+import { FORM_STYLES } from '../../constants/formsStyles';
+import type { Activity } from '../../types/types';
 
 interface TaskFormProps {
   isOpen: boolean;
@@ -41,38 +40,27 @@ export const TaskForm = ({
     setFormData,
     newEquipment,
     setNewEquipment,
-    pdfFile,
-    setPdfFile,
     isEditing,
     handleAddEquipment,
     handleRemoveEquipment,
     buildTaskData,
   } = useTaskForm({ task, defaultStartTime, crewMemberId });
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [uploadingPdf, setUploadingPdf] = useState(false);
+  const { isRecurring, recurrence, setIsRecurring, setRecurrence, validateRecurrence } =
+    useRecurrence(task);
 
-  const [isRecurring, setIsRecurring] = useState(task?.isRecurring || false);
-  const [recurrence, setRecurrence] = useState<RecurrenceConfig | undefined>(
-    task?.recurrence || {
-      type: 'daily',
-      interval: 1,
-    }
-  );
+  const { pdfFile, uploadingPdf, handlePdfSelect, handleRemovePdf, uploadPdfIfNeeded } =
+    usePdfUpload({ task, onPdfUploaded, onSubmit });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.name?.trim()) return;
 
-    if (isRecurring) {
-      if (
-        recurrence?.type === 'weekly' &&
-        (!recurrence.daysOfWeek || recurrence.daysOfWeek.length === 0)
-      ) {
-        alert('Please select at least one day of the week for weekly recurrence');
-        return;
-      }
+    const recurrenceValidation = validateRecurrence();
+    if (!recurrenceValidation.isValid) {
+      alert(recurrenceValidation.error);
+      return;
     }
 
     let savedActivity: Activity | void;
@@ -91,57 +79,9 @@ export const TaskForm = ({
     }
 
     const activityWithId = savedActivity || buildTaskData();
-
-    if (pdfFile && activityWithId && 'id' in activityWithId && activityWithId.id) {
-      try {
-        setUploadingPdf(true);
-        const updated = await activityService.uploadPDF(activityWithId.id, pdfFile);
-        onPdfUploaded?.(updated);
-      } catch (error) {
-        console.error('Failed to upload PDF:', error);
-        alert(
-          'Task saved successfully, but PDF upload failed. You can try uploading again by editing the task.'
-        );
-      } finally {
-        setUploadingPdf(false);
-      }
-    }
+    await uploadPdfIfNeeded(activityWithId);
 
     onClose();
-  };
-
-  const handlePdfSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.type !== 'application/pdf') {
-        alert('Only PDF files are allowed');
-        return;
-      }
-      if (file.size > 10 * 1024 * 1024) {
-        alert('PDF file size must be less than 10MB');
-        return;
-      }
-      setPdfFile(file);
-    }
-  };
-
-  const handleRemovePdf = async () => {
-    if (task?.id && task?.pdfUrl) {
-      if (!confirm('Are you sure you want to remove this PDF?')) return;
-
-      try {
-        const updatedActivity = await activityService.deletePDF(task.id);
-        setFormData((prev) => ({ ...prev, pdfUrl: undefined }));
-        await onSubmit(updatedActivity);
-      } catch (error) {
-        console.error('Failed to delete PDF:', error);
-        alert('Failed to delete PDF. Please try again.');
-      }
-    }
-    setPdfFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
   };
 
   const handleDelete = () => {
@@ -150,6 +90,9 @@ export const TaskForm = ({
       onClose();
     }
   };
+
+  const showRecurrenceSettings = !isEditing || !task?.parentActivityId;
+  const isRecurringInstance = isEditing && task?.parentActivityId;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -180,14 +123,12 @@ export const TaskForm = ({
           <PrioritySelector formData={formData} setFormData={setFormData} />
 
           <div className="space-y-1.5 sm:space-y-2">
-            <label className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">
-              Description
-            </label>
+            <label className={FORM_STYLES.label}>Description</label>
             <textarea
               value={formData.description || ''}
               onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
               rows={3}
-              className="w-full px-3 py-2 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-sm sm:text-base text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-space-500 focus:border-transparent resize-none"
+              className={FORM_STYLES.textarea}
               placeholder="Task description..."
             />
           </div>
@@ -200,8 +141,7 @@ export const TaskForm = ({
             onRemoveEquipment={handleRemoveEquipment}
           />
 
-          {/* Recurrence Settings - only show for new tasks or non-recurring tasks */}
-          {(!isEditing || !task?.parentActivityId) && (
+          {showRecurrenceSettings && (
             <RecurrenceSettings
               isRecurring={isRecurring}
               recurrence={recurrence}
@@ -211,9 +151,8 @@ export const TaskForm = ({
             />
           )}
 
-          {/* Show info if editing a recurring instance */}
-          {isEditing && task?.parentActivityId && (
-            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+          {isRecurringInstance && (
+            <div className={FORM_STYLES.infoBox}>
               <p className="text-xs text-blue-800 dark:text-blue-200">
                 This is part of a recurring series. Changes will only affect this instance.
               </p>
@@ -224,7 +163,7 @@ export const TaskForm = ({
             formData={formData}
             pdfFile={pdfFile}
             onPdfSelect={handlePdfSelect}
-            onRemovePdf={handleRemovePdf}
+            onRemovePdf={() => handleRemovePdf(setFormData)}
           />
 
           <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-4 sm:pt-6 border-t border-slate-200 dark:border-slate-800">

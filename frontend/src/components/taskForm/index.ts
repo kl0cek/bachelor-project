@@ -3,3 +3,8 @@ export { PDFUploadSection } from './PDFUploadSection';
 export { PrioritySelector } from './PrioritySelector';
 export { TaskFormBasicFields } from './TaskFormBasicFields';
 export { RecurrenceSettings } from './RecurrenceSettings';
+export { RecurrenceTypeSelector } from './RecurrenceTypeSelector';
+export { WeekdaySelector } from './WeekdaySelector';
+export { CustomIntervalSelector } from './CustomIntervalSelector';
+export { EndDateSelector } from './EndDateSelector';
+export { RecurrencePreview } from './RecurrencePreview';
