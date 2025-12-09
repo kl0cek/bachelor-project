@@ -95,9 +95,7 @@ export const ISSStatus = ({ mission }: ISSStatusProps) => {
             className={`h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full animate-pulse ${getStatusColor(mission.status)}`}
           />
           <div className="flex flex-col min-w-0">
-            <span className="text-[10px] sm:text-xs font-medium whitespace-nowrap">
-              Mission
-            </span>
+            <span className="text-[10px] sm:text-xs font-medium whitespace-nowrap">Mission</span>
             <span className="text-[10px] sm:text-xs opacity-75 whitespace-nowrap">
               {mission.status.charAt(0).toUpperCase() + mission.status.slice(1)}
             </span>

@@ -21,12 +21,12 @@ export const PlaybookHeader = ({ mission }: PlaybookHeaderProps) => {
               <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
               <span className="hidden sm:inline text-sm">Back</span>
             </Link>
-            
+
             <div className="flex items-center gap-2 sm:gap-3 md:gap-4 min-w-0 flex-1">
               <div className="p-2 sm:p-3 rounded-xl bg-space-100 dark:bg-space-900 shrink-0">
                 <Calendar className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 text-space-600 dark:text-space-400" />
               </div>
-              
+
               <div className="min-w-0 flex-1">
                 <h1 className="text-base sm:text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100 truncate">
                   {mission.name}
@@ -43,7 +43,7 @@ export const PlaybookHeader = ({ mission }: PlaybookHeaderProps) => {
               </div>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-2 sm:gap-3 md:gap-4 shrink-0">
             <div className="hidden lg:block">
               <ISSStatus mission={mission} />

@@ -221,7 +221,7 @@ export const HomePage = () => {
                     key={mission.id}
                     className="p-6 hover:shadow-md transition-shadow duration-200"
                   >
-                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex justify-between items-start mb-4">
                       <Link to={`/mission/${mission.id}/scheduler`}>
                         <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                           {mission.name}
@@ -307,9 +307,9 @@ export const HomePage = () => {
                   >
                     <div className="flex justify-between items-start mb-4">
                       <Link to={`/mission/${mission.id}/scheduler`}>
-                      <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                        {mission.name}
-                      </h3>
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
+                          {mission.name}
+                        </h3>
                       </Link>
                       <Badge className={statusColors[mission.status]}>
                         {statusLabels[mission.status]}

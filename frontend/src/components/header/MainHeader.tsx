@@ -1,13 +1,11 @@
 import { Link } from 'react-router';
-import { User, LogIn, Shield, LogOut } from 'lucide-react';
+import { User, Shield, LogOut } from 'lucide-react';
 import { Button } from '../ui';
-import { LoginModal } from './LoginModal';
 import { getRoleBadgeColor } from '../../utils/auth';
 import { useAuthHeader } from '../../hooks/useAuthHeader';
 
 export const MainHeader = () => {
-  const { user, isLoginModalOpen, setIsLoginModalOpen, isLoggingOut, handleLogin, handleLogout } =
-    useAuthHeader();
+  const { user, isLoggingOut, handleLogout } = useAuthHeader();
 
   return (
     <>
@@ -25,7 +23,7 @@ export const MainHeader = () => {
             </Link>
 
             <div className="flex items-center gap-2">
-              {user ? (
+              {user && (
                 <>
                   <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-700">
                     <User className="h-4 w-4" />
@@ -66,22 +64,11 @@ export const MainHeader = () => {
                     </span>
                   </Button>
                 </>
-              ) : (
-                <Button size="sm" onClick={() => setIsLoginModalOpen(true)}>
-                  <LogIn className="h-4 w-4" />
-                  <span className="ml-2 hidden xs:inline">Login</span>
-                </Button>
               )}
             </div>
           </div>
         </div>
       </header>
-
-      <LoginModal
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
-        onLogin={handleLogin}
-      />
     </>
   );
 };

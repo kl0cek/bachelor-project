@@ -66,7 +66,10 @@ export const TaskForm = ({
     if (!formData.name?.trim()) return;
 
     if (isRecurring) {
-      if (recurrence?.type === 'weekly' && (!recurrence.daysOfWeek || recurrence.daysOfWeek.length === 0)) {
+      if (
+        recurrence?.type === 'weekly' &&
+        (!recurrence.daysOfWeek || recurrence.daysOfWeek.length === 0)
+      ) {
         alert('Please select at least one day of the week for weekly recurrence');
         return;
       }
@@ -233,10 +236,10 @@ export const TaskForm = ({
                 {uploadingPdf
                   ? 'Uploading PDF...'
                   : isRecurring && !isEditing
-                  ? 'Create Recurring Tasks'
-                  : isEditing
-                  ? 'Update Task'
-                  : 'Create Task'}
+                    ? 'Create Recurring Tasks'
+                    : isEditing
+                      ? 'Update Task'
+                      : 'Create Task'}
               </span>
             </Button>
           </div>

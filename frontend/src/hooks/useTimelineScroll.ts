@@ -20,13 +20,13 @@ export const useTimelineScroll = (mission: Mission): TimelineScrollState => {
       const dates: string[] = [];
       const start = new Date(mission.startDate);
       const end = new Date(mission.endDate);
-      
+
       const current = new Date(start);
       while (current <= end) {
         dates.push(current.toISOString().split('T')[0]);
         current.setDate(current.getDate() + 1);
       }
-      
+
       return dates;
     };
 
@@ -42,31 +42,37 @@ export const useTimelineScroll = (mission: Mission): TimelineScrollState => {
     }
   }, [mission.startDate, mission.endDate]);
 
-  const getDayNumber = useCallback((date: string): number => {
-    const index = allDates.indexOf(date);
-    return index !== -1 ? index + 1 : 1;
-  }, [allDates]);
+  const getDayNumber = useCallback(
+    (date: string): number => {
+      const index = allDates.indexOf(date);
+      return index !== -1 ? index + 1 : 1;
+    },
+    [allDates]
+  );
 
-  const scrollToDate = useCallback((date: string) => {
-    const index = allDates.indexOf(date);
-    if (index === -1 || !scrollContainerRef.current) return;
+  const scrollToDate = useCallback(
+    (date: string) => {
+      const index = allDates.indexOf(date);
+      if (index === -1 || !scrollContainerRef.current) return;
 
-    const container = scrollContainerRef.current;
-    const dayWidth = container.scrollWidth / allDates.length;
-    const scrollPosition = dayWidth * index;
+      const container = scrollContainerRef.current;
+      const dayWidth = container.scrollWidth / allDates.length;
+      const scrollPosition = dayWidth * index;
 
-    container.scrollTo({
-      left: scrollPosition,
-      behavior: 'smooth'
-    });
+      container.scrollTo({
+        left: scrollPosition,
+        behavior: 'smooth',
+      });
 
-    setCurrentDateIndex(index);
-  }, [allDates]);
+      setCurrentDateIndex(index);
+    },
+    [allDates]
+  );
 
   const scrollToToday = useCallback(() => {
     const today = new Date().toISOString().split('T')[0];
     const todayIndex = allDates.indexOf(today);
-    
+
     if (todayIndex !== -1) {
       scrollToDate(today);
     }

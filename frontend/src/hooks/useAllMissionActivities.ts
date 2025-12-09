@@ -15,13 +15,13 @@ export const useAllMissionActivities = (missionId: string, startDate: string, en
     const dates: string[] = [];
     const start = new Date(startDate);
     const end = new Date(endDate);
-    
+
     const current = new Date(start);
     while (current <= end) {
       dates.push(current.toISOString().split('T')[0]);
       current.setDate(current.getDate() + 1);
     }
-    
+
     return dates;
   }, [startDate, endDate]);
 
@@ -39,13 +39,13 @@ export const useAllMissionActivities = (missionId: string, startDate: string, en
         setError(null);
 
         const dates = generateDateRange();
-        
-        const promises = dates.map(date => 
+
+        const promises = dates.map((date) =>
           activityService.getActivitiesForMission(missionId, date)
         );
 
         const results = await Promise.all(promises);
-        
+
         const allActivities = results.flat();
 
         activityCache.set(cacheKey, allActivities);

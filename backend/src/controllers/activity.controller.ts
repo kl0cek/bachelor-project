@@ -104,10 +104,7 @@ export class ActivityController {
       const result = await activityService.updateRecurringActivities(parentId, req.body, userId);
 
       res.json(
-        successResponse(
-          result,
-          `Updated ${result.updated} activities, skipped ${result.skipped}`
-        )
+        successResponse(result, `Updated ${result.updated} activities, skipped ${result.skipped}`)
       );
     } catch (error) {
       next(error);

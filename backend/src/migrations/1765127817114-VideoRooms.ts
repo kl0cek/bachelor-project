@@ -1,15 +1,14 @@
-import { MigrationInterface, QueryRunner } from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class VideoRooms1765127817114 implements MigrationInterface {
-
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        // UUID extension (safe)
-        await queryRunner.query(`
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    // UUID extension (safe)
+    await queryRunner.query(`
             CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
         `);
 
-        // Table: video_rooms
-        await queryRunner.query(`
+    // Table: video_rooms
+    await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS video_rooms (
                 id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
                 mission_id UUID NOT NULL REFERENCES missions(id) ON DELETE CASCADE,
@@ -23,8 +22,8 @@ export class VideoRooms1765127817114 implements MigrationInterface {
             );
         `);
 
-        // Table: video_sessions
-        await queryRunner.query(`
+    // Table: video_sessions
+    await queryRunner.query(`
             CREATE TABLE IF NOT EXISTS video_sessions (
                 id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
                 room_id UUID NOT NULL REFERENCES video_rooms(id) ON DELETE CASCADE,
@@ -37,25 +36,25 @@ export class VideoRooms1765127817114 implements MigrationInterface {
             );
         `);
 
-        // Indexes (no CONCURRENTLY because migrations run in transaction)
-        await queryRunner.query(`
+    // Indexes (no CONCURRENTLY because migrations run in transaction)
+    await queryRunner.query(`
             CREATE INDEX IF NOT EXISTS idx_video_rooms_mission ON video_rooms(mission_id);
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE INDEX IF NOT EXISTS idx_video_rooms_active ON video_rooms(is_active);
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE INDEX IF NOT EXISTS idx_video_sessions_room ON video_sessions(room_id);
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE INDEX IF NOT EXISTS idx_video_sessions_user ON video_sessions(user_id);
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE INDEX IF NOT EXISTS idx_video_sessions_joined ON video_sessions(joined_at);
         `);
 
-        // Function & Trigger
-        await queryRunner.query(`
+    // Function & Trigger
+    await queryRunner.query(`
             CREATE OR REPLACE FUNCTION calculate_session_duration()
             RETURNS TRIGGER AS $$
             BEGIN
@@ -67,35 +66,37 @@ export class VideoRooms1765127817114 implements MigrationInterface {
             $$ LANGUAGE plpgsql;
         `);
 
-        await queryRunner.query(`
+    await queryRunner.query(`
             DROP TRIGGER IF EXISTS update_video_session_duration ON video_sessions;
         `);
 
-        await queryRunner.query(`
+    await queryRunner.query(`
             CREATE TRIGGER update_video_session_duration
             BEFORE UPDATE ON video_sessions
             FOR EACH ROW
             EXECUTE FUNCTION calculate_session_duration();
         `);
 
-        // Comments
-        await queryRunner.query(`
+    // Comments
+    await queryRunner.query(`
             COMMENT ON TABLE video_rooms IS 'Video call rooms for missions';
         `);
-        await queryRunner.query(`
+    await queryRunner.query(`
             COMMENT ON TABLE video_sessions IS 'Individual user sessions in video rooms';
         `);
-    }
+  }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`DROP TRIGGER IF EXISTS update_video_session_duration ON video_sessions;`);
-        await queryRunner.query(`DROP FUNCTION IF EXISTS calculate_session_duration;`);
-        await queryRunner.query(`DROP INDEX IF EXISTS idx_video_sessions_joined;`);
-        await queryRunner.query(`DROP INDEX IF EXISTS idx_video_sessions_user;`);
-        await queryRunner.query(`DROP INDEX IF EXISTS idx_video_sessions_room;`);
-        await queryRunner.query(`DROP INDEX IF EXISTS idx_video_rooms_active;`);
-        await queryRunner.query(`DROP INDEX IF EXISTS idx_video_rooms_mission;`);
-        await queryRunner.query(`DROP TABLE IF EXISTS video_sessions;`);
-        await queryRunner.query(`DROP TABLE IF EXISTS video_rooms;`);
-    }
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(
+      `DROP TRIGGER IF EXISTS update_video_session_duration ON video_sessions;`
+    );
+    await queryRunner.query(`DROP FUNCTION IF EXISTS calculate_session_duration;`);
+    await queryRunner.query(`DROP INDEX IF EXISTS idx_video_sessions_joined;`);
+    await queryRunner.query(`DROP INDEX IF EXISTS idx_video_sessions_user;`);
+    await queryRunner.query(`DROP INDEX IF EXISTS idx_video_sessions_room;`);
+    await queryRunner.query(`DROP INDEX IF EXISTS idx_video_rooms_active;`);
+    await queryRunner.query(`DROP INDEX IF EXISTS idx_video_rooms_mission;`);
+    await queryRunner.query(`DROP TABLE IF EXISTS video_sessions;`);
+    await queryRunner.query(`DROP TABLE IF EXISTS video_rooms;`);
+  }
 }

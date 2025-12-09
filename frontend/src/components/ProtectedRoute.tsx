@@ -39,7 +39,7 @@ export const ProtectedRoute = ({
     };
 
     window.addEventListener('storage', handleStorageChange);
-    
+
     const interval = setInterval(() => {
       const savedUser = localStorage.getItem('currentUser');
       if (!savedUser && user) {

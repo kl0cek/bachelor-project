@@ -120,7 +120,8 @@ export const ScrollableTimelineTable = ({
 
                 return hours.map((hour) => {
                   const activityAtHour = memberActivities.find(
-                    (activity) => activity.start <= hour && activity.start + activity.duration > hour
+                    (activity) =>
+                      activity.start <= hour && activity.start + activity.duration > hour
                   );
 
                   const isActivityStart = activityAtHour && activityAtHour.start === hour;

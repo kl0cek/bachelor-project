@@ -8,9 +8,9 @@ import { auditService } from './audit.service';
 
 export interface RecurrenceConfig {
   type: RecurrenceType;
-  interval?: number; 
-  daysOfWeek?: number[]; 
-  endDate?: string; 
+  interval?: number;
+  daysOfWeek?: number[];
+  endDate?: string;
 }
 
 export interface CreateActivityDto {
@@ -110,10 +110,7 @@ class ActivityService {
     return await this.createRecurringActivities(data, mission, userId);
   }
 
-  private async createSingleActivity(
-    data: CreateActivityDto,
-    userId: string
-  ): Promise<Activity> {
+  private async createSingleActivity(data: CreateActivityDto, userId: string): Promise<Activity> {
     const hasConflict = await this.checkTimeConflict(
       data.crew_member_id,
       data.date,
@@ -200,7 +197,7 @@ class ActivityService {
 
     for (const date of dates) {
       const dateStr = date.toISOString().split('T')[0];
-      
+
       const hasConflict = await this.checkTimeConflict(
         data.crew_member_id,
         dateStr,
@@ -210,7 +207,7 @@ class ActivityService {
 
       if (hasConflict) {
         conflictDates.push(dateStr);
-        continue; 
+        continue;
       }
 
       const instance = this.activityRepository.create({
@@ -274,7 +271,7 @@ class ActivityService {
         if (!daysOfWeek || daysOfWeek.length === 0) {
           throw new BadRequestError('Days of week required for weekly recurrence');
         }
-        
+
         while (current <= endDate) {
           const dayOfWeek = current.getDay();
           if (daysOfWeek.includes(dayOfWeek)) {

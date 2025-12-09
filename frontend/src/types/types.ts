@@ -26,9 +26,9 @@ export type RecurrenceType = 'daily' | 'weekly' | 'custom';
 
 export interface RecurrenceConfig {
   type: RecurrenceType;
-  interval?: number; 
-  daysOfWeek?: number[]; 
-  endDate?: string; 
+  interval?: number;
+  daysOfWeek?: number[];
+  endDate?: string;
 }
 
 export interface Activity {

@@ -33,11 +33,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     handlePdfUploaded,
   } = useTimelineState(mission);
 
-  const {
-    allDates,
-    scrollContainerRef,
-    getDayNumber,
-  } = useTimelineScroll(mission);
+  const { allDates, scrollContainerRef, getDayNumber } = useTimelineScroll(mission);
 
   const crewMembers = mission.crewMembers || [];
 
@@ -116,7 +112,6 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   return (
     <>
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm overflow-hidden mb-6">
-
         <ScrollableTimelineTable
           crewMembers={crewMembers}
           allDates={allDates}
