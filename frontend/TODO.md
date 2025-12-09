@@ -3,7 +3,6 @@
 TODO:
 intuicyjne UI C:
 
-opcja dodania cyklicznosci taskow
 lokalizacja taska np gym / kuchnia itd + ile ludzi w danym pomieszczeniu na dole grida nad legenda na przyklad obciazenei resource (opcjonalne)
 w taksu variant name ktory task np first task (time)
 
@@ -25,6 +24,7 @@ DEPLOY DEPLOY
 plus audio plus kamerka  dodaac do localhosta https'a i bedzie git
 user musi sam siebei w kamerce
 automatyczne przejscie przez dzien
+opcja dodania cyklicznosci taskow
 
 FIXING UI:
 ADMIN PANEL edit nad emotka edit
