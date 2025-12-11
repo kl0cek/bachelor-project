@@ -39,14 +39,14 @@ export const AppDataSource = new DataSource({
   ],
 
   migrations: [
-    isProduction 
+    isProduction
       ? path.join(__dirname, 'migrations', '**', '*.js')
-      : path.join(__dirname, '..', 'migrations', '**', '*.ts')
+      : path.join(__dirname, '..', 'migrations', '**', '*.ts'),
   ],
   subscribers: [
-    isProduction 
+    isProduction
       ? path.join(__dirname, 'subscribers', '**', '*.js')
-      : path.join(__dirname, '..', 'subscribers', '**', '*.ts')
+      : path.join(__dirname, '..', 'subscribers', '**', '*.ts'),
   ],
   synchronize: process.env.DB_SYNC === 'true' && !isProduction,
 
