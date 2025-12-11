@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts",
     "devh": "HOST=0.0.0.0 nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts",
-    "build": "tsc",
+    "build": "NODE_ENV=production tsc && cp -R src/certs prod/",
     "start": "node prod/server.js",
     "typeorm": "typeorm-ts-node-commonjs",
     "migration:generate": "npm run typeorm -- migration:generate -d src/config/database.ts",

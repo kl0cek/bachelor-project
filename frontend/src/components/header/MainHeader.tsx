@@ -10,14 +10,14 @@ export const MainHeader = () => {
   return (
     <>
       <header className="border-b border-white dark:border-slate-800 bg-white dark:bg-slate-800 shadow-sm">
-        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
-          <div className="flex items-center justify-between gap-3">
-            <Link to="/" className="flex items-center gap-4 -ml-2">
-              <div className="h-24 w-24 rounded-xl bg-space-100 dark:bg-space-900 flex items-center justify-center">
+        <div className="container mx-auto px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4">
+          <div className="flex items-center justify-between gap-2 sm:gap-3">
+            <Link to="/" className="flex items-center gap-2 sm:gap-4 -ml-1 sm:-ml-2 min-w-0 flex-shrink">
+              <div className="h-12 w-12 sm:h-16 sm:w-16 lg:h-24 lg:w-24 rounded-lg sm:rounded-xl bg-space-100 dark:bg-space-900 flex items-center justify-center flex-shrink-0">
                 <img src="/WTK_light.png" className="dark:hidden object-contain" />
                 <img src="/WTK_dark.png" className="hidden dark:block object-contain" />
               </div>
-              <h1 className="text-xl font-light text-slate-900 dark:text-slate-100 truncate">
+              <h1 className="text-sm sm:text-base lg:text-xl font-light text-slate-900 dark:text-slate-100 truncate">
                 Mission Control Platform
               </h1>
             </Link>
