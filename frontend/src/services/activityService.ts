@@ -1,5 +1,5 @@
 import { apiClient } from '../api/client';
-import type { Activity } from '../types/types';
+import type { Activity, RecurrenceConfig } from '../types/types';
 import type {
   BackendActivity,
   ApiResponse,
@@ -51,12 +51,17 @@ class ActivityService {
 
   async createActivity(data: CreateActivityBackendRequest): Promise<Activity> {
     try {
-      const response = await apiClient.post<ApiResponse<BackendActivity>>(
+      const response = await apiClient.post<ApiResponse<BackendActivity | BackendActivity[]>>(
         `/activities/missions/${data.mission_id}/activities`,
         data
       );
 
       const rawActivity = response.data.data;
+
+      if (Array.isArray(rawActivity)) {
+        return this.mapActivityToFrontend(rawActivity[0]);
+      }
+
       return this.mapActivityToFrontend(rawActivity);
     } catch (error) {
       console.error('Error in createActivity:', error);
@@ -72,6 +77,8 @@ class ActivityService {
 
   async updateActivity(activityId: string, data: UpdateActivityBackendRequest): Promise<Activity> {
     try {
+      console.log('Sending update request:', { activityId, data });
+
       const response = await apiClient.patch<ApiResponse<BackendActivity>>(
         `/activities/${activityId}`,
         data
@@ -79,8 +86,13 @@ class ActivityService {
 
       const rawActivity = response.data.data;
       return this.mapActivityToFrontend(rawActivity);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error in updateActivity:', error);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: unknown; status?: number } };
+        console.error('Error response data:', axiosError.response?.data);
+        console.error('Error status:', axiosError.response?.status);
+      }
       throw error;
     }
   }
@@ -131,10 +143,78 @@ class ActivityService {
     }
   }
 
+  async updateRecurringActivities(
+    parentId: string,
+    data: UpdateActivityBackendRequest
+  ): Promise<{ updated: number; skipped: number }> {
+    try {
+      const cleanData: UpdateActivityBackendRequest = {
+        name: data.name,
+        start_hour: data.start_hour,
+        duration: data.duration,
+        type: data.type,
+        priority: data.priority,
+        mission: data.mission,
+        description: data.description,
+        equipment: data.equipment,
+      };
+
+      Object.keys(cleanData).forEach((key) => {
+        if (cleanData[key as keyof UpdateActivityBackendRequest] === undefined) {
+          delete cleanData[key as keyof UpdateActivityBackendRequest];
+        }
+      });
+
+      console.log('Sending recurring update request:', { parentId, data: cleanData });
+
+      const response = await apiClient.patch<ApiResponse<{ updated: number; skipped: number }>>(
+        `/activities/recurring/${parentId}/all`,
+        cleanData
+      );
+
+      return response.data.data;
+    } catch (error) {
+      console.error('Error in updateRecurringActivities:', error);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: unknown } };
+        console.error('Error response:', axiosError.response?.data);
+      }
+      throw error;
+    }
+  }
+
+  async deleteRecurringActivities(parentId: string): Promise<{ deleted: number }> {
+    try {
+      const response = await apiClient.delete<ApiResponse<{ deleted: number }>>(
+        `/activities/recurring/${parentId}/all`
+      );
+
+      return response.data.data;
+    } catch (error) {
+      console.error('Error in deleteRecurringActivities:', error);
+      if (error && typeof error === 'object' && 'response' in error) {
+        const axiosError = error as { response?: { data?: unknown } };
+        console.error('Error response:', axiosError.response?.data);
+      }
+      throw error;
+    }
+  }
+
   private mapActivityToFrontend(activity: BackendActivity): Activity {
     if (!activity) {
       console.warn('Attempted to map null/undefined activity');
       throw new Error('Invalid activity data');
+    }
+
+    let recurrence: RecurrenceConfig | undefined;
+
+    if (activity.is_recurring && activity.recurrence_type) {
+      recurrence = {
+        type: activity.recurrence_type,
+        interval: activity.recurrence_interval,
+        daysOfWeek: activity.recurrence_days_of_week,
+        endDate: activity.recurrence_end_date,
+      };
     }
 
     const mapped: Activity = {
@@ -153,6 +233,9 @@ class ActivityService {
       pdfUrl: activity.pdf_url,
       createdAt: activity.created_at,
       updatedAt: activity.updated_at,
+      isRecurring: activity.is_recurring,
+      parentActivityId: activity.parent_activity_id || undefined,
+      recurrence,
     };
 
     return mapped;

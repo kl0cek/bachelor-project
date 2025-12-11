@@ -86,12 +86,27 @@ export class ActivityController {
   async update(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const userId = req.userId!;
+      const updateData = req.body;
+      const userId = req.user!.id;
 
+      console.log('=== UPDATE ACTIVITY REQUEST ===');
+      console.log('Activity ID:', id);
+      console.log('User ID:', userId);
+      console.log('Update Data:', JSON.stringify(updateData, null, 2));
+      console.log('Update Data Types:', {
+        name: typeof updateData.name,
+        date: typeof updateData.date,
+        start_hour: typeof updateData.start_hour,
+        duration: typeof updateData.duration,
+        type: typeof updateData.type,
+      });
       const activity = await activityService.updateActivity(id, req.body, userId);
 
       res.json(successResponse(activity, 'Activity updated'));
     } catch (error) {
+      console.error('=== UPDATE ACTIVITY ERROR ===');
+      console.error('Error:', error);
+      console.error('Request body:', req.body);
       next(error);
     }
   }

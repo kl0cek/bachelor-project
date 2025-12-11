@@ -1,4 +1,4 @@
-import { Between, IsNull } from 'typeorm';
+import { Between, IsNull, Not } from 'typeorm';
 import { AppDataSource } from '../config/database';
 import { Activity, ActivityType, Priority, RecurrenceType } from '../entities/Activity.entity';
 import { CrewMember } from '../entities/CrewMember.entity';
@@ -40,6 +40,8 @@ export interface UpdateActivityDto {
   description?: string;
   equipment?: string[];
   pdf_url?: string | null;
+  is_recurring?: boolean;
+  recurrence?: RecurrenceConfig;
 }
 
 class ActivityService {
@@ -48,29 +50,30 @@ class ActivityService {
   private missionRepository = AppDataSource.getRepository(Mission);
 
   async getActivitiesByMissionAndDate(missionId: string, date: string): Promise<Activity[]> {
-    return await this.activityRepository.find({
-      where: {
-        mission_id: missionId,
-        date: new Date(date),
-      },
-      relations: ['crew_member', 'crew_member.user'],
-      order: {
-        crew_member_id: 'ASC',
-        start_hour: 'ASC',
-      },
-    });
+    const activities = await this.activityRepository
+      .createQueryBuilder('activity')
+      .leftJoinAndSelect('activity.crew_member', 'crew_member')
+      .leftJoinAndSelect('crew_member.user', 'user')
+      .where('activity.mission_id = :missionId', { missionId })
+      .andWhere('activity.date = :date', { date: new Date(date) })
+      .andWhere('NOT (activity.is_recurring = true AND activity.parent_activity_id IS NULL)')
+      .orderBy('activity.crew_member_id', 'ASC')
+      .addOrderBy('activity.start_hour', 'ASC')
+      .getMany();
+
+    return activities;
   }
 
   async getActivitiesByCrewAndDate(crewMemberId: string, date: string): Promise<Activity[]> {
-    return await this.activityRepository.find({
-      where: {
-        crew_member_id: crewMemberId,
-        date: new Date(date),
-      },
-      order: {
-        start_hour: 'ASC',
-      },
-    });
+    const activities = await this.activityRepository
+      .createQueryBuilder('activity')
+      .where('activity.crew_member_id = :crewMemberId', { crewMemberId })
+      .andWhere('activity.date = :date', { date: new Date(date) })
+      .andWhere('NOT (activity.is_recurring = true AND activity.parent_activity_id IS NULL)')
+      .orderBy('activity.start_hour', 'ASC')
+      .getMany();
+
+    return activities;
   }
 
   async createActivity(data: CreateActivityDto, userId: string): Promise<Activity | Activity[]> {
@@ -306,7 +309,15 @@ class ActivityService {
 
     if (activity.isRecurringParent()) {
       throw new BadRequestError(
-        'Cannot update recurring parent activity. Use updateRecurringActivities instead.'
+        'Cannot update recurring parent activity directly. Use updateRecurringActivities instead.'
+      );
+    }
+
+    if (!activity.is_recurring && data.is_recurring && data.recurrence) {
+      return await this.convertToRecurring(
+        activity,
+        data as UpdateActivityDto & { recurrence: RecurrenceConfig },
+        userId
       );
     }
 
@@ -324,10 +335,13 @@ class ActivityService {
         throw new BadRequestError('Invalid activity duration');
       }
 
-      const date = data.date ? new Date(data.date) : activity.date;
+      const dateToCheck = data.date
+        ? new Date(data.date).toISOString().split('T')[0]
+        : activity.date.toISOString().split('T')[0];
+
       const hasConflict = await this.checkTimeConflict(
         activity.crew_member_id,
-        date.toISOString().split('T')[0],
+        dateToCheck,
         newStartHour,
         newDuration,
         id
@@ -338,10 +352,13 @@ class ActivityService {
       }
     }
 
-    Object.assign(activity, {
-      ...data,
-      ...(data.date && { date: new Date(data.date) }),
-    });
+    const { date: newDate, is_recurring, recurrence, ...safeData } = data;
+
+    Object.assign(activity, safeData);
+
+    if (newDate) {
+      activity.date = new Date(newDate);
+    }
 
     const updated = await this.activityRepository.save(activity);
 
@@ -373,12 +390,41 @@ class ActivityService {
       where: { parent_activity_id: parentId },
     });
 
+    const { date, is_recurring, recurrence, ...updateData } = data;
+
     let updated = 0;
     let skipped = 0;
 
     for (const instance of instances) {
       try {
-        await this.updateActivity(instance.id, data, userId);
+        const instanceUpdate = { ...updateData };
+
+        if (updateData.start_hour !== undefined || updateData.duration !== undefined) {
+          const newStartHour = updateData.start_hour ?? instance.start_hour;
+          const newDuration = updateData.duration ?? instance.duration;
+
+          const instanceDateStr =
+            instance.date instanceof Date
+              ? instance.date.toISOString().split('T')[0]
+              : String(instance.date).split('T')[0];
+
+          const hasConflict = await this.checkTimeConflict(
+            instance.crew_member_id,
+            instanceDateStr,
+            newStartHour,
+            newDuration,
+            instance.id
+          );
+
+          if (hasConflict) {
+            skipped++;
+            console.log(`Skipping instance ${instance.id} due to time conflict`);
+            continue;
+          }
+        }
+
+        Object.assign(instance, instanceUpdate);
+        await this.activityRepository.save(instance);
         updated++;
       } catch (error) {
         skipped++;
@@ -386,7 +432,8 @@ class ActivityService {
       }
     }
 
-    Object.assign(parent, data);
+    const { date: _, is_recurring: __, recurrence: ___, ...parentUpdateData } = data;
+    Object.assign(parent, parentUpdateData);
     await this.activityRepository.save(parent);
 
     await auditService.log({
@@ -394,7 +441,7 @@ class ActivityService {
       action: 'update_recurring_activities',
       resourceType: 'activity',
       resourceId: parentId,
-      changes: { updated, skipped, data },
+      changes: { updated, skipped, data: updateData },
     });
 
     return { updated, skipped };
@@ -407,6 +454,12 @@ class ActivityService {
 
     if (!activity) {
       throw new NotFoundError('Activity not found');
+    }
+
+    if (activity.isRecurringParent()) {
+      throw new BadRequestError(
+        'Cannot delete recurring parent directly. Use deleteRecurringActivities instead.'
+      );
     }
 
     await this.activityRepository.remove(activity);
@@ -461,6 +514,20 @@ class ActivityService {
     return activity;
   }
 
+  async getRecurringParent(childId: string): Promise<Activity | null> {
+    const child = await this.activityRepository.findOne({
+      where: { id: childId },
+    });
+
+    if (!child || !child.parent_activity_id) {
+      return null;
+    }
+
+    return await this.activityRepository.findOne({
+      where: { id: child.parent_activity_id },
+    });
+  }
+
   private async checkTimeConflict(
     crewMemberId: string,
     date: string,
@@ -478,7 +545,8 @@ class ActivityService {
       .andWhere(
         '(activity.start_hour < :endHour AND (activity.start_hour + activity.duration) > :startHour)',
         { startHour, endHour }
-      );
+      )
+      .andWhere('NOT (activity.is_recurring = true AND activity.parent_activity_id IS NULL)');
 
     if (excludeActivityId) {
       query.andWhere('activity.id != :excludeActivityId', { excludeActivityId });
@@ -523,6 +591,105 @@ class ActivityService {
     }
 
     return slots;
+  }
+
+  private async convertToRecurring(
+    activity: Activity,
+    data: UpdateActivityDto & { recurrence: RecurrenceConfig },
+    userId: string
+  ): Promise<Activity> {
+    const mission = await this.missionRepository.findOne({
+      where: { id: activity.mission_id },
+    });
+
+    if (!mission) {
+      throw new NotFoundError('Mission not found');
+    }
+
+    activity.is_recurring = true;
+    activity.recurrence_type = data.recurrence.type;
+    activity.recurrence_interval = data.recurrence.interval;
+    activity.recurrence_days_of_week = data.recurrence.daysOfWeek;
+    activity.recurrence_end_date = data.recurrence.endDate
+      ? new Date(data.recurrence.endDate)
+      : new Date(mission.end_date);
+
+    const parent = await this.activityRepository.save(activity);
+
+    const endDate = data.recurrence.endDate
+      ? new Date(data.recurrence.endDate)
+      : new Date(mission.end_date);
+
+    const startDate = new Date(activity.date);
+
+    const dates = this.generateRecurringDates(
+      startDate,
+      endDate,
+      data.recurrence.type,
+      data.recurrence.interval,
+      data.recurrence.daysOfWeek
+    );
+
+    if (dates.length === 0) {
+      throw new BadRequestError('No valid dates generated for recurrence pattern');
+    }
+
+    const instances: Activity[] = [];
+    const conflictDates: string[] = [];
+
+    const startDateStr = startDate.toISOString().split('T')[0];
+    const datesToCreate = dates.filter((date) => date.toISOString().split('T')[0] !== startDateStr);
+
+    for (const date of datesToCreate) {
+      const dateStr = date.toISOString().split('T')[0];
+
+      const hasConflict = await this.checkTimeConflict(
+        activity.crew_member_id,
+        dateStr,
+        activity.start_hour,
+        activity.duration
+      );
+
+      if (hasConflict) {
+        conflictDates.push(dateStr);
+        continue;
+      }
+
+      const instance = this.activityRepository.create({
+        crew_member_id: activity.crew_member_id,
+        mission_id: activity.mission_id,
+        name: activity.name,
+        date: date,
+        start_hour: activity.start_hour,
+        duration: activity.duration,
+        type: activity.type,
+        priority: activity.priority,
+        mission: activity.mission,
+        description: activity.description,
+        equipment: activity.equipment,
+        created_by: userId,
+        is_recurring: false,
+        parent_activity_id: parent.id,
+      });
+
+      instances.push(instance);
+    }
+
+    await this.activityRepository.save(instances);
+
+    await auditService.log({
+      userId,
+      action: 'convert_to_recurring',
+      resourceType: 'activity',
+      resourceId: parent.id,
+      changes: {
+        instancesCreated: instances.length,
+        conflictsSkipped: conflictDates.length,
+        conflictDates,
+      },
+    });
+
+    return parent;
   }
 }
 

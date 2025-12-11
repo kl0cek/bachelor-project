@@ -1,4 +1,4 @@
-import type { ActivityType, Priority, MissionStatus, UserRole } from './types';
+import type { ActivityType, Priority, MissionStatus, UserRole, RecurrenceType } from './types';
 
 export interface BackendActivity {
   id: string;
@@ -16,6 +16,12 @@ export interface BackendActivity {
   pdf_url: string;
   created_at: string;
   updated_at: string;
+  is_recurring: boolean;
+  parent_activity_id?: string | null;
+  recurrence_type?: RecurrenceType;
+  recurrence_interval?: number;
+  recurrence_days_of_week?: number[];
+  recurrence_end_date?: string;
 }
 
 export interface BackendCrewMember {
@@ -120,6 +126,13 @@ export interface UpdateActivityBackendRequest {
   date?: string;
   crew_member_id?: string;
   mission_id?: string;
+  is_recurring?: boolean;
+  recurrence?: {
+    type: 'daily' | 'weekly' | 'custom';
+    interval?: number;
+    daysOfWeek?: number[];
+    endDate?: string;
+  };
 }
 
 export interface CreateCrewMemberBackendRequest {

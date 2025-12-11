@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { activityService, type CreateActivityRequest } from '../services/activityService';
 import type { Activity } from '../types/types';
+import type { UpdateActivityBackendRequest } from '../types/apiTypes';
 
 const activityCache = new Map<string, Activity[]>();
 
@@ -65,45 +66,65 @@ export const useAllMissionActivities = (missionId: string, startDate: string, en
     fetchAllActivities();
   }, [fetchAllActivities]);
 
-  const createActivity = async (data: CreateActivityRequest) => {
-    const newActivity = await activityService.createActivity(data);
+  const createActivity = async (data: CreateActivityRequest): Promise<Activity> => {
+    const result = await activityService.createActivity(data);
 
-    setActivities((prev) => [...prev, newActivity]);
-    activityCache.set(cacheKey, [...activities, newActivity]);
+    if (data.is_recurring) {
+      await fetchAllActivities(true);
+      return result;
+    }
 
-    return newActivity;
+    setActivities((prev) => {
+      const updated = [...prev, result];
+      activityCache.set(cacheKey, updated);
+      return updated;
+    });
+
+    return result;
   };
 
-  const updateActivity = async (id: string, updates: Partial<CreateActivityRequest>) => {
+  const updateActivity = async (
+    id: string,
+    updates: UpdateActivityBackendRequest
+  ): Promise<Activity> => {
     const updated = await activityService.updateActivity(id, updates);
 
-    setActivities((prev) => prev.map((a) => (a.id === id ? updated : a)));
-    activityCache.set(
-      cacheKey,
-      activities.map((a) => (a.id === id ? updated : a))
-    );
+    setActivities((prev) => {
+      const newActivities = prev.map((a) => (a.id === id ? updated : a));
+      activityCache.set(cacheKey, newActivities);
+      return newActivities;
+    });
 
     return updated;
   };
 
-  const deleteActivity = async (id: string) => {
+  const deleteActivity = async (id: string): Promise<void> => {
     await activityService.deleteActivity(id);
 
-    setActivities((prev) => prev.filter((a) => a.id !== id));
-    activityCache.set(
-      cacheKey,
-      activities.filter((a) => a.id !== id)
-    );
+    setActivities((prev) => {
+      const filtered = prev.filter((a) => a.id !== id);
+      activityCache.set(cacheKey, filtered);
+      return filtered;
+    });
   };
+
+  const refetch = useCallback(() => {
+    return fetchAllActivities(true);
+  }, [fetchAllActivities]);
+
+  const clearCache = useCallback(() => {
+    activityCache.delete(cacheKey);
+  }, [cacheKey]);
 
   return {
     activities,
     setActivities,
     loading,
     error,
-    refetch: () => fetchAllActivities(true),
+    refetch,
     createActivity,
     updateActivity,
     deleteActivity,
+    clearCache,
   };
 };

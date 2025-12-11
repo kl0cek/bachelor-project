@@ -60,7 +60,7 @@ export const ScrollableTimelineTable = ({
               Crew Member
             </th>
 
-            {allDates.map((date) => (
+            {allDates.flatMap((date) => (
               <th
                 key={date}
                 colSpan={24}
@@ -87,7 +87,7 @@ export const ScrollableTimelineTable = ({
               UTC Time
             </th>
 
-            {allDates.map((date) => (
+            {allDates.flatMap((date) => (
               <>
                 {hours.map((hour) => (
                   <th
@@ -115,7 +115,7 @@ export const ScrollableTimelineTable = ({
                 </div>
               </td>
 
-              {allDates.map((date) => {
+              {allDates.flatMap((date) => {
                 const memberActivities = getActivitiesForCrewMemberAndDate(member.id, date);
 
                 return hours.map((hour) => {

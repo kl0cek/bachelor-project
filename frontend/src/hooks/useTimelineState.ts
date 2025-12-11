@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useAllMissionActivities } from './useAllMissionActivities';
 import type { Mission, Activity } from '../types/types';
 
@@ -13,14 +13,25 @@ export const useTimelineState = (mission: Mission) => {
     return missionStart.toISOString().split('T')[0];
   });
 
-  const { activities, setActivities, loading, createActivity, updateActivity, deleteActivity } =
-    useAllMissionActivities(mission.id, mission.startDate, mission.endDate);
+  const {
+    activities,
+    setActivities,
+    loading,
+    createActivity,
+    updateActivity,
+    deleteActivity,
+    refetch,
+  } = useAllMissionActivities(mission.id, mission.startDate, mission.endDate);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Activity | null>(null);
   const [selectedCrewMemberId, setSelectedCrewMemberId] = useState<string>('');
   const [defaultStartTime, setDefaultStartTime] = useState<number>(6);
   const [viewingTask, setViewingTask] = useState<Activity | null>(null);
+
+  const refreshActivities = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   const handlePreviousDay = () => {
     const date = new Date(currentDate);
@@ -109,5 +120,6 @@ export const useTimelineState = (mission: Mission) => {
     setSelectedTask,
     closeViewModal,
     handlePdfUploaded,
+    refreshActivities,
   };
 };
