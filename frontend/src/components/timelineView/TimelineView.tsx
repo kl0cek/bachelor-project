@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { TaskForm } from '../taskForm/TaskForm';
 import { ActivityModal } from '../activityModal/ActivityModal';
 import { activityService } from '../../services/activityService';
@@ -52,18 +52,18 @@ export const TimelineView = ({ mission, onTodayAvailable }: TimelineViewProps) =
   const today = new Date().toISOString().split('T')[0];
   const isTodayInMission = allDates.includes(today);
 
-  const handleGoToToday = () => {
+  const handleGoToToday = useCallback(() => {
     if (isTodayInMission) {
       setCurrentDate(today);
       scrollToToday();
     }
-  };
+  }, [isTodayInMission, setCurrentDate, today, scrollToToday]);
 
   useEffect(() => {
     if (onTodayAvailable) {
       onTodayAvailable(handleGoToToday, isTodayInMission);
     }
-  }, [isTodayInMission, onTodayAvailable]);
+  }, [handleGoToToday, isTodayInMission, onTodayAvailable]);
 
   const handleFormSubmit = async (
     taskData: Activity,

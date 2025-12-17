@@ -37,7 +37,8 @@ export const ScrollableTimelineTable = ({
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentHour(new Date().getHours());
-    }, 60000);
+    }, 60000); 
+
     return () => clearInterval(interval);
   }, []);
 
@@ -109,7 +110,7 @@ export const ScrollableTimelineTable = ({
                   >
                     {hour.toString().padStart(2, '0')}:00
                     {isTodayInMission && date === today && hour === currentHour && (
-                      <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-red-600 dark:bg-red-500 z-40" />
+                      <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-0.5 bg-red-600 dark:bg-red-500 z-40" />
                     )}
                   </th>
                 ))}
@@ -154,7 +155,7 @@ export const ScrollableTimelineTable = ({
                         onViewTask={onViewTask}
                       />
                       {isTodayInMission && date === today && hour === currentHour && (
-                        <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-red-600 dark:bg-red-500 z-50 pointer-events-none" />
+                        <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-0.5 bg-red-600 dark:bg-red-500 z-50 pointer-events-none" />
                       )}
                     </td>
                   );
