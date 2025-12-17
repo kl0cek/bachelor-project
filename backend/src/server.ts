@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
 import app from './index';
-import fs from 'fs';
-import path from 'path';
-import https from 'https';
+//import fs from 'fs';
+//import path from 'path';
+import http from 'http';
 import { initializeDatabase } from './config/database';
 import { initializeSocket } from './config/socket';
 import { logger } from './config/logger';
@@ -12,22 +12,22 @@ dotenv.config();
 const PORT = Number(process.env.PORT) || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-const options = {
-  key: fs.readFileSync(path.join(__dirname, './certs/localhost+1-key.pem')),
-  cert: fs.readFileSync(path.join(__dirname, './certs/localhost+1.pem')),
-};
+// const options = {
+//   key: fs.readFileSync(path.join(__dirname, './certs/localhost+1-key.pem')),
+//   cert: fs.readFileSync(path.join(__dirname, './certs/localhost+1.pem')),
+// };
 
 async function startServer() {
   try {
     await initializeDatabase();
     logger.info('Database initialized successfully');
 
-    const httpsServer = https.createServer(options, app);
+    const httpServer = http.createServer( app ); //options
 
-    initializeSocket(httpsServer);
+    initializeSocket(httpServer);
     logger.info('Socket.io initialized successfully');
 
-    httpsServer.listen(PORT, '0.0.0.0', () => {
+    httpServer.listen(PORT, '0.0.0.0', () => {
       logger.info(`Server running in ${NODE_ENV} mode on port ${PORT}`);
       logger.info(`API available at http://localhost:${PORT}${process.env.API_PREFIX || '/api'}`);
       logger.info(`WebSocket available at ws://localhost:${PORT}`);
