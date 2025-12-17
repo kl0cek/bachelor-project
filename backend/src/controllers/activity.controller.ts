@@ -6,7 +6,6 @@ import { BadRequestError } from '../utils/errors';
 import path from 'path';
 import fs from 'fs';
 
-// Helper to delete file
 const deleteFile = (filePath: string): Promise<void> => {
   return new Promise((resolve, reject) => {
     const fullPath = path.join(process.cwd(), filePath);
@@ -62,9 +61,23 @@ export class ActivityController {
   async create(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const userId = req.userId!;
-      const activity = await activityService.createActivity(req.body, userId);
+      const result = await activityService.createActivity(req.body, userId);
 
-      res.status(201).json(successResponse(activity, 'Activity created'));
+      if (Array.isArray(result)) {
+        const [parent, ...instances] = result;
+        res.status(201).json(
+          successResponse(
+            {
+              parent,
+              instances,
+              totalCreated: result.length,
+            },
+            `Recurring activity created with ${instances.length} instances`
+          )
+        );
+      } else {
+        res.status(201).json(successResponse(result, 'Activity created'));
+      }
     } catch (error) {
       next(error);
     }
@@ -73,11 +86,41 @@ export class ActivityController {
   async update(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
-      const userId = req.userId!;
+      const updateData = req.body;
+      const userId = req.user!.id;
 
+      console.log('=== UPDATE ACTIVITY REQUEST ===');
+      console.log('Activity ID:', id);
+      console.log('User ID:', userId);
+      console.log('Update Data:', JSON.stringify(updateData, null, 2));
+      console.log('Update Data Types:', {
+        name: typeof updateData.name,
+        date: typeof updateData.date,
+        start_hour: typeof updateData.start_hour,
+        duration: typeof updateData.duration,
+        type: typeof updateData.type,
+      });
       const activity = await activityService.updateActivity(id, req.body, userId);
 
       res.json(successResponse(activity, 'Activity updated'));
+    } catch (error) {
+      console.error('=== UPDATE ACTIVITY ERROR ===');
+      console.error('Error:', error);
+      console.error('Request body:', req.body);
+      next(error);
+    }
+  }
+
+  async updateRecurring(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { parentId } = req.params;
+      const userId = req.userId!;
+
+      const result = await activityService.updateRecurringActivities(parentId, req.body, userId);
+
+      res.json(
+        successResponse(result, `Updated ${result.updated} activities, skipped ${result.skipped}`)
+      );
     } catch (error) {
       next(error);
     }
@@ -91,6 +134,19 @@ export class ActivityController {
       await activityService.deleteActivity(id, userId);
 
       res.json(successResponse(null, 'Activity deleted'));
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async deleteRecurring(req: AuthRequest, res: Response, next: NextFunction) {
+    try {
+      const { parentId } = req.params;
+      const userId = req.userId!;
+
+      const deletedCount = await activityService.deleteRecurringActivities(parentId, userId);
+
+      res.json(successResponse({ deletedCount }, `Deleted ${deletedCount} activities`));
     } catch (error) {
       next(error);
     }
@@ -128,7 +184,6 @@ export class ActivityController {
     }
   }
 
-  // NEW: Upload PDF
   async uploadPDF(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -139,17 +194,14 @@ export class ActivityController {
         throw new BadRequestError('No PDF file provided');
       }
 
-      // Get activity to check if it has old PDF
       const activity = await activityService.getActivityById(id);
 
-      // Delete old PDF if exists
       if (activity.pdf_url) {
         await deleteFile(activity.pdf_url).catch((err) =>
           console.error('Error deleting old PDF:', err)
         );
       }
 
-      // Update activity with new PDF URL
       const pdfUrl = `/uploads/activities/${file.filename}`;
       const updated = await activityService.updateActivity(id, { pdf_url: pdfUrl }, userId);
 
@@ -159,7 +211,6 @@ export class ActivityController {
     }
   }
 
-  // NEW: Delete PDF
   async deletePDF(req: AuthRequest, res: Response, next: NextFunction) {
     try {
       const { id } = req.params;
@@ -171,10 +222,8 @@ export class ActivityController {
         throw new BadRequestError('Activity has no PDF attached');
       }
 
-      // Delete file from filesystem
       await deleteFile(activity.pdf_url);
 
-      // Update activity
       const updated = await activityService.updateActivity(id, { pdf_url: null }, userId);
 
       res.json(successResponse(updated, 'PDF deleted successfully'));

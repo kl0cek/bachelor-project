@@ -8,12 +8,13 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts",
-    "build": "tsc",
+    "devh": "HOST=0.0.0.0 nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts",
+    "build": "NODE_ENV=production tsc && cp -R src/certs prod/",
     "start": "node prod/server.js",
     "typeorm": "typeorm-ts-node-commonjs",
     "migration:generate": "npm run typeorm -- migration:generate -d src/config/database.ts",
     "migration:run": "npm run typeorm -- migration:run -d src/config/database.ts",
-    "migration:run:prod": "node -r dotenv/config ./node_modules/typeorm/cli.js migration:run -d dist/config/database.js",
+    "migration:run:prod": "node -r dotenv/config ./node_modules/typeorm/cli.js migration:run -d prod/config/database.js",
     "migration:revert": "npm run typeorm -- migration:revert -d src/config/database.ts",
     "seed": "ts-node src/scripts/seed.ts",
     "test": "jest --coverage",
@@ -21,6 +22,15 @@
     "format": "prettier --write \"src/**/*.ts\""
   },
   "dependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/compression": "^1.8.1",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.5",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/morgan": "^1.9.10",
+    "@types/multer": "^2.0.0",
+    "@types/socket.io": "^3.0.1",
     "bcrypt": "^6.0.0",
     "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
@@ -34,23 +44,17 @@
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "pg": "^8.16.3",
-    "typeorm": "^0.3.27",
-    "winston": "^3.18.3",
-    "typescript": "^5.9.3",
+    "socket.io": "^4.8.1",
     "ts-node": "^10.9.2",
-    "@types/bcrypt": "^6.0.0",
-    "@types/compression": "^1.8.1",
-    "@types/cookie-parser": "^1.4.10",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.5",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/morgan": "^1.9.10",
-    "@types/multer": "^2.0.0"
+    "typeorm": "^0.3.17",
+    "typescript": "^5.9.3",
+    "winston": "^3.18.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",
     "eslint": "^9.39.0",
     "nodemon": "^3.1.10",
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "typescript-eslint": "^8.48.1"
   }
 }

@@ -22,12 +22,36 @@ const createActivityValidation = [
   body('mission').optional().isString(),
   body('description').optional().isString(),
   body('equipment').optional().isArray(),
+  body('is_recurring').optional().isBoolean(),
+  body('recurrence').optional().isObject(),
+  body('recurrence.type').optional().isIn(['daily', 'weekly', 'custom']),
+  body('recurrence.interval').optional().isInt({ min: 1 }),
+  body('recurrence.daysOfWeek').optional().isArray(),
+  body('recurrence.endDate').optional().isISO8601(),
 ];
 
 const updateActivityValidation = [
   param('id').isUUID(),
   body('name').optional().trim().isLength({ max: 200 }),
   body('date').optional().isISO8601(),
+  body('start_hour').optional().isFloat({ min: 0, max: 24 }),
+  body('duration').optional().isFloat({ min: 0.1, max: 24 }),
+  body('type').optional().isIn(['exercise', 'meal', 'sleep', 'work', 'eva', 'optional']),
+  body('priority').optional().isIn(['high', 'medium', 'low']),
+  body('mission').optional().isString(),
+  body('description').optional().isString(),
+  body('equipment').optional().isArray(),
+  body('is_recurring').optional().isBoolean(),
+  body('recurrence').optional().isObject(),
+  body('recurrence.type').optional().isIn(['daily', 'weekly', 'custom']),
+  body('recurrence.interval').optional().isInt({ min: 1 }),
+  body('recurrence.daysOfWeek').optional().isArray(),
+  body('recurrence.endDate').optional().isISO8601(),
+];
+
+const updateRecurringValidation = [
+  param('parentId').isUUID(),
+  body('name').optional().trim().isLength({ max: 200 }),
   body('start_hour').optional().isFloat({ min: 0, max: 24 }),
   body('duration').optional().isFloat({ min: 0.1, max: 24 }),
   body('type').optional().isIn(['exercise', 'meal', 'sleep', 'work', 'eva', 'optional']),
@@ -75,6 +99,22 @@ router.patch(
   updateActivityValidation,
   validate,
   activityController.update
+);
+
+router.patch(
+  '/recurring/:parentId/all',
+  requirePermission('manage_activities'),
+  updateRecurringValidation,
+  validate,
+  activityController.updateRecurring
+);
+
+router.delete(
+  '/recurring/:parentId/all',
+  requirePermission('manage_activities'),
+  param('parentId').isUUID(),
+  validate,
+  activityController.deleteRecurring
 );
 
 router.post(

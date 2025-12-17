@@ -1,31 +1,34 @@
 import { Link } from 'react-router';
-import { User, LogIn, Shield, LogOut } from 'lucide-react';
+import { User, Shield, LogOut } from 'lucide-react';
 import { Button } from '../ui';
-import { LoginModal } from './LoginModal';
 import { getRoleBadgeColor } from '../../utils/auth';
 import { useAuthHeader } from '../../hooks/useAuthHeader';
 
 export const MainHeader = () => {
-  const { user, isLoginModalOpen, setIsLoginModalOpen, isLoggingOut, handleLogin, handleLogout } =
-    useAuthHeader();
+  const { user, isLoggingOut, handleLogout } = useAuthHeader();
 
   return (
     <>
       <header className="border-b border-white dark:border-slate-800 bg-white dark:bg-slate-800 shadow-sm">
-        <div className="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
-          <div className="flex items-center justify-between gap-3">
-            <Link to="/" className="flex items-center gap-4 -ml-2">
-              <div className="h-24 w-24 rounded-xl bg-space-100 dark:bg-space-900 flex items-center justify-center">
-                <img src="/WTK_light.png" className="dark:hidden object-contain" />
-                <img src="/WTK_dark.png" className="hidden dark:block object-contain" />
+        <div className="container mx-auto px-2 sm:px-4 lg:px-6 py-2 sm:py-3 lg:py-4">
+          <div className="flex items-center justify-between gap-2 sm:gap-3">
+            <Link to="/" className="flex items-center gap-2 sm:gap-4 -ml-1 sm:-ml-2 min-w-0 shrink">
+              <div className="h-12 w-12 sm:h-16 sm:w-16 lg:h-24 lg:w-24 rounded-lg sm:rounded-xl bg-space-100 dark:bg-space-900 flex items-center justify-center shrink-0">
+                <img src="/AGH_czarne_logo.png" className="dark:hidden object-contain" />
+                <img src="/AGH_biale_logo.png" className="hidden dark:block object-contain" />
               </div>
-              <h1 className="text-xl font-light text-slate-900 dark:text-slate-100 truncate">
-                Mission Control Platform
-              </h1>
+              <div className="flex flex-col min-w-0">
+                <p className="text-sm sm:text-sm font-medium text-slate-500 dark:text-slate-500 uppercase tracking-wide">
+                  Faculty of Space Technologies
+                </p>
+                <h1 className="text-xs sm:text-base lg:text-xl font-light text-slate-900 dark:text-slate-100 truncate">
+                  Mission Control Platform
+                </h1>
+              </div>
             </Link>
 
             <div className="flex items-center gap-2">
-              {user ? (
+              {user && (
                 <>
                   <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-100 dark:bg-slate-700">
                     <User className="h-4 w-4" />
@@ -66,22 +69,11 @@ export const MainHeader = () => {
                     </span>
                   </Button>
                 </>
-              ) : (
-                <Button size="sm" onClick={() => setIsLoginModalOpen(true)}>
-                  <LogIn className="h-4 w-4" />
-                  <span className="ml-2 hidden xs:inline">Login</span>
-                </Button>
               )}
             </div>
           </div>
         </div>
       </header>
-
-      <LoginModal
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
-        onLogin={handleLogin}
-      />
     </>
   );
 };

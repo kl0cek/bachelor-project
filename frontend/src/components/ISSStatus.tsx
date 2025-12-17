@@ -3,8 +3,14 @@ import { useISS } from '../hooks/useISS';
 import { cn } from '../utils/utils';
 import { getVisibilityIcon, getVisibilityText } from '../utils/issUtils';
 import { getDayOfYear, formatDate } from '../utils/dateUtils';
+import { statusStyles, getStatusColor } from '../utils/headerUtils';
+import type { Mission } from '../types/types';
 
-export const ISSStatus = () => {
+interface ISSStatusProps {
+  mission?: Mission;
+}
+
+export const ISSStatus = ({ mission }: ISSStatusProps) => {
   const { data, loading, error } = useISS(30000);
   const currentDate = new Date();
   const dayOfYear = getDayOfYear(currentDate);
@@ -67,14 +73,31 @@ export const ISSStatus = () => {
             visibilityColor
           )}
         >
-          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+          <div className="flex flex-col items-center gap-1.5 sm:gap-2 shrink-0">
             <span className="text-xs sm:text-sm">{getVisibilityIcon(data.visibility)}</span>
-            <Satellite className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </div>
           <div className="flex flex-col min-w-0">
             <span className="text-[10px] sm:text-xs font-medium whitespace-nowrap">
-              <span className="hidden sm:inline">ISS {getVisibilityText(data.visibility)}</span>
-              <span className="sm:hidden">{getVisibilityText(data.visibility)}</span>
+              <span className="hidden sm:inline">ISS</span>
+            </span>
+            <span className="text-[10px] sm:text-xs opacity-75 whitespace-nowrap">
+              {getVisibilityText(data.visibility)}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {mission && (
+        <div
+          className={`flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl border ${statusStyles[mission.status]}`}
+        >
+          <div
+            className={`h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full animate-pulse ${getStatusColor(mission.status)}`}
+          />
+          <div className="flex flex-col min-w-0">
+            <span className="text-[10px] sm:text-xs font-medium whitespace-nowrap">Mission</span>
+            <span className="text-[10px] sm:text-xs opacity-75 whitespace-nowrap">
+              {mission.status.charAt(0).toUpperCase() + mission.status.slice(1)}
             </span>
           </div>
         </div>

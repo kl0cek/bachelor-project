@@ -1,21 +1,36 @@
 import dotenv from 'dotenv';
 import app from './index';
+//import fs from 'fs';
+//import path from 'path';
+import http from 'http';
 import { initializeDatabase } from './config/database';
+import { initializeSocket } from './config/socket';
 import { logger } from './config/logger';
 
 dotenv.config();
 
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT) || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
+
+// const options = {
+//   key: fs.readFileSync(path.join(__dirname, './certs/localhost+1-key.pem')),
+//   cert: fs.readFileSync(path.join(__dirname, './certs/localhost+1.pem')),
+// };
 
 async function startServer() {
   try {
     await initializeDatabase();
-    logger.info('✅ Database initialized successfully');
+    logger.info('Database initialized successfully');
 
-    app.listen(PORT, () => {
+    const httpServer = http.createServer( app ); //options
+
+    initializeSocket(httpServer);
+    logger.info('Socket.io initialized successfully');
+
+    httpServer.listen(PORT, '0.0.0.0', () => {
       logger.info(`Server running in ${NODE_ENV} mode on port ${PORT}`);
       logger.info(`API available at http://localhost:${PORT}${process.env.API_PREFIX || '/api'}`);
+      logger.info(`WebSocket available at ws://localhost:${PORT}`);
       logger.info(`Health check at http://localhost:${PORT}/health`);
     });
   } catch (error) {
@@ -39,8 +54,13 @@ process.on('uncaughtException', (error: Error) => {
   process.exit(1);
 });
 
-process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
+process.on('unhandledRejection', (reason: unknown, promise: Promise<unknown>) => {
   logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
+
+  if (reason instanceof Error) {
+    logger.error('Error stack:', reason.stack);
+  }
+
   process.exit(1);
 });
 

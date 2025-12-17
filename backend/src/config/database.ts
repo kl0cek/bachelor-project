@@ -1,4 +1,5 @@
 import { DataSource } from 'typeorm';
+import path from 'path';
 import dotenv from 'dotenv';
 import { User } from '../entities/User.entity';
 import { Mission } from '../entities/Mission.entity';
@@ -37,10 +38,16 @@ export const AppDataSource = new DataSource({
     ActivityComment,
   ],
 
-  migrations: [isProduction ? 'prod/migrations/**/*.js' : 'src/migrations/**/*.ts'],
-
-  subscribers: [isProduction ? 'prod/subscribers/**/*.js' : 'src/subscribers/**/*.ts'],
-
+  migrations: [
+    isProduction
+      ? path.join(__dirname, 'migrations', '**', '*.js')
+      : path.join(__dirname, '..', 'migrations', '**', '*.ts'),
+  ],
+  subscribers: [
+    isProduction
+      ? path.join(__dirname, 'subscribers', '**', '*.js')
+      : path.join(__dirname, '..', 'subscribers', '**', '*.ts'),
+  ],
   synchronize: process.env.DB_SYNC === 'true' && !isProduction,
 
   logging: process.env.DB_LOGGING === 'true' ? ['query', 'error', 'warn'] : false,

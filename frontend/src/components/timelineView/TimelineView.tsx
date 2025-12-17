@@ -1,14 +1,21 @@
-import { TimelineNavigation, TimelineTable } from './index';
+import { useEffect, useCallback } from 'react';
 import { TaskForm } from '../taskForm/TaskForm';
 import { ActivityModal } from '../activityModal/ActivityModal';
+import { activityService } from '../../services/activityService';
 import { useTimelineState } from '../../hooks/useTimelineState';
+import { useTimelineScroll } from '../../hooks/useTimelineScroll';
+import { ScrollableTimelineTable } from './index';
 import type { Mission, Activity } from '../../types/types';
+
+type UpdateScope = 'single' | 'all';
+type DeleteScope = 'single' | 'all';
 
 interface TimelineViewProps {
   mission: Mission;
+  onTodayAvailable?: (goToToday: () => void, isAvailable: boolean) => void;
 }
 
-export const TimelineView = ({ mission }: TimelineViewProps) => {
+export const TimelineView = ({ mission, onTodayAvailable }: TimelineViewProps) => {
   const {
     currentDate,
     activities,
@@ -21,10 +28,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     createActivity,
     updateActivity,
     deleteActivity,
-    handlePreviousDay,
-    handleNextDay,
-    canNavigatePrevious,
-    canNavigateNext,
+    setCurrentDate,
     handleAddTask,
     handleEditTask,
     handleViewTask,
@@ -33,11 +37,38 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     setSelectedTask,
     closeViewModal,
     handlePdfUploaded,
+    refreshActivities,
   } = useTimelineState(mission);
+
+  const { allDates, scrollContainerRef, getDayNumber, scrollToToday } = useTimelineScroll(mission);
 
   const crewMembers = mission.crewMembers || [];
 
-  const handleFormSubmit = async (taskData: Activity): Promise<Activity | void> => {
+  const isRecurringInstance = (task: Activity | null): boolean => {
+    if (!task) return false;
+    return !!task.parentActivityId;
+  };
+
+  const today = new Date().toISOString().split('T')[0];
+  const isTodayInMission = allDates.includes(today);
+
+  const handleGoToToday = useCallback(() => {
+    if (isTodayInMission) {
+      setCurrentDate(today);
+      scrollToToday();
+    }
+  }, [isTodayInMission, setCurrentDate, today, scrollToToday]);
+
+  useEffect(() => {
+    if (onTodayAvailable) {
+      onTodayAvailable(handleGoToToday, isTodayInMission);
+    }
+  }, [handleGoToToday, isTodayInMission, onTodayAvailable]);
+
+  const handleFormSubmit = async (
+    taskData: Activity,
+    updateScope?: UpdateScope
+  ): Promise<Activity | void> => {
     if (!taskData.crewMemberId) {
       console.error('Crew member ID is required');
       return;
@@ -45,9 +76,35 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
 
     try {
       if (selectedTask) {
-        const updated = await updateActivity(selectedTask.id!, {
-          crew_member_id: taskData.crewMemberId,
-          mission_id: mission.id,
+        if (updateScope === 'all' && selectedTask.parentActivityId) {
+          console.log('Updating all instances in series...');
+
+          const recurringUpdateData = {
+            name: taskData.name,
+            start_hour: taskData.start,
+            duration: taskData.duration,
+            type: taskData.type,
+            priority: taskData.priority,
+            mission: taskData.mission,
+            description: taskData.description,
+            equipment: taskData.equipment,
+          };
+
+          const result = await activityService.updateRecurringActivities(
+            selectedTask.parentActivityId,
+            recurringUpdateData
+          );
+
+          console.log(`Updated ${result.updated} instances, skipped ${result.skipped}`);
+
+          await refreshActivities();
+
+          setIsFormOpen(false);
+          setSelectedTask(null);
+          return;
+        }
+
+        const singleUpdateData = {
           name: taskData.name,
           date: currentDate,
           start_hour: taskData.start,
@@ -57,12 +114,16 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
           mission: taskData.mission,
           description: taskData.description,
           equipment: taskData.equipment,
-        });
+        };
+
+        console.log('Updating single instance...');
+
+        const updated = await updateActivity(selectedTask.id!, singleUpdateData);
         setIsFormOpen(false);
         setSelectedTask(null);
         return updated;
       } else {
-        const created = await createActivity({
+        const createData = {
           crew_member_id: taskData.crewMemberId,
           mission_id: mission.id,
           name: taskData.name,
@@ -74,7 +135,12 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
           mission: taskData.mission,
           description: taskData.description,
           equipment: taskData.equipment,
-        });
+          is_recurring: taskData.isRecurring,
+          recurrence: taskData.isRecurring ? taskData.recurrence : undefined,
+        };
+
+        const created = await createActivity(createData);
+
         setIsFormOpen(false);
         setSelectedTask(null);
         return created;
@@ -85,9 +151,23 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     }
   };
 
-  const handleDeleteTask = async (taskId: string) => {
+  const handleDeleteTask = async (taskId: string, deleteScope?: DeleteScope) => {
     try {
-      await deleteActivity(taskId);
+      const taskToDelete = selectedTask || activities.find((a) => a.id === taskId);
+
+      if (deleteScope === 'all' && taskToDelete?.parentActivityId) {
+        console.log('Deleting entire series...');
+        const result = await activityService.deleteRecurringActivities(
+          taskToDelete.parentActivityId
+        );
+        console.log(`Deleted ${result.deleted} recurring activities`);
+
+        await refreshActivities();
+      } else {
+        console.log('Deleting single instance...');
+        await deleteActivity(taskId);
+      }
+
       closeForm();
     } catch (error) {
       console.error('Error deleting activity:', error);
@@ -110,20 +190,17 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
   return (
     <>
       <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm overflow-hidden mb-6">
-        <TimelineNavigation
-          currentDate={currentDate}
-          onPrevious={handlePreviousDay}
-          onNext={handleNextDay}
-          canNavigatePrevious={canNavigatePrevious()}
-          canNavigateNext={canNavigateNext()}
-        />
-
-        <TimelineTable
+        <ScrollableTimelineTable
           crewMembers={crewMembers}
+          allDates={allDates}
           activities={activities}
           loading={loading}
           onAddTask={handleAddTask}
           onViewTask={handleViewTask}
+          scrollContainerRef={scrollContainerRef}
+          currentDate={currentDate}
+          setCurrentDate={setCurrentDate}
+          getDayNumber={getDayNumber}
         />
       </div>
 
@@ -138,6 +215,8 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
         date={currentDate}
         key={selectedTask?.id || 'new'}
         onPdfUploaded={handlePdfUploaded}
+        missionEndDate={mission.endDate}
+        isRecurringInstance={isRecurringInstance(selectedTask)}
       />
 
       <ActivityModal

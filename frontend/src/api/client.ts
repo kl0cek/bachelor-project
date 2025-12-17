@@ -44,13 +44,11 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest);
       } catch (err) {
         isRefreshing = false;
-        console.error('Refresh failed', err);
+        console.error('Refresh failed - token expired, redirecting to home');
 
         localStorage.removeItem('currentUser');
 
-        if (!window.location.pathname.includes('/login')) {
-          window.location.href = '/login';
-        }
+        window.location.href = '/';
 
         return Promise.reject(err);
       }

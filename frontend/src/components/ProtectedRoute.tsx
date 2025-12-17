@@ -24,10 +24,34 @@ export const ProtectedRoute = ({
         setUser(JSON.parse(savedUser));
       } catch (error) {
         console.error('Failed to parse user:', error);
+        localStorage.removeItem('currentUser');
       }
     }
     setLoading(false);
   }, []);
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const savedUser = localStorage.getItem('currentUser');
+      if (!savedUser) {
+        setUser(null);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    const interval = setInterval(() => {
+      const savedUser = localStorage.getItem('currentUser');
+      if (!savedUser && user) {
+        setUser(null);
+      }
+    }, 1000);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, [user]);
 
   if (loading) {
     return (

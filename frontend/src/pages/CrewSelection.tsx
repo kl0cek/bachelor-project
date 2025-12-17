@@ -58,7 +58,6 @@ export const CrewSelection = () => {
     };
 
     loadMission();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
@@ -74,7 +73,6 @@ export const CrewSelection = () => {
         }))
       );
     } else if (!crewLoading && crew.length === 0) {
-      // If no crew members exist, show one empty form
       setCrewMembers([
         { id: 'temp-1', name: '', role: '', email: '', isNew: true, isModified: false },
       ]);
@@ -91,10 +89,8 @@ export const CrewSelection = () => {
 
   const removeCrewMember = async (memberId: string, isNew: boolean) => {
     if (isNew) {
-      // Just remove from local state if it's a new member
       setCrewMembers(crewMembers.filter((member) => member.id !== memberId));
     } else {
-      // Delete from backend if it's an existing member
       if (window.confirm('Are you sure you want to remove this crew member?')) {
         try {
           await deleteCrewMember(memberId);
@@ -136,7 +132,6 @@ export const CrewSelection = () => {
     setError(null);
 
     try {
-      // Create new members
       const newMembers = validMembers.filter((member) => member.isNew);
       for (const member of newMembers) {
         await createCrewMember({
@@ -147,7 +142,6 @@ export const CrewSelection = () => {
         });
       }
 
-      // Update existing members that were modified
       const modifiedMembers = validMembers.filter((member) => !member.isNew && member.isModified);
       for (const member of modifiedMembers) {
         await updateCrewMember(member.id, {
@@ -187,7 +181,6 @@ export const CrewSelection = () => {
     setError(null);
 
     try {
-      // Create new members
       const newMembers = validMembers.filter((member) => member.isNew);
       for (const member of newMembers) {
         await createCrewMember({
@@ -198,7 +191,6 @@ export const CrewSelection = () => {
         });
       }
 
-      // Update existing members that were modified
       const modifiedMembers = validMembers.filter((member) => !member.isNew && member.isModified);
       for (const member of modifiedMembers) {
         await updateCrewMember(member.id, {
@@ -286,7 +278,7 @@ export const CrewSelection = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-4">
+            <div className="max-h-[500px] overflow-y-auto pr-2 space-y-4">
               {crewMembers.map((member) => (
                 <div
                   key={member.id}

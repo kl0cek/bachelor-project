@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useActivities } from './useActivities';
+import { useState, useCallback } from 'react';
+import { useAllMissionActivities } from './useAllMissionActivities';
 import type { Mission, Activity } from '../types/types';
 
 export const useTimelineState = (mission: Mission) => {
@@ -7,21 +7,31 @@ export const useTimelineState = (mission: Mission) => {
     const today = new Date();
     const missionStart = new Date(mission.startDate);
     const missionEnd = new Date(mission.endDate);
-
     if (today >= missionStart && today <= missionEnd) {
       return today.toISOString().split('T')[0];
     }
     return missionStart.toISOString().split('T')[0];
   });
 
-  const { activities, setActivities, loading, createActivity, updateActivity, deleteActivity } =
-    useActivities(mission.id, currentDate);
+  const {
+    activities,
+    setActivities,
+    loading,
+    createActivity,
+    updateActivity,
+    deleteActivity,
+    refetch,
+  } = useAllMissionActivities(mission.id, mission.startDate, mission.endDate);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Activity | null>(null);
   const [selectedCrewMemberId, setSelectedCrewMemberId] = useState<string>('');
   const [defaultStartTime, setDefaultStartTime] = useState<number>(6);
   const [viewingTask, setViewingTask] = useState<Activity | null>(null);
+
+  const refreshActivities = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
 
   const handlePreviousDay = () => {
     const date = new Date(currentDate);
@@ -87,6 +97,7 @@ export const useTimelineState = (mission: Mission) => {
 
   return {
     currentDate,
+    setCurrentDate,
     activities,
     loading,
     isFormOpen,
@@ -109,5 +120,6 @@ export const useTimelineState = (mission: Mission) => {
     setSelectedTask,
     closeViewModal,
     handlePdfUploaded,
+    refreshActivities,
   };
 };

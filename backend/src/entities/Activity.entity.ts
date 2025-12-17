@@ -28,6 +28,12 @@ export enum Priority {
   LOW = 'low',
 }
 
+export enum RecurrenceType {
+  DAILY = 'daily',
+  WEEKLY = 'weekly',
+  CUSTOM = 'custom',
+}
+
 @Entity('activities')
 export class Activity {
   @PrimaryGeneratedColumn('uuid')
@@ -72,6 +78,24 @@ export class Activity {
   @Column({ type: 'varchar', length: 500, nullable: true })
   pdf_url?: string;
 
+  @Column({ type: 'boolean', default: false })
+  is_recurring!: boolean;
+
+  @Column({ type: 'uuid', nullable: true })
+  parent_activity_id?: string;
+
+  @Column({ type: 'varchar', length: 20, nullable: true })
+  recurrence_type?: RecurrenceType;
+
+  @Column({ type: 'integer', nullable: true })
+  recurrence_interval?: number;
+
+  @Column({ type: 'integer', array: true, nullable: true })
+  recurrence_days_of_week?: number[];
+
+  @Column({ type: 'date', nullable: true })
+  recurrence_end_date?: Date;
+
   @CreateDateColumn({ type: 'timestamp with time zone' })
   created_at!: Date;
 
@@ -94,6 +118,10 @@ export class Activity {
   @JoinColumn({ name: 'created_by' })
   created_by_user?: User;
 
+  @ManyToOne(() => Activity, { nullable: true, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'parent_activity_id' })
+  parent_activity?: Activity;
+
   @OneToMany(() => ActivityComment, (comment) => comment.activity)
   comments!: ActivityComment[];
 
@@ -108,5 +136,13 @@ export class Activity {
     const thisEnd = this.getEndHour();
     const otherEnd = other.getEndHour();
     return this.start_hour < otherEnd && thisEnd > other.start_hour;
+  }
+
+  isRecurringInstance(): boolean {
+    return !!this.parent_activity_id;
+  }
+
+  isRecurringParent(): boolean {
+    return this.is_recurring && !this.parent_activity_id;
   }
 }
