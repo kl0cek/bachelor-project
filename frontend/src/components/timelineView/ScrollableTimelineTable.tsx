@@ -1,6 +1,7 @@
 import { Loader2 } from 'lucide-react';
 import { TimeSlot } from './TimeSlot';
 import type { CrewMember, Activity } from '../../types/types';
+import { useEffect, useState } from 'react';
 
 interface ScrollableTimelineTableProps {
   crewMembers: CrewMember[];
@@ -29,6 +30,17 @@ export const ScrollableTimelineTable = ({
   setCurrentDate,
   getDayNumber,
 }: ScrollableTimelineTableProps) => {
+  const [currentHour, setCurrentHour] = useState<number>(new Date().getHours());
+  const today = new Date().toISOString().split('T')[0];
+  const isTodayInMission = allDates.includes(today);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentHour(new Date().getHours());
+    }, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
   const formatDateShort = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', {
@@ -52,7 +64,7 @@ export const ScrollableTimelineTable = ({
   }
 
   return (
-    <div ref={scrollContainerRef} className="overflow-x-auto overflow-y-auto max-h-[600px]">
+    <div ref={scrollContainerRef} className="overflow-x-auto overflow-y-auto max-h-[600px] relative">
       <table className="min-w-full border-collapse">
         <thead className="sticky top-0 z-20 bg-slate-50 dark:bg-slate-900">
           <tr>
@@ -92,10 +104,13 @@ export const ScrollableTimelineTable = ({
                 {hours.map((hour) => (
                   <th
                     key={`${date}-${hour}`}
-                    className="px-2 py-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400 border-r border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800"
+                    className="px-2 py-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400 border-r border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 relative"
                     style={{ minWidth: '60px' }}
                   >
                     {hour.toString().padStart(2, '0')}:00
+                    {isTodayInMission && date === today && hour === currentHour && (
+                      <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-red-600 dark:bg-red-500 z-40" />
+                    )}
                   </th>
                 ))}
               </>
@@ -127,17 +142,21 @@ export const ScrollableTimelineTable = ({
                   const isActivityStart = activityAtHour && activityAtHour.start === hour;
 
                   return (
-                    <TimeSlot
-                      key={`${date}-${hour}`}
-                      hour={hour}
-                      activity={activityAtHour}
-                      isActivityStart={isActivityStart}
-                      onAddTask={(h) => {
-                        setCurrentDate(date);
-                        onAddTask(member.id, h);
-                      }}
-                      onViewTask={onViewTask}
-                    />
+                    <td key={`${date}-${hour}`} className="relative">
+                      <TimeSlot
+                        hour={hour}
+                        activity={activityAtHour}
+                        isActivityStart={isActivityStart}
+                        onAddTask={(h) => {
+                          setCurrentDate(date);
+                          onAddTask(member.id, h);
+                        }}
+                        onViewTask={onViewTask}
+                      />
+                      {isTodayInMission && date === today && hour === currentHour && (
+                        <div className="absolute left-0 top-0 bottom-0 w-0.5 bg-red-600 dark:bg-red-500 z-50 pointer-events-none" />
+                      )}
+                    </td>
                   );
                 });
               })}

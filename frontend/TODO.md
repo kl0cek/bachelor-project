@@ -32,3 +32,6 @@ Misja sie odpala po wcisnieciu name
 Kamerka: buttony widoczne zawsze
 updateCrew: buttony zostaja grid z crew rozwija sie
 Gdy jest sie logout i link jest po /mission itd a nie permisji ( user jest logout ) - przekierowac na strone glowna
+Poprawiono logo
+Linia ktory mamy dzien
+button do powrotu do dzisiejszej daty

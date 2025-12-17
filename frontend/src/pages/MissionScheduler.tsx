@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router';
-import { Users, Loader2, AlertCircle, Video } from 'lucide-react';
+import { Users, Loader2, AlertCircle, Video, Calendar } from 'lucide-react';
 import { TimelineView, ActivityLegend, PlaybookHeader } from '../components/index';
 import { Button } from '../components/ui/index';
 import { useMissions } from '../hooks/useMissions';
@@ -12,6 +12,8 @@ export const MissionScheduler = () => {
   const [mission, setMission] = useState<Mission | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [goToTodayFn, setGoToTodayFn] = useState<(() => void) | null>(null);
+  const [isTodayAvailable, setIsTodayAvailable] = useState(false);
 
   useEffect(() => {
     const loadMission = async () => {
@@ -37,6 +39,11 @@ export const MissionScheduler = () => {
 
     loadMission();
   }, [id]);
+
+  const handleTodayAvailable = (goToToday: () => void, isAvailable: boolean) => {
+    setGoToTodayFn(() => goToToday);
+    setIsTodayAvailable(isAvailable);
+  };
 
   if (loading) {
     return (
@@ -92,12 +99,22 @@ export const MissionScheduler = () => {
             </div>
           </div>
 
-          <div className="flex justify-between text-sm text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-lg p-4">
+          <div className="flex justify-between items-start text-sm text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-lg p-4">
             <div>
               <p className="font-medium mb-2">Mission Description:</p>
               <p>{mission.description}</p>
             </div>
-            <div className="flex flex-col items-end gap-2">
+            <div className="flex flex-row items-end gap-2">
+              {isTodayAvailable && goToTodayFn && (
+                <Button
+                  variant="outline"
+                  className="flex items-center gap-2"
+                  onClick={goToTodayFn}
+                >
+                  <Calendar className="h-4 w-4" />
+                  Go to Today
+                </Button>
+              )}
               <Link to={`/mission/${mission.id}/video-call`}>
                 <Button className="flex items-center gap-2">
                   <Video className="h-4 w-4" />
@@ -108,7 +125,7 @@ export const MissionScheduler = () => {
           </div>
         </div>
 
-        <TimelineView mission={mission} />
+        <TimelineView mission={mission} onTodayAvailable={handleTodayAvailable} />
         <ActivityLegend />
       </main>
     </div>

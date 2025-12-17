@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { TaskForm } from '../taskForm/TaskForm';
 import { ActivityModal } from '../activityModal/ActivityModal';
 import { activityService } from '../../services/activityService';
@@ -11,9 +12,10 @@ type DeleteScope = 'single' | 'all';
 
 interface TimelineViewProps {
   mission: Mission;
+  onTodayAvailable?: (goToToday: () => void, isAvailable: boolean) => void;
 }
 
-export const TimelineView = ({ mission }: TimelineViewProps) => {
+export const TimelineView = ({ mission, onTodayAvailable }: TimelineViewProps) => {
   const {
     currentDate,
     activities,
@@ -38,7 +40,7 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     refreshActivities,
   } = useTimelineState(mission);
 
-  const { allDates, scrollContainerRef, getDayNumber } = useTimelineScroll(mission);
+  const { allDates, scrollContainerRef, getDayNumber, scrollToToday } = useTimelineScroll(mission);
 
   const crewMembers = mission.crewMembers || [];
 
@@ -46,6 +48,22 @@ export const TimelineView = ({ mission }: TimelineViewProps) => {
     if (!task) return false;
     return !!task.parentActivityId;
   };
+
+  const today = new Date().toISOString().split('T')[0];
+  const isTodayInMission = allDates.includes(today);
+
+  const handleGoToToday = () => {
+    if (isTodayInMission) {
+      setCurrentDate(today);
+      scrollToToday();
+    }
+  };
+
+  useEffect(() => {
+    if (onTodayAvailable) {
+      onTodayAvailable(handleGoToToday, isTodayInMission);
+    }
+  }, [isTodayInMission, onTodayAvailable]);
 
   const handleFormSubmit = async (
     taskData: Activity,

@@ -14,12 +14,17 @@ export const MainHeader = () => {
           <div className="flex items-center justify-between gap-2 sm:gap-3">
             <Link to="/" className="flex items-center gap-2 sm:gap-4 -ml-1 sm:-ml-2 min-w-0 shrink">
               <div className="h-12 w-12 sm:h-16 sm:w-16 lg:h-24 lg:w-24 rounded-lg sm:rounded-xl bg-space-100 dark:bg-space-900 flex items-center justify-center shrink-0">
-                <img src="/WTK_light.png" className="dark:hidden object-contain" />
-                <img src="/WTK_dark.png" className="hidden dark:block object-contain" />
+                <img src="/AGH_czarne_logo.png" className="dark:hidden object-contain" />
+                <img src="/AGH_biale_logo.png" className="hidden dark:block object-contain" />
               </div>
-              <h1 className="text-sm sm:text-base lg:text-xl font-light text-slate-900 dark:text-slate-100 truncate">
-                Mission Control Platform
-              </h1>
+              <div className="flex flex-col min-w-0">
+                <p className="text-sm sm:text-sm font-medium text-slate-500 dark:text-slate-500 uppercase tracking-wide">
+                  Faculty of Space Technologies
+                </p>
+                <h1 className="text-xs sm:text-base lg:text-xl font-light text-slate-900 dark:text-slate-100 truncate">
+                  Mission Control Platform
+                </h1>
+              </div>
             </Link>
 
             <div className="flex items-center gap-2">
