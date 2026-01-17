@@ -18,6 +18,24 @@ interface PaginationInfo {
   hasPrev: boolean;
 }
 
+interface CreateUserData {
+  username: string;
+  password: string;
+  full_name: string;
+  email?: string;
+  role: UserRole;
+  is_active: boolean;
+}
+
+interface UpdateUserData {
+  username?: string;
+  password?: string;
+  full_name?: string;
+  email?: string;
+  role?: UserRole;
+  is_active?: boolean;
+}
+
 export const useUsers = (options: UseUsersOptions = {}) => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
@@ -45,62 +63,39 @@ export const useUsers = (options: UseUsersOptions = {}) => {
     }
   }, [loadUsers, options.autoLoad]);
 
-  const createUser = useCallback(
-    async (userData: {
-      username: string;
-      password: string;
-      full_name: string;
-      email?: string;
-      role: UserRole;
-      is_active: boolean;
-    }) => {
-      setLoading(true);
-      setError(null);
+  const createUser = useCallback(async (userData: CreateUserData) => {
+    setLoading(true);
+    setError(null);
 
-      try {
-        const newUser = await userService.createUser(userData);
-        setUsers((prev) => [...prev, newUser]);
-        return newUser;
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to create user';
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
+    try {
+      const newUser = await userService.createUser(userData);
+      setUsers((prev) => [...prev, newUser]);
+      return newUser;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create user';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const updateUser = useCallback(
-    async (
-      id: string,
-      updates: {
-        username?: string;
-        password?: string;
-        fullName?: string;
-        email?: string;
-        role?: UserRole;
-        isActive?: boolean;
-      }
-    ) => {
-      setLoading(true);
-      setError(null);
+  const updateUser = useCallback(async (id: string, updates: UpdateUserData) => {
+    setLoading(true);
+    setError(null);
 
-      try {
-        const updatedUser = await userService.updateUser(id, updates);
-        setUsers((prev) => prev.map((user) => (user.id === id ? updatedUser : user)));
-        return updatedUser;
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'Failed to update user';
-        setError(errorMessage);
-        throw err;
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
+    try {
+      const updatedUser = await userService.updateUser(id, updates);
+      setUsers((prev) => prev.map((user) => (user.id === id ? updatedUser : user)));
+      return updatedUser;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update user';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   const deleteUser = useCallback(async (id: string) => {
     setLoading(true);

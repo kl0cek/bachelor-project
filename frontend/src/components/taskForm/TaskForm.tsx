@@ -11,6 +11,7 @@ import {
 import { useTaskForm, useRecurrence, usePdfUpload } from '../../hooks/index';
 import { FORM_STYLES } from '../../constants/formsStyles';
 import type { Activity } from '../../types/types';
+import { useToast } from '../../hooks/index';
 
 type UpdateScope = 'single' | 'all';
 type DeleteScope = 'single' | 'all';
@@ -54,6 +55,7 @@ export const TaskForm = ({
     handleRemoveEquipment,
     buildTaskData,
   } = useTaskForm({ task, defaultStartTime, crewMemberId });
+  const { showSuccess, showError } = useToast();
 
   const { isRecurring, recurrence, setIsRecurring, setRecurrence, validateRecurrence } =
     useRecurrence(task);
@@ -85,9 +87,23 @@ export const TaskForm = ({
 
       const scope = isRecurringInstance ? updateScope : undefined;
       savedActivity = await onSubmit(taskData, scope);
+
+      if (isEditing) {
+        if (isRecurringInstance && updateScope === 'all') {
+          showSuccess('All tasks in series updated successfully');
+        } else {
+          showSuccess('Task updated successfully');
+        }
+      } else {
+        if (isRecurring) {
+          showSuccess('Recurring tasks created successfully');
+        } else {
+          showSuccess('Task created successfully');
+        }
+      }
     } catch (error) {
       console.error('Failed to save task:', error);
-      alert('Failed to save task. Please try again.');
+      showError('Failed to save task. Please check for hour collision.');
       return;
     }
 
@@ -109,6 +125,7 @@ export const TaskForm = ({
   const handleDeleteSingle = () => {
     if (task && onDelete) {
       onDelete(task.id, 'single');
+      showSuccess('Task deleted successfully');
       setShowDeleteOptions(false);
       onClose();
     }
@@ -117,6 +134,7 @@ export const TaskForm = ({
   const handleDeleteSeries = () => {
     if (task && onDelete) {
       onDelete(task.id, 'all');
+      showSuccess('Task series deleted successfully');
       setShowDeleteOptions(false);
       onClose();
     }

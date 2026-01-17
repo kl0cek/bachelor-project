@@ -37,7 +37,7 @@ export const ScrollableTimelineTable = ({
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentHour(new Date().getHours());
-    }, 60000); 
+    }, 60000);
 
     return () => clearInterval(interval);
   }, []);
@@ -65,7 +65,10 @@ export const ScrollableTimelineTable = ({
   }
 
   return (
-    <div ref={scrollContainerRef} className="overflow-x-auto overflow-y-auto max-h-[600px] relative">
+    <div
+      ref={scrollContainerRef}
+      className="overflow-x-auto overflow-y-auto max-h-[600px] relative"
+    >
       <table className="min-w-full border-collapse">
         <thead className="sticky top-0 z-20 bg-slate-50 dark:bg-slate-900">
           <tr>
