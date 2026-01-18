@@ -1,12 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
-import type { 
-  VideoCallState, 
-  VideoRoom, 
-  ConnectionState, 
-  DelayPreset
-} from '../types/videoCall';
+import type { VideoCallState, VideoRoom, ConnectionState, DelayPreset } from '../types/videoCall';
 import { SOCKET_URL, INITIAL_STATE, SOCKET_OPTIONS } from '../constants/videoCall';
 import { getAccessToken, getMediaStream } from '../utils/videoCall';
 import { usePeerConnection } from '../hooks/usePeerConnection';
@@ -131,8 +126,8 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
 
         setState((prev) => ({
           ...prev,
-          room: { 
-            id: roomId, 
+          room: {
+            id: roomId,
             mission_id: missionId,
             room_name: `Mission ${missionId} Video Call`,
             is_active: true,
@@ -148,7 +143,7 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
           const response = await fetch(`${apiUrl}/video-rooms/mission/${missionId}`, {
             credentials: 'include',
           });
-          
+
           if (response.ok) {
             const roomData = await response.json();
             if (roomData.success && roomData.data) {
@@ -222,116 +217,125 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
     }
   }, []);
 
-  const setDelay = useCallback((seconds: number) => {
-    const socket = socketRef.current;
-    const roomId = roomIdRef.current;
+  const setDelay = useCallback(
+    (seconds: number) => {
+      const socket = socketRef.current;
+      const roomId = roomIdRef.current;
 
-    setState((prev) => ({
-      ...prev,
-      delayConfig: {
-        ...prev.delayConfig,
-        delaySeconds: seconds,
-        delayPreset: 'custom',
-      },
-    }));
+      setState((prev) => ({
+        ...prev,
+        delayConfig: {
+          ...prev.delayConfig,
+          delaySeconds: seconds,
+          delayPreset: 'custom',
+        },
+      }));
 
-    if (socket && roomId) {
-      socket.emit('update-delay', { 
-        roomId, 
-        delaySeconds: seconds,
-        enabled: state.delayConfig.enabled,
-      });
-    }
+      if (socket && roomId) {
+        socket.emit('update-delay', {
+          roomId,
+          delaySeconds: seconds,
+          enabled: state.delayConfig.enabled,
+        });
+      }
 
-    if (state.room?.id) {
-      const apiUrl = import.meta.env.VITE_API_URL || '';
-      fetch(`${apiUrl}/video-rooms/${state.room.id}/delay`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ 
-          delay_seconds: seconds,
-          delay_enabled: state.delayConfig.enabled,
-        }),
-      }).catch(console.error);
-    }
-  }, [state.delayConfig.enabled, state.room?.id]);
+      if (state.room?.id) {
+        const apiUrl = import.meta.env.VITE_API_URL || '';
+        fetch(`${apiUrl}/video-rooms/${state.room.id}/delay`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            delay_seconds: seconds,
+            delay_enabled: state.delayConfig.enabled,
+          }),
+        }).catch(console.error);
+      }
+    },
+    [state.delayConfig.enabled, state.room?.id]
+  );
 
-  const toggleDelay = useCallback((enabled: boolean) => {
-    const socket = socketRef.current;
-    const roomId = roomIdRef.current;
+  const toggleDelay = useCallback(
+    (enabled: boolean) => {
+      const socket = socketRef.current;
+      const roomId = roomIdRef.current;
 
-    setState((prev) => ({
-      ...prev,
-      delayConfig: {
-        ...prev.delayConfig,
-        enabled,
-      },
-    }));
+      setState((prev) => ({
+        ...prev,
+        delayConfig: {
+          ...prev.delayConfig,
+          enabled,
+        },
+      }));
 
-    if (socket && roomId) {
-      socket.emit('update-delay', { 
-        roomId, 
-        delaySeconds: state.delayConfig.delaySeconds,
-        enabled,
-      });
-    }
+      if (socket && roomId) {
+        socket.emit('update-delay', {
+          roomId,
+          delaySeconds: state.delayConfig.delaySeconds,
+          enabled,
+        });
+      }
 
-    if (state.room?.id) {
-      const apiUrl = import.meta.env.VITE_API_URL || '';
-      fetch(`${apiUrl}/video-rooms/${state.room.id}/delay`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ 
-          delay_seconds: state.delayConfig.delaySeconds,
-          delay_enabled: enabled,
-        }),
-      }).catch(console.error);
-    }
-  }, [state.delayConfig.delaySeconds, state.room?.id]);
+      if (state.room?.id) {
+        const apiUrl = import.meta.env.VITE_API_URL || '';
+        fetch(`${apiUrl}/video-rooms/${state.room.id}/delay`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            delay_seconds: state.delayConfig.delaySeconds,
+            delay_enabled: enabled,
+          }),
+        }).catch(console.error);
+      }
+    },
+    [state.delayConfig.delaySeconds, state.room?.id]
+  );
 
-  const setDelayPreset = useCallback((preset: DelayPreset) => {
-    const presetConfig = {
-      none: { label: 'Brak opóźnienia', seconds: 0 },
-      moon: { label: 'Księżyc (~1.3s)', seconds: 1.3 },
-      mars_min: { label: 'Mars minimum (~3 min)', seconds: 180 },
-      mars_max: { label: 'Mars maximum (~22 min)', seconds: 1320 },
-      custom: { label: 'Niestandardowe', seconds: state.delayConfig.delaySeconds },
-    };
+  const setDelayPreset = useCallback(
+    (preset: DelayPreset) => {
+      const presetConfig = {
+        none: { label: 'Brak opóźnienia', seconds: 0 },
+        moon: { label: 'Księżyc (~1.3s)', seconds: 1.3 },
+        mars_min: { label: 'Mars minimum (~3 min)', seconds: 180 },
+        mars_max: { label: 'Mars maximum (~22 min)', seconds: 1320 },
+        custom: { label: 'Niestandardowe', seconds: state.delayConfig.delaySeconds },
+      };
 
-    const seconds = presetConfig[preset].seconds;
-    const enabled = preset !== 'none';
+      const seconds = presetConfig[preset].seconds;
+      const enabled = preset !== 'none';
 
-    setState((prev) => ({
-      ...prev,
-      delayConfig: {
-        enabled,
-        delaySeconds: seconds,
-        delayPreset: preset,
-      },
-    }));
+      setState((prev) => ({
+        ...prev,
+        delayConfig: {
+          enabled,
+          delaySeconds: seconds,
+          delayPreset: preset,
+        },
+      }));
 
-    const socket = socketRef.current;
-    const roomId = roomIdRef.current;
+      const socket = socketRef.current;
+      const roomId = roomIdRef.current;
 
-    if (socket && roomId) {
-      socket.emit('update-delay', { roomId, delaySeconds: seconds, enabled });
-    }
+      if (socket && roomId) {
+        socket.emit('update-delay', { roomId, delaySeconds: seconds, enabled });
+      }
 
-    if (state.room?.id) {
-      const apiUrl = import.meta.env.VITE_API_URL || '';
-      fetch(`${apiUrl}/video-rooms/${state.room.id}/delay`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ 
-          delay_seconds: seconds,
-          delay_enabled: enabled,
-        }),
-      }).catch(console.error);
-    }
-  }, [state.delayConfig.delaySeconds, state.room?.id]);
+      if (state.room?.id) {
+        const apiUrl = import.meta.env.VITE_API_URL || '';
+        fetch(`${apiUrl}/video-rooms/${state.room.id}/delay`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            delay_seconds: seconds,
+            delay_enabled: enabled,
+          }),
+        }).catch(console.error);
+      }
+    },
+    [state.delayConfig.delaySeconds, state.room?.id]
+  );
 
   useEffect(() => {
     const handleBeforeUnload = () => {
@@ -347,12 +351,12 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
   }, [fullCleanup]);
 
   return (
-    <VideoCallContext.Provider 
-      value={{ 
-        state, 
-        joinRoom, 
-        leaveRoom, 
-        toggleAudio, 
+    <VideoCallContext.Provider
+      value={{
+        state,
+        joinRoom,
+        leaveRoom,
+        toggleAudio,
         toggleVideo,
         setDelay,
         toggleDelay,

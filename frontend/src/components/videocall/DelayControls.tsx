@@ -39,20 +39,21 @@ export function DelayControls({
   const [customMinutes, setCustomMinutes] = useState(
     Math.floor(delayConfig.delaySeconds / 60).toString()
   );
-  const [customSeconds, setCustomSeconds] = useState(
-    (delayConfig.delaySeconds % 60).toFixed(0)
-  );
+  const [customSeconds, setCustomSeconds] = useState((delayConfig.delaySeconds % 60).toFixed(0));
 
-  const handlePresetClick = useCallback((preset: DelayPreset) => {
-    onSetPreset(preset);
-    if (preset !== 'custom') {
-      const presetData = PRESETS.find(p => p.key === preset);
-      if (presetData) {
-        setCustomMinutes(Math.floor(presetData.seconds / 60).toString());
-        setCustomSeconds((presetData.seconds % 60).toFixed(0));
+  const handlePresetClick = useCallback(
+    (preset: DelayPreset) => {
+      onSetPreset(preset);
+      if (preset !== 'custom') {
+        const presetData = PRESETS.find((p) => p.key === preset);
+        if (presetData) {
+          setCustomMinutes(Math.floor(presetData.seconds / 60).toString());
+          setCustomSeconds((presetData.seconds % 60).toFixed(0));
+        }
       }
-    }
-  }, [onSetPreset]);
+    },
+    [onSetPreset]
+  );
 
   const handleCustomDelayChange = useCallback(() => {
     const mins = parseInt(customMinutes) || 0;
@@ -72,14 +73,15 @@ export function DelayControls({
         className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-700 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <Clock className={`h-5 w-5 ${delayConfig.enabled ? 'text-blue-400' : 'text-slate-400'}`} />
+          <Clock
+            className={`h-5 w-5 ${delayConfig.enabled ? 'text-blue-400' : 'text-slate-400'}`}
+          />
           <div className="text-left">
             <p className="text-white font-medium">Opóźnienie komunikacji</p>
             <p className="text-sm text-slate-400">
-              {delayConfig.enabled 
+              {delayConfig.enabled
                 ? `Aktywne: ${formatDelay(delayConfig.delaySeconds)}`
-                : 'Wyłączone'
-              }
+                : 'Wyłączone'}
             </p>
           </div>
         </div>
@@ -174,9 +176,9 @@ export function DelayControls({
           {delayConfig.enabled && delayConfig.delaySeconds > 0 && (
             <div className="bg-slate-700/50 rounded-lg p-3">
               <p className="text-sm text-slate-300">
-                <span className="text-blue-400 font-medium">Info:</span> Obraz i dźwięk od innych uczestników 
-                będą opóźnione o {formatDelay(delayConfig.delaySeconds)}. Symuluje to realne 
-                opóźnienie komunikacji kosmicznej.
+                <span className="text-blue-400 font-medium">Info:</span> Obraz i dźwięk od innych
+                uczestników będą opóźnione o {formatDelay(delayConfig.delaySeconds)}. Symuluje to
+                realne opóźnienie komunikacji kosmicznej.
               </p>
             </div>
           )}
@@ -199,12 +201,12 @@ export function DelayIndicator({ delayConfig }: { delayConfig: DelayConfig }) {
   );
 }
 
-export function BufferingIndicator({ 
-  isBuffering, 
-  progress, 
-  delaySeconds 
-}: { 
-  isBuffering: boolean; 
+export function BufferingIndicator({
+  isBuffering,
+  progress,
+  delaySeconds,
+}: {
+  isBuffering: boolean;
   progress: number;
   delaySeconds: number;
 }) {
@@ -216,12 +218,10 @@ export function BufferingIndicator({
         <Clock className="h-8 w-8 text-blue-400 animate-pulse mx-auto" />
         <div className="text-white">
           <p className="font-medium">Buforowanie...</p>
-          <p className="text-sm text-slate-400">
-            Opóźnienie: {formatDelay(delaySeconds)}
-          </p>
+          <p className="text-sm text-slate-400">Opóźnienie: {formatDelay(delaySeconds)}</p>
         </div>
         <div className="w-32 h-2 bg-slate-700 rounded-full overflow-hidden">
-          <div 
+          <div
             className="h-full bg-blue-500 transition-all duration-300"
             style={{ width: `${progress}%` }}
           />

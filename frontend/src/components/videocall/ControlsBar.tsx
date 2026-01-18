@@ -27,11 +27,7 @@ export function ControlsBar({
           }`}
           title={isAudioEnabled ? 'Wycisz mikrofon' : 'Włącz mikrofon'}
         >
-          {isAudioEnabled ? (
-            <Mic className="h-6 w-6" />
-          ) : (
-            <MicOff className="h-6 w-6" />
-          )}
+          {isAudioEnabled ? <Mic className="h-6 w-6" /> : <MicOff className="h-6 w-6" />}
         </button>
 
         <button
@@ -43,11 +39,7 @@ export function ControlsBar({
           }`}
           title={isVideoEnabled ? 'Wyłącz kamerę' : 'Włącz kamerę'}
         >
-          {isVideoEnabled ? (
-            <Video className="h-6 w-6" />
-          ) : (
-            <VideoOff className="h-6 w-6" />
-          )}
+          {isVideoEnabled ? <Video className="h-6 w-6" /> : <VideoOff className="h-6 w-6" />}
         </button>
 
         <button

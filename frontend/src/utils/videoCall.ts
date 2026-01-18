@@ -17,7 +17,7 @@ export async function getMediaStream(): Promise<MediaStream> {
     return stream;
   } catch (error) {
     console.error('Error accessing media devices:', error);
-    
+
     if (error instanceof Error) {
       if (error.name === 'NotAllowedError') {
         throw new Error('Brak uprawnień do kamery/mikrofonu. Sprawdź ustawienia przeglądarki.');
@@ -29,7 +29,7 @@ export async function getMediaStream(): Promise<MediaStream> {
         throw new Error('Kamera lub mikrofon są używane przez inną aplikację.');
       }
     }
-    
+
     throw new Error('Nie udało się uzyskać dostępu do kamery/mikrofonu.');
   }
 }
@@ -68,19 +68,26 @@ export const CELESTIAL_DISTANCES = {
   },
 };
 
-export function getOneWayDelay(destination: keyof typeof CELESTIAL_DISTANCES, variant: 'min' | 'max' | 'avg' = 'avg'): number {
+export function getOneWayDelay(
+  destination: keyof typeof CELESTIAL_DISTANCES,
+  variant: 'min' | 'max' | 'avg' = 'avg'
+): number {
   const distances = CELESTIAL_DISTANCES[destination];
-  const distance = 'avg' in distances && variant === 'avg' 
-    ? distances.avg 
-    : variant === 'min' && 'min' in distances
-      ? distances.min
-      : variant === 'max' && 'max' in distances
-        ? distances.max
-        : distances.avg;
-  
+  const distance =
+    'avg' in distances && variant === 'avg'
+      ? distances.avg
+      : variant === 'min' && 'min' in distances
+        ? distances.min
+        : variant === 'max' && 'max' in distances
+          ? distances.max
+          : distances.avg;
+
   return calculateLightDelay(distance);
 }
 
-export function getRoundTripDelay(destination: keyof typeof CELESTIAL_DISTANCES, variant: 'min' | 'max' | 'avg' = 'avg'): number {
+export function getRoundTripDelay(
+  destination: keyof typeof CELESTIAL_DISTANCES,
+  variant: 'min' | 'max' | 'avg' = 'avg'
+): number {
   return getOneWayDelay(destination, variant) * 2;
 }

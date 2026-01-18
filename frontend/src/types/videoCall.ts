@@ -29,12 +29,7 @@ export interface DelayConfig {
   delayPreset?: DelayPreset;
 }
 
-export type DelayPreset = 
-  | 'none'
-  | 'moon'
-  | 'mars_min'
-  | 'mars_max'
-  | 'custom';
+export type DelayPreset = 'none' | 'moon' | 'mars_min' | 'mars_max' | 'custom';
 
 export const DELAY_PRESETS: Record<DelayPreset, { label: string; seconds: number }> = {
   none: { label: 'Brak opóźnienia', seconds: 0 },

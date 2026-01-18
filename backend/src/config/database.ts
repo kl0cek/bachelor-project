@@ -39,7 +39,7 @@ export const AppDataSource = new DataSource({
     ActivityHistory,
     ActivityComment,
     VideoRoom,
-    VideoSession
+    VideoSession,
   ],
 
   migrations: [

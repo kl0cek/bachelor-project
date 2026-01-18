@@ -16,11 +16,11 @@ const ROOM_PREFIX = 'mission-';
 export function VideoRoom() {
   const { missionId } = useParams<{ missionId: string }>();
   const navigate = useNavigate();
-  const { 
-    state, 
-    joinRoom, 
-    leaveRoom, 
-    toggleAudio, 
+  const {
+    state,
+    joinRoom,
+    leaveRoom,
+    toggleAudio,
     toggleVideo,
     setDelay,
     toggleDelay,
@@ -74,12 +74,12 @@ export function VideoRoom() {
 
       <div className="absolute top-4 left-4 right-4 z-40 flex items-center justify-between">
         <DelayIndicator delayConfig={state.delayConfig} />
-        
+
         <button
           onClick={handleToggleSettings}
           className={`p-2 rounded-lg transition-colors ${
-            showSettings 
-              ? 'bg-blue-600 text-white' 
+            showSettings
+              ? 'bg-blue-600 text-white'
               : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
           }`}
         >

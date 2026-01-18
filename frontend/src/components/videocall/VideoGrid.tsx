@@ -41,8 +41,8 @@ export function VideoGrid({
         />
 
         {participants.map((participant) => (
-          <ParticipantVideo 
-            key={participant.userId} 
+          <ParticipantVideo
+            key={participant.userId}
             participant={participant}
             delayConfig={delayConfig}
           />

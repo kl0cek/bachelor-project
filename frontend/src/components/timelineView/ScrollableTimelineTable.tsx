@@ -146,7 +146,8 @@ export const ScrollableTimelineTable = ({
                       );
 
                       const isActivityStart = activityAtHour && activityAtHour.start === hour;
-                      const showIndicator = isTodayInMission && date === today && hour === currentHour;
+                      const showIndicator =
+                        isTodayInMission && date === today && hour === currentHour;
 
                       return (
                         <td

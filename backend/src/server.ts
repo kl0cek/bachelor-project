@@ -12,17 +12,17 @@ dotenv.config();
 const PORT = Number(process.env.PORT) || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
-  const options = {
-    key: fs.readFileSync(path.join(__dirname, './certs/localhost+1-key.pem')),
-    cert: fs.readFileSync(path.join(__dirname, './certs/localhost+1.pem')),
-  };
+const options = {
+  key: fs.readFileSync(path.join(__dirname, './certs/localhost+1-key.pem')),
+  cert: fs.readFileSync(path.join(__dirname, './certs/localhost+1.pem')),
+};
 
 async function startServer() {
   try {
     await initializeDatabase();
     logger.info('Database initialized successfully');
 
-    const httpsServer = https.createServer( options, app ); //options
+    const httpsServer = https.createServer(options, app); //options
 
     initializeSocket(httpsServer);
     logger.info('Socket.io initialized successfully');

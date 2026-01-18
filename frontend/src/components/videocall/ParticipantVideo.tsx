@@ -16,13 +16,7 @@ export const ParticipantVideo = memo(({ participant, delayConfig }: ParticipantV
 
   const delayMs = delayConfig.enabled ? delayConfig.delaySeconds * 1000 : 0;
 
-  const { 
-    delayedStream, 
-    isBuffering, 
-    bufferProgress, 
-    startDelay, 
-    stopDelay 
-  } = useDelayedStream({
+  const { delayedStream, isBuffering, bufferProgress, startDelay, stopDelay } = useDelayedStream({
     delayMs,
     enabled: delayConfig.enabled && delayConfig.delaySeconds > 0,
   });
@@ -83,7 +77,8 @@ export const ParticipantVideo = memo(({ participant, delayConfig }: ParticipantV
   const displayName = participant.fullName || participant.username || 'Unknown';
   const initials = displayName.charAt(0).toUpperCase();
 
-  const showDelayIndicator = delayConfig.enabled && delayConfig.delaySeconds > 0 && !isBuffering && isPlaying;
+  const showDelayIndicator =
+    delayConfig.enabled && delayConfig.delaySeconds > 0 && !isBuffering && isPlaying;
   const showBuffering = isBuffering && delayConfig.enabled && delayConfig.delaySeconds > 0;
 
   return (
@@ -110,8 +105,8 @@ export const ParticipantVideo = memo(({ participant, delayConfig }: ParticipantV
       )}
 
       {showBuffering && (
-        <BufferingIndicator 
-          isBuffering={true} 
+        <BufferingIndicator
+          isBuffering={true}
           progress={bufferProgress}
           delaySeconds={delayConfig.delaySeconds}
         />
@@ -125,10 +120,9 @@ export const ParticipantVideo = memo(({ participant, delayConfig }: ParticipantV
           <div className="bg-blue-600/80 px-2 py-1 rounded-lg flex items-center gap-1">
             <Clock className="h-3 w-3 text-white" />
             <span className="text-white text-xs">
-              {delayConfig.delaySeconds < 60 
-                ? `${delayConfig.delaySeconds.toFixed(1)}s` 
-                : `${Math.floor(delayConfig.delaySeconds / 60)}m`
-              }
+              {delayConfig.delaySeconds < 60
+                ? `${delayConfig.delaySeconds.toFixed(1)}s`
+                : `${Math.floor(delayConfig.delaySeconds / 60)}m`}
             </span>
           </div>
         )}
