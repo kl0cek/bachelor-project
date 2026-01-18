@@ -22,7 +22,7 @@ app.use(cookieParser());
 app.set('trust proxy', 1);
 
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN?.split(',') || ['http://localhost:5173'] || [
+  origin: process.env.CORS_ORIGIN?.split(',') || ['https://localhost:5173'] || [
       'https://192.168.0.100:5173',
     ],
   credentials: true,

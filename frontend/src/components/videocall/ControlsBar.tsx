@@ -1,5 +1,4 @@
-import { Mic, MicOff, Video, VideoOff, Phone } from 'lucide-react';
-import { ControlButton } from './ControlButton';
+import { Mic, MicOff, Video, VideoOff, PhoneOff } from 'lucide-react';
 
 interface ControlsBarProps {
   isAudioEnabled: boolean;
@@ -19,27 +18,45 @@ export function ControlsBar({
   return (
     <div className="bg-slate-800 border-t border-slate-700 px-6 py-4">
       <div className="flex items-center justify-center gap-4">
-        <ControlButton
+        <button
           onClick={onToggleAudio}
-          isEnabled={isAudioEnabled}
-          enabledIcon={<Mic className="h-5 w-5" />}
-          disabledIcon={<MicOff className="h-5 w-5" />}
-        />
+          className={`p-4 rounded-full transition-colors ${
+            isAudioEnabled
+              ? 'bg-slate-700 hover:bg-slate-600 text-white'
+              : 'bg-red-600 hover:bg-red-700 text-white'
+          }`}
+          title={isAudioEnabled ? 'Wycisz mikrofon' : 'Włącz mikrofon'}
+        >
+          {isAudioEnabled ? (
+            <Mic className="h-6 w-6" />
+          ) : (
+            <MicOff className="h-6 w-6" />
+          )}
+        </button>
 
-        <ControlButton
+        <button
           onClick={onToggleVideo}
-          isEnabled={isVideoEnabled}
-          enabledIcon={<Video className="h-5 w-5" />}
-          disabledIcon={<VideoOff className="h-5 w-5" />}
-        />
+          className={`p-4 rounded-full transition-colors ${
+            isVideoEnabled
+              ? 'bg-slate-700 hover:bg-slate-600 text-white'
+              : 'bg-red-600 hover:bg-red-700 text-white'
+          }`}
+          title={isVideoEnabled ? 'Wyłącz kamerę' : 'Włącz kamerę'}
+        >
+          {isVideoEnabled ? (
+            <Video className="h-6 w-6" />
+          ) : (
+            <VideoOff className="h-6 w-6" />
+          )}
+        </button>
 
-        <ControlButton
+        <button
           onClick={onLeave}
-          isEnabled={true}
-          enabledIcon={<Phone className="h-5 w-5 rotate-135" />}
-          disabledIcon={<Phone className="h-5 w-5 rotate-135" />}
-          danger
-        />
+          className="p-4 rounded-full bg-red-600 hover:bg-red-700 text-white transition-colors"
+          title="Opuść rozmowę"
+        >
+          <PhoneOff className="h-6 w-6" />
+        </button>
       </div>
     </div>
   );

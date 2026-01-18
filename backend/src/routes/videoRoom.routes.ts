@@ -14,6 +14,10 @@ router.get('/:roomId', videoRoomController.getRoomById.bind(videoRoomController)
 
 router.patch('/:roomId/end', videoRoomController.endRoom.bind(videoRoomController));
 
+router.patch('/:roomId/delay', videoRoomController.updateDelay.bind(videoRoomController));
+
+router.get('/:roomId/delay', videoRoomController.getDelayConfig.bind(videoRoomController));
+
 router.get('/:roomId/sessions', videoRoomController.getActiveSessions.bind(videoRoomController));
 
 router.get(

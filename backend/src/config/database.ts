@@ -9,6 +9,8 @@ import { RefreshToken } from '../entities/RefreshToken.entity';
 import { AuditLog } from '../entities/AuditLog.entity';
 import { ActivityHistory } from '../entities/ActivityHistory.entity';
 import { ActivityComment } from '../entities/ActivityComment.entity';
+import { VideoRoom } from '../entities/VideoRoom.entity';
+import { VideoSession } from '../entities/VideoSession.entity';
 
 dotenv.config();
 
@@ -36,6 +38,8 @@ export const AppDataSource = new DataSource({
     AuditLog,
     ActivityHistory,
     ActivityComment,
+    VideoRoom,
+    VideoSession
   ],
 
   migrations: [
