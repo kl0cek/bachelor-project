@@ -1,7 +1,7 @@
+import { Fragment, useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { TimeSlot } from './TimeSlot';
 import type { CrewMember, Activity } from '../../types/types';
-import { useEffect, useState } from 'react';
 
 interface ScrollableTimelineTableProps {
   crewMembers: CrewMember[];
@@ -76,9 +76,9 @@ export const ScrollableTimelineTable = ({
               Crew Member
             </th>
 
-            {allDates.flatMap((date) => (
+            {allDates.map((date) => (
               <th
-                key={date}
+                key={`date-header-${date}`}
                 colSpan={24}
                 className={`px-2 py-3 text-center text-sm font-semibold border-r-2 border-slate-300 dark:border-slate-600 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ${
                   date === currentDate
@@ -103,11 +103,11 @@ export const ScrollableTimelineTable = ({
               UTC Time
             </th>
 
-            {allDates.flatMap((date) => (
-              <>
+            {allDates.map((date) => (
+              <Fragment key={`hours-header-${date}`}>
                 {hours.map((hour) => (
                   <th
-                    key={`${date}-${hour}`}
+                    key={`${date}-hour-${hour}`}
                     className="px-2 py-2 text-center text-xs font-medium text-slate-500 dark:text-slate-400 border-r border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 relative"
                     style={{ minWidth: '60px' }}
                   >
@@ -117,7 +117,7 @@ export const ScrollableTimelineTable = ({
                     )}
                   </th>
                 ))}
-              </>
+              </Fragment>
             ))}
           </tr>
         </thead>
@@ -134,35 +134,42 @@ export const ScrollableTimelineTable = ({
                 </div>
               </td>
 
-              {allDates.flatMap((date) => {
+              {allDates.map((date) => {
                 const memberActivities = getActivitiesForCrewMemberAndDate(member.id, date);
 
-                return hours.map((hour) => {
-                  const activityAtHour = memberActivities.find(
-                    (activity) =>
-                      activity.start <= hour && activity.start + activity.duration > hour
-                  );
+                return (
+                  <Fragment key={`${member.id}-${date}`}>
+                    {hours.map((hour) => {
+                      const activityAtHour = memberActivities.find(
+                        (activity) =>
+                          activity.start <= hour && activity.start + activity.duration > hour
+                      );
 
-                  const isActivityStart = activityAtHour && activityAtHour.start === hour;
+                      const isActivityStart = activityAtHour && activityAtHour.start === hour;
+                      const showIndicator = isTodayInMission && date === today && hour === currentHour;
 
-                  return (
-                    <td key={`${date}-${hour}`} className="relative">
-                      <TimeSlot
-                        hour={hour}
-                        activity={activityAtHour}
-                        isActivityStart={isActivityStart}
-                        onAddTask={(h) => {
-                          setCurrentDate(date);
-                          onAddTask(member.id, h);
-                        }}
-                        onViewTask={onViewTask}
-                      />
-                      {isTodayInMission && date === today && hour === currentHour && (
-                        <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-0.5 bg-red-600 dark:bg-red-500 z-50 pointer-events-none" />
-                      )}
-                    </td>
-                  );
-                });
+                      return (
+                        <td
+                          key={`${member.id}-${date}-${hour}`}
+                          className="relative border-r border-slate-200 dark:border-slate-700 p-0"
+                          style={{ height: '60px', minWidth: '60px' }}
+                        >
+                          <TimeSlot
+                            hour={hour}
+                            activity={activityAtHour}
+                            isActivityStart={isActivityStart}
+                            onAddTask={(h) => {
+                              setCurrentDate(date);
+                              onAddTask(member.id, h);
+                            }}
+                            onViewTask={onViewTask}
+                            showCurrentHourIndicator={showIndicator}
+                          />
+                        </td>
+                      );
+                    })}
+                  </Fragment>
+                );
               })}
             </tr>
           ))}
