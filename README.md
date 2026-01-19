@@ -223,11 +223,11 @@ npm run build
 npm run preview
 ```
 
-## 📝 License
+## License
 
 MIT
 
-## 👤 Author
+## Author
 
 kl0cek (Klocek)
 

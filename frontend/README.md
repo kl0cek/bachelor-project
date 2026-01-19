@@ -21,7 +21,7 @@ The frontend provides an intuitive interface for managing missions, activities, 
 - **Linting**: ESLint with TypeScript support
 - **Formatting**: Prettier
 
-## 📁 Project Structure
+## Project Structure
 
 ```text
 src/
