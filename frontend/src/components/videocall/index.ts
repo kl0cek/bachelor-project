@@ -1,9 +1,8 @@
-export { VideoRoom } from '../../pages/VideoRoom.tsx';
-export { ParticipantVideo } from './ParticipantVideo';
 export { LocalVideo } from './LocalVideo';
-export { ControlButton } from './ControlButton';
-export { ControlsBar } from './ControlsBar.tsx';
+export { ParticipantVideo } from './ParticipantVideo';
 export { VideoGrid } from './VideoGrid';
+export { DelayControls, DelayIndicator, BufferingIndicator } from './DelayControls';
 export { LoadingState } from './LoadingState';
 export { ErrorState } from './ErrorState';
 export { ConnectingOverlay } from './ConnectingOverlay';
+export { ControlsBar } from './ControlsBar';

@@ -91,7 +91,7 @@ export function LocalVideo({
       </button>
 
       <div className="absolute bottom-4 left-4 bg-slate-900/80 px-3 py-1 rounded-lg">
-        <p className="text-white text-sm font-medium">You</p>
+        <p className="text-white text-sm font-medium">Ty</p>
       </div>
 
       {!isVideoEnabled && (

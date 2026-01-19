@@ -4,8 +4,8 @@ import {
   Column,
   CreateDateColumn,
   ManyToOne,
-  JoinColumn,
   OneToMany,
+  JoinColumn,
 } from 'typeorm';
 import { Mission } from './Mission.entity';
 import { User } from './User.entity';
@@ -19,31 +19,37 @@ export class VideoRoom {
   @Column({ type: 'uuid' })
   mission_id!: string;
 
-  @ManyToOne(() => Mission, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'mission_id' })
-  mission!: Mission;
-
-  @Column({ type: 'varchar', length: 200 })
+  @Column({ type: 'varchar', length: 255 })
   room_name!: string;
 
   @Column({ type: 'boolean', default: true })
   is_active!: boolean;
 
-  @Column({ type: 'integer', default: 10 })
+  @Column({ type: 'int', default: 10 })
   max_participants!: number;
 
   @Column({ type: 'uuid', nullable: true })
-  created_by?: string;
+  created_by!: string;
 
-  @ManyToOne(() => User, { onDelete: 'SET NULL', nullable: true })
-  @JoinColumn({ name: 'created_by' })
-  creator?: User;
+  @Column({ type: 'float', default: 0 })
+  delay_seconds!: number;
 
-  @CreateDateColumn({ type: 'timestamp with time zone' })
+  @Column({ type: 'boolean', default: false })
+  delay_enabled!: boolean;
+
+  @CreateDateColumn()
   created_at!: Date;
 
-  @Column({ type: 'timestamp with time zone', nullable: true })
-  ended_at?: Date;
+  @Column({ type: 'timestamp', nullable: true })
+  ended_at!: Date | null;
+
+  @ManyToOne(() => Mission, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'mission_id' })
+  mission!: Mission;
+
+  @ManyToOne(() => User, { onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'created_by' })
+  creator!: User;
 
   @OneToMany(() => VideoSession, (session) => session.room)
   sessions!: VideoSession[];
