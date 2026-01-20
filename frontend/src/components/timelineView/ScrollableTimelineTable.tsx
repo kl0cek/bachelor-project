@@ -125,7 +125,7 @@ export const ScrollableTimelineTable = ({
         <tbody>
           {crewMembers.map((member) => (
             <tr key={member.id} className="border-t border-slate-200 dark:border-slate-700">
-              <td className="sticky left-0 z-10 bg-white dark:bg-slate-800 px-4 py-3 border-r-2 border-slate-300 dark:border-slate-600">
+              <td className="sticky left-0 z-20 bg-white dark:bg-slate-800 px-4 py-3 border-r-2 border-slate-300 dark:border-slate-600">
                 <div>
                   <div className="font-medium text-slate-900 dark:text-slate-100">
                     {member.name}

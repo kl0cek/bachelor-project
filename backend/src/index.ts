@@ -22,9 +22,11 @@ app.use(cookieParser());
 app.set('trust proxy', 1);
 
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN?.split(',') || ['https://localhost:5173'] || [
-      'https://192.168.0.100:5173',
-    ],
+  origin: process.env.CORS_ORIGIN?.split(',') || [
+    'https://localhost:5173',
+    'https://192.168.0.100:5173',
+  ],
+
   credentials: true,
   methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -33,7 +35,7 @@ app.use(cors(corsOptions));
 
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'),
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '200'),
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '500'),
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
