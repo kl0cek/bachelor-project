@@ -1,5 +1,6 @@
 import { useRef, useCallback, useEffect } from 'react';
 import type { Participant, DelayConfig } from '../types/videoCall';
+import { useToast } from './useToast';
 
 interface DelayedStreamManager {
   audioContext: AudioContext | null;
@@ -26,6 +27,7 @@ export function useParticipantDelays(
   const managersRef = useRef<Map<string, DelayedStreamManager>>(new Map());
   const delayMsRef = useRef(delayConfig.delaySeconds * 1000);
   const enabledRef = useRef(delayConfig.enabled);
+  const { showError } = useToast();
 
   useEffect(() => {
     delayMsRef.current = delayConfig.delaySeconds * 1000;
@@ -125,7 +127,8 @@ export function useParticipantDelays(
             combinedStream.addTrack(track);
           });
         } catch (error) {
-          console.error('Failed to create delayed audio:', error);
+          showError('Failed to create delayed audio');
+          console.error(error);
           audioTracks.forEach((track) => combinedStream.addTrack(track));
         }
       }
@@ -203,7 +206,8 @@ export function useParticipantDelays(
             });
           }
         } catch (error) {
-          console.error('Failed to create delayed video:', error);
+          showError('Failed to create delayed video');
+          console.error(error);
           videoTracks.forEach((track) => combinedStream.addTrack(track));
         }
       }

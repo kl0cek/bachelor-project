@@ -10,6 +10,7 @@ import {
   ControlsBar,
 } from '../components/videocall/index';
 import { DelayControls, DelayIndicator } from '../components/videocall/DelayControls';
+import { useToast } from '../hooks';
 
 const ROOM_PREFIX = 'mission-';
 
@@ -28,6 +29,7 @@ export function VideoRoom() {
   } = useVideoCall();
   const [showSelfView, setShowSelfView] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
+  const { showInfo }  = useToast();
 
   const hasJoinedRef = useRef(false);
 
@@ -35,7 +37,7 @@ export function VideoRoom() {
     if (!missionId) return;
 
     if (hasJoinedRef.current) {
-      console.log('Already joined, skipping');
+      showInfo('Already joined, skipping');
       return;
     }
 
