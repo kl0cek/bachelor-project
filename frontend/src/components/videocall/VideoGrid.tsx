@@ -33,7 +33,7 @@ export function VideoGrid({
     <div className="flex-1 p-6">
       <div className={`grid ${getGridClass()} gap-4 h-full`}>
         <LocalVideo
-          key={localStream?.id}
+          key={localStream?.id || 'local'}
           stream={localStream}
           isVideoEnabled={isVideoEnabled}
           isVisible={showSelfView}

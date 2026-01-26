@@ -9,53 +9,75 @@ interface ParticipantVideoProps {
   delayConfig: DelayConfig;
 }
 
-export const ParticipantVideo = memo(({ participant, delayConfig }: ParticipantVideoProps) => {
+function ParticipantVideoInner({ participant, delayConfig }: ParticipantVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [videoError, setVideoError] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const mountedRef = useRef(true);
+  const initializedRef = useRef(false);
 
   const delayMs = delayConfig.enabled ? delayConfig.delaySeconds * 1000 : 0;
+  const delayEnabled = delayConfig.enabled && delayConfig.delaySeconds > 0;
 
-  const { delayedStream, isBuffering, bufferProgress, startDelay, stopDelay } = useDelayedStream({
+  const { delayedStream, isBuffering, bufferProgress, setSourceStream } = useDelayedStream({
     delayMs,
-    enabled: delayConfig.enabled && delayConfig.delaySeconds > 0,
+    enabled: delayEnabled,
   });
 
   useEffect(() => {
-    if (participant.stream) {
-      console.log('Starting delay for participant:', participant.userId);
-      startDelay(participant.stream);
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!participant.stream) {
+      if (initializedRef.current) {
+        console.log('[ParticipantVideo] Stream removed for:', participant.userId);
+        setSourceStream(null);
+        initializedRef.current = false;
+      }
+      return;
     }
 
-    return () => {
-      stopDelay();
-    };
-  }, [participant.stream, participant.userId, startDelay, stopDelay]);
+    if (!initializedRef.current) {
+      console.log('[ParticipantVideo] Initializing stream for:', participant.userId, 'streamId:', participant.stream.id);
+      initializedRef.current = true;
+      setSourceStream(participant.stream);
+    }
+  }, [participant.stream, participant.userId, setSourceStream]);
 
   useEffect(() => {
     const videoElement = videoRef.current;
-    const streamToUse = delayedStream;
-
-    if (!videoElement) return;
-
-    if (!streamToUse) {
-      videoElement.srcObject = null;
+    if (!videoElement || !delayedStream) {
+      if (videoElement) {
+        videoElement.srcObject = null;
+      }
       setIsPlaying(false);
       return;
     }
 
+    if (videoElement.srcObject === delayedStream) {
+      return;
+    }
+
+    console.log('[ParticipantVideo] Setting srcObject:', delayedStream.id);
     setVideoError(false);
-    videoElement.srcObject = streamToUse;
+    videoElement.srcObject = delayedStream;
 
     const playVideo = async () => {
+      if (!mountedRef.current) return;
       try {
         await videoElement.play();
-        setIsPlaying(true);
-        console.log('Participant video playing');
+        if (mountedRef.current) {
+          setIsPlaying(true);
+        }
       } catch (err) {
+        if (!mountedRef.current) return;
         const error = err as Error;
         if (error.name !== 'AbortError') {
-          console.warn('Video play failed:', error);
+          console.warn('[ParticipantVideo] Play failed:', error);
           setVideoError(true);
         }
       }
@@ -64,7 +86,7 @@ export const ParticipantVideo = memo(({ participant, delayConfig }: ParticipantV
     if (videoElement.readyState >= 2) {
       playVideo();
     } else {
-      videoElement.onloadeddata = () => playVideo();
+      videoElement.onloadeddata = playVideo;
     }
 
     return () => {
@@ -76,10 +98,8 @@ export const ParticipantVideo = memo(({ participant, delayConfig }: ParticipantV
 
   const displayName = participant.fullName || participant.username || 'Unknown';
   const initials = displayName.charAt(0).toUpperCase();
-
-  const showDelayIndicator =
-    delayConfig.enabled && delayConfig.delaySeconds > 0 && !isBuffering && isPlaying;
-  const showBuffering = isBuffering && delayConfig.enabled && delayConfig.delaySeconds > 0;
+  const showDelayIndicator = delayEnabled && !isBuffering && isPlaying;
+  const showBuffering = isBuffering && delayEnabled;
 
   return (
     <div className="relative bg-slate-800 rounded-lg overflow-hidden aspect-video">
@@ -151,6 +171,17 @@ export const ParticipantVideo = memo(({ participant, delayConfig }: ParticipantV
         )}
       </div>
     </div>
+  );
+}
+
+export const ParticipantVideo = memo(ParticipantVideoInner, (prev, next) => {
+  return (
+    prev.participant.userId === next.participant.userId &&
+    prev.participant.stream === next.participant.stream &&
+    prev.participant.audioEnabled === next.participant.audioEnabled &&
+    prev.participant.videoEnabled === next.participant.videoEnabled &&
+    prev.delayConfig.enabled === next.delayConfig.enabled &&
+    prev.delayConfig.delaySeconds === next.delayConfig.delaySeconds
   );
 });
 

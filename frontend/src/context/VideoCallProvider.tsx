@@ -38,12 +38,10 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
   });
 
   const fullCleanup = useCallback(() => {
-    console.log('Full cleanup called');
+    console.log('[VideoCallProvider] Full cleanup called');
 
     if (localStreamRef.current) {
-      console.log('Stopping local stream tracks');
       localStreamRef.current.getTracks().forEach((track) => {
-        console.log(`Stopping ${track.kind} track`);
         track.stop();
       });
       localStreamRef.current = null;
@@ -67,12 +65,11 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
   const joinRoom = useCallback(
     async (roomId: string, missionId: string) => {
       if (connectionStateRef.current !== 'idle') {
-        console.warn('Already connecting or connected, state:', connectionStateRef.current);
+        console.warn('[VideoCallProvider] Already connecting or connected');
         return;
       }
 
       if (localStreamRef.current || socketRef.current) {
-        console.log('Cleaning up existing connection before joining');
         fullCleanup();
       }
 
@@ -97,31 +94,41 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
         setupSocketListeners(socket, stream);
 
         socket.on('connect', () => {
-          console.log('Connected to signaling server');
+          console.log('[VideoCallProvider] Connected to signaling server');
           socket.emit('join-room', { roomId });
         });
 
         socket.on('room-delay-update', (data: { delaySeconds: number; enabled: boolean }) => {
-          setState((prev) => ({
-            ...prev,
-            delayConfig: {
+          console.log('[VideoCallProvider] *** RECEIVED room-delay-update ***:', data);
+          setState((prev) => {
+            const newConfig = {
               ...prev.delayConfig,
               delaySeconds: data.delaySeconds,
               enabled: data.enabled,
-              delayPreset: 'custom',
-            },
-          }));
+              delayPreset: 'custom' as DelayPreset,
+            };
+            console.log('[VideoCallProvider] Setting new delayConfig:', newConfig);
+            return {
+              ...prev,
+              delayConfig: newConfig,
+            };
+          });
         });
 
         socket.on('room-delay-config', (data: { delaySeconds: number; enabled: boolean }) => {
-          setState((prev) => ({
-            ...prev,
-            delayConfig: {
+          console.log('[VideoCallProvider] *** RECEIVED room-delay-config ***:', data);
+          setState((prev) => {
+            const newConfig = {
               enabled: data.enabled,
               delaySeconds: data.delaySeconds,
-              delayPreset: data.delaySeconds > 0 ? 'custom' : 'none',
-            },
-          }));
+              delayPreset: (data.delaySeconds > 0 ? 'custom' : 'none') as DelayPreset,
+            };
+            console.log('[VideoCallProvider] Setting initial delayConfig:', newConfig);
+            return {
+              ...prev,
+              delayConfig: newConfig,
+            };
+          });
         });
 
         setState((prev) => ({
@@ -148,6 +155,7 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
             const roomData = await response.json();
             if (roomData.success && roomData.data) {
               const room = roomData.data as VideoRoom;
+              console.log('[VideoCallProvider] Fetched room data:', room);
               setState((prev) => ({
                 ...prev,
                 room,
@@ -160,10 +168,10 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
             }
           }
         } catch (fetchError) {
-          console.warn('Could not fetch room data, using defaults:', fetchError);
+          console.warn('[VideoCallProvider] Could not fetch room data:', fetchError);
         }
       } catch (error) {
-        console.error('Failed to join room:', error);
+        console.error('[VideoCallProvider] Failed to join room:', error);
         fullCleanup();
         setState((prev) => ({
           ...prev,
@@ -176,7 +184,7 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
   );
 
   const leaveRoom = useCallback(() => {
-    console.log('Leave room called');
+    console.log('[VideoCallProvider] Leave room called');
     fullCleanup();
     setState(INITIAL_STATE);
   }, [fullCleanup]);
@@ -219,6 +227,7 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
 
   const setDelay = useCallback(
     (seconds: number) => {
+      console.log('[VideoCallProvider] setDelay called:', seconds);
       const socket = socketRef.current;
       const roomId = roomIdRef.current;
 
@@ -232,6 +241,7 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
       }));
 
       if (socket && roomId) {
+        console.log('[VideoCallProvider] Emitting update-delay');
         socket.emit('update-delay', {
           roomId,
           delaySeconds: seconds,
@@ -257,6 +267,7 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
 
   const toggleDelay = useCallback(
     (enabled: boolean) => {
+      console.log('[VideoCallProvider] toggleDelay called:', enabled);
       const socket = socketRef.current;
       const roomId = roomIdRef.current;
 
@@ -269,6 +280,7 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
       }));
 
       if (socket && roomId) {
+        console.log('[VideoCallProvider] Emitting update-delay');
         socket.emit('update-delay', {
           roomId,
           delaySeconds: state.delayConfig.delaySeconds,
@@ -294,6 +306,7 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
 
   const setDelayPreset = useCallback(
     (preset: DelayPreset) => {
+      console.log('[VideoCallProvider] setDelayPreset called:', preset);
       const presetConfig = {
         none: { label: 'Brak opóźnienia', seconds: 0 },
         moon: { label: 'Księżyc (~1.3s)', seconds: 1.3 },
@@ -318,6 +331,7 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
       const roomId = roomIdRef.current;
 
       if (socket && roomId) {
+        console.log('[VideoCallProvider] Emitting update-delay for preset');
         socket.emit('update-delay', { roomId, delaySeconds: seconds, enabled });
       }
 

@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner, TableColumn } from 'typeorm';
 
-export class AddDelayFieldsToVideoRoom1705000000000 implements MigrationInterface {
-  name = 'AddDelayFieldsToVideoRoom1705000000000';
+export class AddDelayFieldsToVideoRoom1765127827114 implements MigrationInterface {
+  name = 'AddDelayFieldsToVideoRoom1765127827114';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.addColumn(

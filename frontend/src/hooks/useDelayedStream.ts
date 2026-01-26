@@ -9,8 +9,7 @@ interface UseDelayedStreamReturn {
   delayedStream: MediaStream | null;
   isBuffering: boolean;
   bufferProgress: number;
-  startDelay: (sourceStream: MediaStream) => void;
-  stopDelay: () => void;
+  setSourceStream: (stream: MediaStream | null) => void;
 }
 
 interface VideoFrame {
@@ -25,17 +24,44 @@ export function useDelayedStream(options: UseDelayedStreamOptions): UseDelayedSt
   const [isBuffering, setIsBuffering] = useState(false);
   const [bufferProgress, setBufferProgress] = useState(0);
 
+  const sourceStreamRef = useRef<MediaStream | null>(null);
   const videoElementRef = useRef<HTMLVideoElement | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+  const delayNodeRef = useRef<DelayNode | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const frameBufferRef = useRef<VideoFrame[]>([]);
-  const sourceStreamRef = useRef<MediaStream | null>(null);
-  const startTimeRef = useRef<number>(0);
   const isRunningRef = useRef(false);
+  const delayedStreamRef = useRef<MediaStream | null>(null);
+
+  const delayMsRef = useRef(delayMs);
+  const enabledRef = useRef(enabled);
+  const bufferStartTimeRef = useRef<number>(0);
+  const lastProgressRef = useRef<number>(0);
+
+  useEffect(() => {
+    delayMsRef.current = delayMs;
+    enabledRef.current = enabled;
+
+    if (delayNodeRef.current && audioContextRef.current) {
+      const maxDelay = 179;
+      const newDelay = (enabled && delayMs > 0) ? Math.min(delayMs / 1000, maxDelay) : 0;
+      console.log('[useDelayedStream] Updating audio delay to:', newDelay);
+      delayNodeRef.current.delayTime.setValueAtTime(newDelay, audioContextRef.current.currentTime);
+    }
+
+    if (enabled && delayMs > 0 && sourceStreamRef.current) {
+      console.log('[useDelayedStream] Delay enabled, resetting buffer timer');
+      bufferStartTimeRef.current = Date.now();
+      setIsBuffering(true);
+    } else {
+      setIsBuffering(false);
+    }
+  }, [delayMs, enabled]);
 
   const cleanup = useCallback(() => {
+    console.log('[useDelayedStream] Cleanup');
     isRunningRef.current = false;
 
     if (animationFrameRef.current) {
@@ -44,6 +70,8 @@ export function useDelayedStream(options: UseDelayedStreamOptions): UseDelayedSt
     }
 
     if (videoElementRef.current) {
+      videoElementRef.current.onplay = null;
+      videoElementRef.current.onloadedmetadata = null;
       videoElementRef.current.pause();
       videoElementRef.current.srcObject = null;
       videoElementRef.current = null;
@@ -51,190 +79,215 @@ export function useDelayedStream(options: UseDelayedStreamOptions): UseDelayedSt
 
     if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
       audioContextRef.current.close().catch(() => {});
-      audioContextRef.current = null;
     }
+    audioContextRef.current = null;
+    delayNodeRef.current = null;
 
     canvasRef.current = null;
     ctxRef.current = null;
     frameBufferRef.current = [];
-    sourceStreamRef.current = null;
+    delayedStreamRef.current = null;
 
-    setDelayedStream(null);
     setIsBuffering(false);
     setBufferProgress(0);
   }, []);
 
-  const startDelay = useCallback(
-    (sourceStream: MediaStream) => {
-      cleanup();
+  const createDelayedStream = useCallback((sourceStream: MediaStream) => {
+    console.log('[useDelayedStream] Creating delayed stream for:', sourceStream.id);
 
-      if (!enabled || delayMs <= 0) {
-        setDelayedStream(sourceStream);
-        setIsBuffering(false);
-        return;
+    const combinedStream = new MediaStream();
+    const currentDelayMs = delayMsRef.current;
+    const currentEnabled = enabledRef.current;
+
+    const audioTracks = sourceStream.getAudioTracks();
+    if (audioTracks.length > 0) {
+      try {
+        const audioContext = new AudioContext();
+        audioContextRef.current = audioContext;
+
+        const source = audioContext.createMediaStreamSource(sourceStream);
+        
+        const maxDelaySeconds = 180;
+        const delayNode = audioContext.createDelay(maxDelaySeconds);
+        delayNodeRef.current = delayNode;
+        
+        const initialDelay = (currentEnabled && currentDelayMs > 0) 
+          ? Math.min(currentDelayMs / 1000, maxDelaySeconds - 1) 
+          : 0;
+        delayNode.delayTime.value = initialDelay;
+        console.log('[useDelayedStream] Audio delay initial value:', initialDelay);
+
+        const destination = audioContext.createMediaStreamDestination();
+        source.connect(delayNode);
+        delayNode.connect(destination);
+
+        destination.stream.getAudioTracks().forEach((track) => {
+          combinedStream.addTrack(track);
+        });
+        console.log('[useDelayedStream] Audio delay ready');
+      } catch (error) {
+        console.error('[useDelayedStream] Audio delay failed:', error);
+        audioTracks.forEach((track) => combinedStream.addTrack(track.clone()));
       }
+    }
 
-      sourceStreamRef.current = sourceStream;
-      isRunningRef.current = true;
-      startTimeRef.current = Date.now();
-      setIsBuffering(true);
-      setBufferProgress(0);
+    const videoTracks = sourceStream.getVideoTracks();
+    if (videoTracks.length > 0) {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 640;
+        canvas.height = 480;
+        canvasRef.current = canvas;
 
-      const combinedStream = new MediaStream();
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        if (!ctx) throw new Error('Cannot get canvas context');
+        ctxRef.current = ctx;
 
-      const audioTracks = sourceStream.getAudioTracks();
-      if (audioTracks.length > 0) {
-        try {
-          const audioContext = new AudioContext();
-          audioContextRef.current = audioContext;
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-          const source = audioContext.createMediaStreamSource(sourceStream);
-          const maxDelay = Math.max(delayMs / 1000 + 1, 10);
-          const delayNode = audioContext.createDelay(maxDelay);
-          delayNode.delayTime.value = delayMs / 1000;
-          const destination = audioContext.createMediaStreamDestination();
+        const video = document.createElement('video');
+        video.srcObject = sourceStream;
+        video.muted = true;
+        video.playsInline = true;
+        video.autoplay = true;
+        videoElementRef.current = video;
+        frameBufferRef.current = [];
 
-          source.connect(delayNode);
-          delayNode.connect(destination);
+        const processFrame = () => {
+          if (!isRunningRef.current) return;
 
-          destination.stream.getAudioTracks().forEach((track) => {
-            combinedStream.addTrack(track);
-          });
-        } catch (error) {
-          console.error('Audio delay setup failed:', error);
-          audioTracks.forEach((track) => combinedStream.addTrack(track.clone()));
-        }
-      }
+          const vid = videoElementRef.current;
+          const cvs = canvasRef.current;
+          const context = ctxRef.current;
+          const currentDelay = delayMsRef.current;
+          const isEnabled = enabledRef.current;
 
-      const videoTracks = sourceStream.getVideoTracks();
-      if (videoTracks.length > 0) {
-        try {
-          const canvas = document.createElement('canvas');
-          canvas.width = 640;
-          canvas.height = 480;
-          canvasRef.current = canvas;
-
-          const ctx = canvas.getContext('2d', { willReadFrequently: true });
-          if (!ctx) {
-            throw new Error('Cannot get canvas context');
+          if (!vid || !cvs || !context) {
+            animationFrameRef.current = requestAnimationFrame(processFrame);
+            return;
           }
-          ctxRef.current = ctx;
 
-          ctx.fillStyle = '#1e293b';
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-          const video = document.createElement('video');
-          video.srcObject = sourceStream;
-          video.muted = true;
-          video.playsInline = true;
-          video.autoplay = true;
-          videoElementRef.current = video;
-
-          frameBufferRef.current = [];
-
-          const processFrame = () => {
-            if (!isRunningRef.current) return;
-
-            const vid = videoElementRef.current;
-            const cvs = canvasRef.current;
-            const context = ctxRef.current;
-
-            if (!vid || !cvs || !context) {
-              animationFrameRef.current = requestAnimationFrame(processFrame);
-              return;
+          if (vid.readyState >= 2 && vid.videoWidth > 0) {
+            if (cvs.width !== vid.videoWidth || cvs.height !== vid.videoHeight) {
+              cvs.width = vid.videoWidth;
+              cvs.height = vid.videoHeight;
             }
 
-            if (vid.readyState >= 2 && vid.videoWidth > 0) {
-              if (cvs.width !== vid.videoWidth || cvs.height !== vid.videoHeight) {
-                cvs.width = vid.videoWidth;
-                cvs.height = vid.videoHeight;
+            context.drawImage(vid, 0, 0, cvs.width, cvs.height);
+
+            const now = Date.now();
+            const imageData = context.getImageData(0, 0, cvs.width, cvs.height);
+            frameBufferRef.current.push({ imageData, timestamp: now });
+
+            const effectiveDelay = Math.max(currentDelay, 5000);
+            const maxFrames = Math.ceil((effectiveDelay / 1000) * 35) + 150;
+            while (frameBufferRef.current.length > maxFrames) {
+              frameBufferRef.current.shift();
+            }
+
+            if (isEnabled && currentDelay > 0) {
+              const targetTime = now - currentDelay;
+              let frameToShow: VideoFrame | null = null;
+
+              for (let i = frameBufferRef.current.length - 1; i >= 0; i--) {
+                if (frameBufferRef.current[i].timestamp <= targetTime) {
+                  frameToShow = frameBufferRef.current[i];
+                  break;
+                }
               }
 
-              context.drawImage(vid, 0, 0, cvs.width, cvs.height);
+              if (frameToShow) {
+                context.putImageData(frameToShow.imageData, 0, 0);
+              }
 
-              const imageData = context.getImageData(0, 0, cvs.width, cvs.height);
-              frameBufferRef.current.push({
-                imageData,
-                timestamp: Date.now(),
-              });
-
-              const maxFrames = Math.ceil((delayMs / 1000) * 30) + 60;
-              while (frameBufferRef.current.length > maxFrames) {
-                frameBufferRef.current.shift();
+              if (now - lastProgressRef.current > 200) {
+                lastProgressRef.current = now;
+                const elapsed = now - bufferStartTimeRef.current;
+                const progress = Math.min(100, (elapsed / currentDelay) * 100);
+                setBufferProgress(progress);
+                if (elapsed >= currentDelay) {
+                  setIsBuffering(false);
+                }
               }
             }
+          }
 
-            const elapsed = Date.now() - startTimeRef.current;
-            const progress = Math.min(100, (elapsed / delayMs) * 100);
-            setBufferProgress(progress);
+          animationFrameRef.current = requestAnimationFrame(processFrame);
+        };
 
-            if (elapsed >= delayMs) {
-              setIsBuffering(false);
-            }
+        video.onloadedmetadata = () => {
+          console.log('[useDelayedStream] Video metadata loaded, playing...');
+          video.play().catch((e) => console.error('[useDelayedStream] Play failed:', e));
+        };
 
-            const targetTime = Date.now() - delayMs;
-            let frameToShow: VideoFrame | null = null;
+        video.onplay = () => {
+          console.log('[useDelayedStream] Video playing, starting capture');
+          isRunningRef.current = true;
+          bufferStartTimeRef.current = Date.now();
+          if (currentEnabled && currentDelayMs > 0) {
+            setIsBuffering(true);
+          }
+          animationFrameRef.current = requestAnimationFrame(processFrame);
+        };
 
-            for (let i = frameBufferRef.current.length - 1; i >= 0; i--) {
-              if (frameBufferRef.current[i].timestamp <= targetTime) {
-                frameToShow = frameBufferRef.current[i];
-                break;
-              }
-            }
-
-            if (frameToShow && context) {
-              context.putImageData(frameToShow.imageData, 0, 0);
-            }
-
-            animationFrameRef.current = requestAnimationFrame(processFrame);
-          };
-
-          video.onloadedmetadata = () => {
-            video.play().catch(console.error);
-          };
-
-          video.onplay = () => {
-            console.log('Video started playing, beginning frame capture');
-            animationFrameRef.current = requestAnimationFrame(processFrame);
-          };
-
-          const canvasStream = canvas.captureStream(30);
-          canvasStream.getVideoTracks().forEach((track) => {
-            combinedStream.addTrack(track);
-          });
-        } catch (error) {
-          console.error('Video delay setup failed:', error);
-          videoTracks.forEach((track) => combinedStream.addTrack(track.clone()));
-          setIsBuffering(false);
-        }
+        const canvasStream = canvas.captureStream(30);
+        canvasStream.getVideoTracks().forEach((track) => {
+          combinedStream.addTrack(track);
+        });
+        console.log('[useDelayedStream] Video delay ready');
+      } catch (error) {
+        console.error('[useDelayedStream] Video delay failed:', error);
+        videoTracks.forEach((track) => combinedStream.addTrack(track.clone()));
       }
+    }
 
-      setDelayedStream(combinedStream);
-    },
-    [enabled, delayMs, cleanup]
-  );
+    delayedStreamRef.current = combinedStream;
+    console.log('[useDelayedStream] Stream ready with', combinedStream.getTracks().length, 'tracks');
+    
+    return combinedStream;
+  }, []);
 
-  const stopDelay = useCallback(() => {
+  const setSourceStream = useCallback((stream: MediaStream | null) => {
+    console.log('[useDelayedStream] setSourceStream:', stream?.id || 'null');
+
+    if (!stream) {
+      cleanup();
+      sourceStreamRef.current = null;
+      setDelayedStream(null);
+      return;
+    }
+
+    if (sourceStreamRef.current?.id === stream.id && delayedStreamRef.current) {
+      console.log('[useDelayedStream] Same stream, keeping existing delay pipeline');
+      return;
+    }
+
     cleanup();
-  }, [cleanup]);
+    sourceStreamRef.current = stream;
+
+    const pipelineStream = createDelayedStream(stream);
+    console.log('[useDelayedStream] Pipeline created, setting as output');
+    
+    if (enabledRef.current && delayMsRef.current > 0) {
+      bufferStartTimeRef.current = Date.now();
+      setIsBuffering(true);
+    }
+    
+    setDelayedStream(pipelineStream);
+  }, [cleanup, createDelayedStream]);
 
   useEffect(() => {
     return () => {
       cleanup();
+      sourceStreamRef.current = null;
     };
   }, [cleanup]);
-
-  useEffect(() => {
-    if (sourceStreamRef.current) {
-      startDelay(sourceStreamRef.current);
-    }
-  }, [delayMs, enabled]);
 
   return {
     delayedStream,
     isBuffering,
     bufferProgress,
-    startDelay,
-    stopDelay,
+    setSourceStream,
   };
 }
