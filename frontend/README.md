@@ -17,7 +17,6 @@ The frontend provides an intuitive interface for managing missions, activities, 
 - **Animation**: Framer Motion
 - **Icons**: Lucide React
 - **PDF Support**: react-pdf
-- **Date Handling**: Day.js
 - **Linting**: ESLint with TypeScript support
 - **Formatting**: Prettier
 
