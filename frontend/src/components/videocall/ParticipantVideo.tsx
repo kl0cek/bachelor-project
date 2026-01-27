@@ -42,7 +42,12 @@ function ParticipantVideoInner({ participant, delayConfig }: ParticipantVideoPro
     }
 
     if (!initializedRef.current) {
-      console.log('[ParticipantVideo] Initializing stream for:', participant.userId, 'streamId:', participant.stream.id);
+      console.log(
+        '[ParticipantVideo] Initializing stream for:',
+        participant.userId,
+        'streamId:',
+        participant.stream.id
+      );
       initializedRef.current = true;
       setSourceStream(participant.stream);
     }

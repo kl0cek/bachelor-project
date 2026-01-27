@@ -78,7 +78,6 @@ export const TimelineView = ({ mission, onTodayAvailable }: TimelineViewProps) =
     try {
       if (selectedTask) {
         if (updateScope === 'all' && selectedTask.parentActivityId) {
-
           const recurringUpdateData = {
             name: taskData.name,
             start_hour: taskData.start,

@@ -29,7 +29,7 @@ export function VideoRoom() {
   } = useVideoCall();
   const [showSelfView, setShowSelfView] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
-  const { showInfo }  = useToast();
+  const { showInfo } = useToast();
 
   const hasJoinedRef = useRef(false);
 

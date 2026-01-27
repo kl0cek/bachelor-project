@@ -48,7 +48,7 @@ export function LocalVideo({
             showError('Video autoplay blocked by browser policy');
             return;
           }
-          showError('Video play error')
+          showError('Video play error');
           console.error(err);
         });
     }, 0);

@@ -46,13 +46,11 @@ export function useDelayedStream(options: UseDelayedStreamOptions): UseDelayedSt
 
     if (delayNodeRef.current && audioContextRef.current) {
       const maxDelay = 179;
-      const newDelay = (enabled && delayMs > 0) ? Math.min(delayMs / 1000, maxDelay) : 0;
-      console.log('[useDelayedStream] Updating audio delay to:', newDelay);
+      const newDelay = enabled && delayMs > 0 ? Math.min(delayMs / 1000, maxDelay) : 0;
       delayNodeRef.current.delayTime.setValueAtTime(newDelay, audioContextRef.current.currentTime);
     }
 
     if (enabled && delayMs > 0 && sourceStreamRef.current) {
-      console.log('[useDelayedStream] Delay enabled, resetting buffer timer');
       bufferStartTimeRef.current = Date.now();
       setIsBuffering(true);
     } else {
@@ -61,7 +59,6 @@ export function useDelayedStream(options: UseDelayedStreamOptions): UseDelayedSt
   }, [delayMs, enabled]);
 
   const cleanup = useCallback(() => {
-    console.log('[useDelayedStream] Cleanup');
     isRunningRef.current = false;
 
     if (animationFrameRef.current) {
@@ -93,8 +90,6 @@ export function useDelayedStream(options: UseDelayedStreamOptions): UseDelayedSt
   }, []);
 
   const createDelayedStream = useCallback((sourceStream: MediaStream) => {
-    console.log('[useDelayedStream] Creating delayed stream for:', sourceStream.id);
-
     const combinedStream = new MediaStream();
     const currentDelayMs = delayMsRef.current;
     const currentEnabled = enabledRef.current;
@@ -106,16 +101,16 @@ export function useDelayedStream(options: UseDelayedStreamOptions): UseDelayedSt
         audioContextRef.current = audioContext;
 
         const source = audioContext.createMediaStreamSource(sourceStream);
-        
+
         const maxDelaySeconds = 180;
         const delayNode = audioContext.createDelay(maxDelaySeconds);
         delayNodeRef.current = delayNode;
-        
-        const initialDelay = (currentEnabled && currentDelayMs > 0) 
-          ? Math.min(currentDelayMs / 1000, maxDelaySeconds - 1) 
-          : 0;
+
+        const initialDelay =
+          currentEnabled && currentDelayMs > 0
+            ? Math.min(currentDelayMs / 1000, maxDelaySeconds - 1)
+            : 0;
         delayNode.delayTime.value = initialDelay;
-        console.log('[useDelayedStream] Audio delay initial value:', initialDelay);
 
         const destination = audioContext.createMediaStreamDestination();
         source.connect(delayNode);
@@ -124,7 +119,6 @@ export function useDelayedStream(options: UseDelayedStreamOptions): UseDelayedSt
         destination.stream.getAudioTracks().forEach((track) => {
           combinedStream.addTrack(track);
         });
-        console.log('[useDelayedStream] Audio delay ready');
       } catch (error) {
         console.error('[useDelayedStream] Audio delay failed:', error);
         audioTracks.forEach((track) => combinedStream.addTrack(track.clone()));
@@ -217,12 +211,10 @@ export function useDelayedStream(options: UseDelayedStreamOptions): UseDelayedSt
         };
 
         video.onloadedmetadata = () => {
-          console.log('[useDelayedStream] Video metadata loaded, playing...');
           video.play().catch((e) => console.error('[useDelayedStream] Play failed:', e));
         };
 
         video.onplay = () => {
-          console.log('[useDelayedStream] Video playing, starting capture');
           isRunningRef.current = true;
           bufferStartTimeRef.current = Date.now();
           if (currentEnabled && currentDelayMs > 0) {
@@ -235,7 +227,6 @@ export function useDelayedStream(options: UseDelayedStreamOptions): UseDelayedSt
         canvasStream.getVideoTracks().forEach((track) => {
           combinedStream.addTrack(track);
         });
-        console.log('[useDelayedStream] Video delay ready');
       } catch (error) {
         console.error('[useDelayedStream] Video delay failed:', error);
         videoTracks.forEach((track) => combinedStream.addTrack(track.clone()));
@@ -243,39 +234,33 @@ export function useDelayedStream(options: UseDelayedStreamOptions): UseDelayedSt
     }
 
     delayedStreamRef.current = combinedStream;
-    console.log('[useDelayedStream] Stream ready with', combinedStream.getTracks().length, 'tracks');
-    
+
     return combinedStream;
   }, []);
 
-  const setSourceStream = useCallback((stream: MediaStream | null) => {
-    console.log('[useDelayedStream] setSourceStream:', stream?.id || 'null');
+  const setSourceStream = useCallback(
+    (stream: MediaStream | null) => {
+      if (!stream) {
+        cleanup();
+        sourceStreamRef.current = null;
+        setDelayedStream(null);
+        return;
+      }
 
-    if (!stream) {
       cleanup();
-      sourceStreamRef.current = null;
-      setDelayedStream(null);
-      return;
-    }
+      sourceStreamRef.current = stream;
 
-    if (sourceStreamRef.current?.id === stream.id && delayedStreamRef.current) {
-      console.log('[useDelayedStream] Same stream, keeping existing delay pipeline');
-      return;
-    }
+      const pipelineStream = createDelayedStream(stream);
 
-    cleanup();
-    sourceStreamRef.current = stream;
+      if (enabledRef.current && delayMsRef.current > 0) {
+        bufferStartTimeRef.current = Date.now();
+        setIsBuffering(true);
+      }
 
-    const pipelineStream = createDelayedStream(stream);
-    console.log('[useDelayedStream] Pipeline created, setting as output');
-    
-    if (enabledRef.current && delayMsRef.current > 0) {
-      bufferStartTimeRef.current = Date.now();
-      setIsBuffering(true);
-    }
-    
-    setDelayedStream(pipelineStream);
-  }, [cleanup, createDelayedStream]);
+      setDelayedStream(pipelineStream);
+    },
+    [cleanup, createDelayedStream]
+  );
 
   useEffect(() => {
     return () => {
