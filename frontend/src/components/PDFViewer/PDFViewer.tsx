@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import {
   Header,
@@ -23,30 +23,104 @@ export const PDFViewer = ({ pdfUrl, maxPages = 3 }: PDFViewerProps) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isPreviewVisible, setIsPreviewVisible] = useState(false);
+  const [pdfValid, setPdfValid] = useState<boolean>(false);
 
   const fullPdfUrl = useMemo(() => {
-    if (/^https?:\/\//.test(pdfUrl)) return pdfUrl;
+    if (/^https?:\/\//.test(pdfUrl)) {
+      return pdfUrl;
+    }
 
-    const base = (import.meta.env.VITE_API_URL ?? 'http://localhost:3000').replace(/\/api$/, '');
+    const serverUrl = import.meta.env.VITE_SERVER_URL || 'https://localhost:3000';
 
-    return `${base}${pdfUrl}`;
+    const normalizedPath = pdfUrl.startsWith('/') ? pdfUrl : `/${pdfUrl}`;
+    
+    const fullUrl = `${serverUrl}${normalizedPath}`;
+    
+    return fullUrl;
   }, [pdfUrl]);
+
+  useEffect(() => {
+    let isMounted = true;
+    
+    const validatePdf = async () => {
+      try {
+        const response = await fetch(fullPdfUrl, { 
+          method: 'HEAD',
+          credentials: 'include' 
+        });
+        
+        console.log('📊 PDF Response:', {
+          status: response.status,
+          statusText: response.statusText,
+          contentType: response.headers.get('content-type'),
+          contentLength: response.headers.get('content-length'),
+        });
+
+        if (!isMounted) return;
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const contentType = response.headers.get('content-type');
+        if (contentType && !contentType.includes('pdf')) {
+          throw new Error(`Backend returned ${contentType} instead of PDF - check server configuration`);
+        }
+        setPdfValid(true);
+      } catch (err) {
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : 'Failed to validate PDF');
+          setLoading(false);
+          setPdfValid(false);
+        }
+      }
+    };
+
+    validatePdf();
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [fullPdfUrl]);
 
   const pagesToShow = Math.min(numPages ?? 0, maxPages);
   const hasMorePages = numPages && numPages > maxPages;
 
+  const fileConfig = useMemo(() => ({
+    url: fullPdfUrl,
+    withCredentials: true,
+  }), [fullPdfUrl]);
+
+  const pdfOptions = useMemo(() => ({
+    standardFontDataUrl: `//unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
+    cMapUrl: `//unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+    cMapPacked: true,
+  }), []);
+
   const handleLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
     setLoading(false);
+    setError(null);
   };
 
   const handleLoadError = (error: Error) => {
-    console.error('Error loading PDF:', error);
-    setError('Failed to load PDF');
+    let errorMessage = 'Failed to load PDF';
+
+    if (error.message.includes('Invalid PDF structure')) {
+      errorMessage = 'Invalid PDF file - the file may be corrupted or not a valid PDF';
+    } else if (error.message.includes('404')) {
+      errorMessage = 'PDF file not found on server';
+    } else if (error.message.includes('Failed to fetch')) {
+      errorMessage = 'Network error - check your connection and server status';
+    }
+    
+    setError(errorMessage);
     setLoading(false);
   };
 
-  const openInNewTab = () => window.open(fullPdfUrl, '_blank');
+  const openInNewTab = () => {
+    window.open(fullPdfUrl, '_blank');
+  };
 
   return (
     <div className="space-y-3 sm:space-y-4">
@@ -59,16 +133,19 @@ export const PDFViewer = ({ pdfUrl, maxPages = 3 }: PDFViewerProps) => {
 
       {isPreviewVisible && (
         <PreviewContainer>
-          {loading && <LoadingState />}
+          {loading && !error && <LoadingState />}
           {error && <ErrorState error={error} onRetry={openInNewTab} />}
 
-          {!error && (
+          {!error && pdfValid && (
             <Document
-              file={fullPdfUrl}
+              key={fullPdfUrl}
+              file={fileConfig}
               onLoadSuccess={handleLoadSuccess}
               onLoadError={handleLoadError}
               loading=""
+              error=""
               className="flex flex-col items-center"
+              options={pdfOptions}
             >
               {Array.from({ length: pagesToShow }).map((_, i) => (
                 <PageWrapper key={i}>
@@ -78,6 +155,8 @@ export const PDFViewer = ({ pdfUrl, maxPages = 3 }: PDFViewerProps) => {
                     renderAnnotationLayer={false}
                     className="max-w-full"
                     width={Math.min(window.innerWidth - 100, 600)}
+                    loading=""
+                    error=""
                   />
                 </PageWrapper>
               ))}

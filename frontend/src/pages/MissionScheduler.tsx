@@ -106,11 +106,7 @@ export const MissionScheduler = () => {
             </div>
             <div className="flex flex-row items-end gap-2">
               {isTodayAvailable && goToTodayFn && (
-                <Button
-                  variant="outline"
-                  className="flex items-center gap-2"
-                  onClick={goToTodayFn}
-                >
+                <Button variant="outline" className="flex items-center gap-2" onClick={goToTodayFn}>
                   <Calendar className="h-4 w-4" />
                   Go to Today
                 </Button>

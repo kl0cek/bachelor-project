@@ -3,6 +3,7 @@ import { Server, Socket } from 'socket.io';
 import jwt from 'jsonwebtoken';
 import { AppDataSource } from './database';
 import { User } from '../entities/User.entity';
+import { VideoRoom } from '../entities/VideoRoom.entity';
 import { logger } from './logger';
 
 interface AuthenticatedSocket extends Socket {
@@ -22,6 +23,12 @@ interface JoinRoomData {
 
 interface ToggleMediaData {
   roomId: string;
+  enabled: boolean;
+}
+
+interface UpdateDelayData {
+  roomId: string;
+  delaySeconds: number;
   enabled: boolean;
 }
 
@@ -87,6 +94,60 @@ function findSocketByUserId(userId: string): AuthenticatedSocket | null {
   }
 
   return null;
+}
+
+async function getRoomDelayConfig(
+  roomId: string
+): Promise<{ delaySeconds: number; enabled: boolean } | null> {
+  try {
+    const videoRoomRepository = AppDataSource.getRepository(VideoRoom);
+
+    const missionId = roomId.replace('mission-', '');
+
+    const room = await videoRoomRepository.findOne({
+      where: { mission_id: missionId, is_active: true },
+    });
+
+    if (room) {
+      return {
+        delaySeconds: room.delay_seconds,
+        enabled: room.delay_enabled,
+      };
+    }
+
+    return null;
+  } catch (error) {
+    logger.error('Error getting room delay config:', error);
+    return null;
+  }
+}
+
+async function updateRoomDelayConfig(
+  roomId: string,
+  delaySeconds: number,
+  enabled: boolean
+): Promise<boolean> {
+  try {
+    const videoRoomRepository = AppDataSource.getRepository(VideoRoom);
+
+    const missionId = roomId.replace('mission-', '');
+
+    const room = await videoRoomRepository.findOne({
+      where: { mission_id: missionId, is_active: true },
+    });
+
+    if (room) {
+      room.delay_seconds = delaySeconds;
+      room.delay_enabled = enabled;
+      await videoRoomRepository.save(room);
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    logger.error('Error updating room delay config:', error);
+    return false;
+  }
 }
 
 export const initializeSocket = (httpServer: HTTPServer): Server => {
@@ -172,6 +233,14 @@ export const initializeSocket = (httpServer: HTTPServer): Server => {
 
       socket.emit('existing-users', existingUsers);
       logger.info(`Sent ${existingUsers.length} existing users to ${socket.userId}`);
+
+      const delayConfig = await getRoomDelayConfig(roomId);
+      if (delayConfig) {
+        socket.emit('room-delay-config', delayConfig);
+        logger.info(
+          `Sent delay config to ${socket.userId}: ${delayConfig.delaySeconds}s, enabled: ${delayConfig.enabled}`
+        );
+      }
     });
 
     socket.on('send-signal', (data: SignalData) => {
@@ -226,6 +295,35 @@ export const initializeSocket = (httpServer: HTTPServer): Server => {
       });
     });
 
+    socket.on('update-delay', async (data: UpdateDelayData) => {
+      const { roomId, delaySeconds, enabled } = data;
+
+      const success = await updateRoomDelayConfig(roomId, delaySeconds, enabled);
+
+      if (success) {
+        io?.to(roomId).emit('room-delay-update', {
+          delaySeconds,
+          enabled,
+          updatedBy: socket.userId,
+        });
+
+        logger.info(
+          `User ${socket.userId} updated delay for room ${roomId}: ${delaySeconds}s, enabled: ${enabled}`
+        );
+      } else {
+        socket.emit('delay-update-error', {
+          message: 'Failed to update delay configuration',
+        });
+      }
+    });
+
+    socket.on('get-delay-config', async (roomId: string) => {
+      const delayConfig = await getRoomDelayConfig(roomId);
+      if (delayConfig) {
+        socket.emit('room-delay-config', delayConfig);
+      }
+    });
+
     socket.on('disconnect', (reason) => {
       logger.info(`User disconnected: ${socket.userId}, reason: ${reason}`);
 
@@ -253,4 +351,10 @@ export const getIO = (): Server => {
 
 export const isSocketInitialized = (): boolean => {
   return io !== null;
+};
+
+export const broadcastDelayUpdate = (roomId: string, delaySeconds: number, enabled: boolean) => {
+  if (io) {
+    io.to(roomId).emit('room-delay-update', { delaySeconds, enabled });
+  }
 };

@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
-import type { VideoCallState, VideoRoom, ConnectionState } from '../types/videoCall';
+import type { VideoCallState, VideoRoom, ConnectionState, DelayPreset } from '../types/videoCall';
 import { SOCKET_URL, INITIAL_STATE, SOCKET_OPTIONS } from '../constants/videoCall';
 import { getAccessToken, getMediaStream } from '../utils/videoCall';
 import { usePeerConnection } from '../hooks/usePeerConnection';
@@ -38,12 +38,10 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
   });
 
   const fullCleanup = useCallback(() => {
-    console.log('Full cleanup called');
+    console.log('[VideoCallProvider] Full cleanup called');
 
     if (localStreamRef.current) {
-      console.log('Stopping local stream tracks');
       localStreamRef.current.getTracks().forEach((track) => {
-        console.log(`Stopping ${track.kind} track`);
         track.stop();
       });
       localStreamRef.current = null;
@@ -67,12 +65,11 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
   const joinRoom = useCallback(
     async (roomId: string, missionId: string) => {
       if (connectionStateRef.current !== 'idle') {
-        console.warn('Already connecting or connected, state:', connectionStateRef.current);
+        console.warn('[VideoCallProvider] Already connecting or connected');
         return;
       }
 
       if (localStreamRef.current || socketRef.current) {
-        console.log('Cleaning up existing connection before joining');
         fullCleanup();
       }
 
@@ -97,16 +94,84 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
         setupSocketListeners(socket, stream);
 
         socket.on('connect', () => {
-          console.log('Connected to signaling server');
+          console.log('[VideoCallProvider] Connected to signaling server');
           socket.emit('join-room', { roomId });
+        });
+
+        socket.on('room-delay-update', (data: { delaySeconds: number; enabled: boolean }) => {
+          console.log('[VideoCallProvider] *** RECEIVED room-delay-update ***:', data);
+          setState((prev) => {
+            const newConfig = {
+              ...prev.delayConfig,
+              delaySeconds: data.delaySeconds,
+              enabled: data.enabled,
+              delayPreset: 'custom' as DelayPreset,
+            };
+            console.log('[VideoCallProvider] Setting new delayConfig:', newConfig);
+            return {
+              ...prev,
+              delayConfig: newConfig,
+            };
+          });
+        });
+
+        socket.on('room-delay-config', (data: { delaySeconds: number; enabled: boolean }) => {
+          console.log('[VideoCallProvider] *** RECEIVED room-delay-config ***:', data);
+          setState((prev) => {
+            const newConfig = {
+              enabled: data.enabled,
+              delaySeconds: data.delaySeconds,
+              delayPreset: (data.delaySeconds > 0 ? 'custom' : 'none') as DelayPreset,
+            };
+            console.log('[VideoCallProvider] Setting initial delayConfig:', newConfig);
+            return {
+              ...prev,
+              delayConfig: newConfig,
+            };
+          });
         });
 
         setState((prev) => ({
           ...prev,
-          room: { id: roomId, mission_id: missionId } as VideoRoom,
+          room: {
+            id: roomId,
+            mission_id: missionId,
+            room_name: `Mission ${missionId} Video Call`,
+            is_active: true,
+            max_participants: 10,
+            delay_seconds: 0,
+            delay_enabled: false,
+            created_at: new Date().toISOString(),
+          } as VideoRoom,
         }));
+
+        try {
+          const apiUrl = import.meta.env.VITE_API_URL || '';
+          const response = await fetch(`${apiUrl}/video-rooms/mission/${missionId}`, {
+            credentials: 'include',
+          });
+
+          if (response.ok) {
+            const roomData = await response.json();
+            if (roomData.success && roomData.data) {
+              const room = roomData.data as VideoRoom;
+              console.log('[VideoCallProvider] Fetched room data:', room);
+              setState((prev) => ({
+                ...prev,
+                room,
+                delayConfig: {
+                  enabled: room.delay_enabled ?? false,
+                  delaySeconds: room.delay_seconds ?? 0,
+                  delayPreset: room.delay_seconds > 0 ? 'custom' : 'none',
+                },
+              }));
+            }
+          }
+        } catch (fetchError) {
+          console.warn('[VideoCallProvider] Could not fetch room data:', fetchError);
+        }
       } catch (error) {
-        console.error('Failed to join room:', error);
+        console.error('[VideoCallProvider] Failed to join room:', error);
         fullCleanup();
         setState((prev) => ({
           ...prev,
@@ -119,7 +184,7 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
   );
 
   const leaveRoom = useCallback(() => {
-    console.log('Leave room called');
+    console.log('[VideoCallProvider] Leave room called');
     fullCleanup();
     setState(INITIAL_STATE);
   }, [fullCleanup]);
@@ -160,6 +225,132 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
     }
   }, []);
 
+  const setDelay = useCallback(
+    (seconds: number) => {
+      console.log('[VideoCallProvider] setDelay called:', seconds);
+      const socket = socketRef.current;
+      const roomId = roomIdRef.current;
+
+      setState((prev) => ({
+        ...prev,
+        delayConfig: {
+          ...prev.delayConfig,
+          delaySeconds: seconds,
+          delayPreset: 'custom',
+        },
+      }));
+
+      if (socket && roomId) {
+        console.log('[VideoCallProvider] Emitting update-delay');
+        socket.emit('update-delay', {
+          roomId,
+          delaySeconds: seconds,
+          enabled: state.delayConfig.enabled,
+        });
+      }
+
+      if (state.room?.id) {
+        const apiUrl = import.meta.env.VITE_API_URL || '';
+        fetch(`${apiUrl}/video-rooms/${state.room.id}/delay`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            delay_seconds: seconds,
+            delay_enabled: state.delayConfig.enabled,
+          }),
+        }).catch(console.error);
+      }
+    },
+    [state.delayConfig.enabled, state.room?.id]
+  );
+
+  const toggleDelay = useCallback(
+    (enabled: boolean) => {
+      console.log('[VideoCallProvider] toggleDelay called:', enabled);
+      const socket = socketRef.current;
+      const roomId = roomIdRef.current;
+
+      setState((prev) => ({
+        ...prev,
+        delayConfig: {
+          ...prev.delayConfig,
+          enabled,
+        },
+      }));
+
+      if (socket && roomId) {
+        console.log('[VideoCallProvider] Emitting update-delay');
+        socket.emit('update-delay', {
+          roomId,
+          delaySeconds: state.delayConfig.delaySeconds,
+          enabled,
+        });
+      }
+
+      if (state.room?.id) {
+        const apiUrl = import.meta.env.VITE_API_URL || '';
+        fetch(`${apiUrl}/video-rooms/${state.room.id}/delay`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            delay_seconds: state.delayConfig.delaySeconds,
+            delay_enabled: enabled,
+          }),
+        }).catch(console.error);
+      }
+    },
+    [state.delayConfig.delaySeconds, state.room?.id]
+  );
+
+  const setDelayPreset = useCallback(
+    (preset: DelayPreset) => {
+      console.log('[VideoCallProvider] setDelayPreset called:', preset);
+      const presetConfig = {
+        none: { label: 'Brak opóźnienia', seconds: 0 },
+        moon: { label: 'Księżyc (~1.3s)', seconds: 1.3 },
+        mars_min: { label: 'Mars minimum (~3 min)', seconds: 180 },
+        mars_max: { label: 'Mars maximum (~22 min)', seconds: 1320 },
+        custom: { label: 'Niestandardowe', seconds: state.delayConfig.delaySeconds },
+      };
+
+      const seconds = presetConfig[preset].seconds;
+      const enabled = preset !== 'none';
+
+      setState((prev) => ({
+        ...prev,
+        delayConfig: {
+          enabled,
+          delaySeconds: seconds,
+          delayPreset: preset,
+        },
+      }));
+
+      const socket = socketRef.current;
+      const roomId = roomIdRef.current;
+
+      if (socket && roomId) {
+        console.log('[VideoCallProvider] Emitting update-delay for preset');
+        socket.emit('update-delay', { roomId, delaySeconds: seconds, enabled });
+      }
+
+      if (state.room?.id) {
+        const apiUrl = import.meta.env.VITE_API_URL || '';
+        fetch(`${apiUrl}/video-rooms/${state.room.id}/delay`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            delay_seconds: seconds,
+            delay_enabled: enabled,
+          }),
+        }).catch(console.error);
+      }
+    },
+    [state.delayConfig.delaySeconds, state.room?.id]
+  );
+
   useEffect(() => {
     const handleBeforeUnload = () => {
       fullCleanup();
@@ -174,7 +365,18 @@ export function VideoCallProvider({ children }: VideoCallProviderProps) {
   }, [fullCleanup]);
 
   return (
-    <VideoCallContext.Provider value={{ state, joinRoom, leaveRoom, toggleAudio, toggleVideo }}>
+    <VideoCallContext.Provider
+      value={{
+        state,
+        joinRoom,
+        leaveRoom,
+        toggleAudio,
+        toggleVideo,
+        setDelay,
+        toggleDelay,
+        setDelayPreset,
+      }}
+    >
       {children}
     </VideoCallContext.Provider>
   );

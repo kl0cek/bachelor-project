@@ -2,8 +2,7 @@ import { useEffect, useCallback } from 'react';
 import { TaskForm } from '../taskForm/TaskForm';
 import { ActivityModal } from '../activityModal/ActivityModal';
 import { activityService } from '../../services/activityService';
-import { useTimelineState } from '../../hooks/useTimelineState';
-import { useTimelineScroll } from '../../hooks/useTimelineScroll';
+import { useTimelineState, useTimelineScroll, useToast } from '../../hooks/index';
 import { ScrollableTimelineTable } from './index';
 import type { Mission, Activity } from '../../types/types';
 
@@ -42,6 +41,8 @@ export const TimelineView = ({ mission, onTodayAvailable }: TimelineViewProps) =
 
   const { allDates, scrollContainerRef, getDayNumber, scrollToToday } = useTimelineScroll(mission);
 
+  const { showError, showSuccess } = useToast();
+
   const crewMembers = mission.crewMembers || [];
 
   const isRecurringInstance = (task: Activity | null): boolean => {
@@ -70,15 +71,13 @@ export const TimelineView = ({ mission, onTodayAvailable }: TimelineViewProps) =
     updateScope?: UpdateScope
   ): Promise<Activity | void> => {
     if (!taskData.crewMemberId) {
-      console.error('Crew member ID is required');
+      showError('Crew member ID is required');
       return;
     }
 
     try {
       if (selectedTask) {
         if (updateScope === 'all' && selectedTask.parentActivityId) {
-          console.log('Updating all instances in series...');
-
           const recurringUpdateData = {
             name: taskData.name,
             start_hour: taskData.start,
@@ -95,7 +94,7 @@ export const TimelineView = ({ mission, onTodayAvailable }: TimelineViewProps) =
             recurringUpdateData
           );
 
-          console.log(`Updated ${result.updated} instances, skipped ${result.skipped}`);
+          showSuccess(`Updated ${result.updated} instances, skipped ${result.skipped}`);
 
           await refreshActivities();
 
@@ -115,8 +114,6 @@ export const TimelineView = ({ mission, onTodayAvailable }: TimelineViewProps) =
           description: taskData.description,
           equipment: taskData.equipment,
         };
-
-        console.log('Updating single instance...');
 
         const updated = await updateActivity(selectedTask.id!, singleUpdateData);
         setIsFormOpen(false);
@@ -146,7 +143,8 @@ export const TimelineView = ({ mission, onTodayAvailable }: TimelineViewProps) =
         return created;
       }
     } catch (error) {
-      console.error('Error saving activity:', error);
+      showError('An error occurred while saving the activity.');
+      console.error(error);
       throw error;
     }
   };
@@ -156,21 +154,21 @@ export const TimelineView = ({ mission, onTodayAvailable }: TimelineViewProps) =
       const taskToDelete = selectedTask || activities.find((a) => a.id === taskId);
 
       if (deleteScope === 'all' && taskToDelete?.parentActivityId) {
-        console.log('Deleting entire series...');
         const result = await activityService.deleteRecurringActivities(
           taskToDelete.parentActivityId
         );
-        console.log(`Deleted ${result.deleted} recurring activities`);
+        showSuccess(`Deleted ${result.deleted} recurring activities`);
 
         await refreshActivities();
       } else {
-        console.log('Deleting single instance...');
+        showSuccess('Deleting single instance...');
         await deleteActivity(taskId);
       }
 
       closeForm();
     } catch (error) {
-      console.error('Error deleting activity:', error);
+      showError('An error occurred while deleting the activity.');
+      console.error(error);
     }
   };
 

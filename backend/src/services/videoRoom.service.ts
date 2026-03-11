@@ -5,6 +5,11 @@ import { Mission } from '../entities/Mission.entity';
 import { NotFoundError, BadRequestError } from '../utils/errors';
 import { IsNull } from 'typeorm';
 
+export interface UpdateDelayDto {
+  delay_seconds: number;
+  delay_enabled: boolean;
+}
+
 export class VideoRoomService {
   private videoRoomRepository = AppDataSource.getRepository(VideoRoom);
   private videoSessionRepository = AppDataSource.getRepository(VideoSession);
@@ -29,6 +34,8 @@ export class VideoRoomService {
       room_name: roomName || `${mission.name} - Video Call`,
       created_by: userId,
       is_active: true,
+      delay_seconds: 0,
+      delay_enabled: false,
     });
 
     return await this.videoRoomRepository.save(room);
@@ -76,6 +83,32 @@ export class VideoRoomService {
     );
 
     return await this.videoRoomRepository.save(room);
+  }
+
+  async updateDelay(roomId: string, updateDelayDto: UpdateDelayDto): Promise<VideoRoom> {
+    const room = await this.getRoomById(roomId);
+
+    if (updateDelayDto.delay_seconds < 0) {
+      throw new BadRequestError('Delay seconds cannot be negative');
+    }
+
+    if (updateDelayDto.delay_seconds > 3600) {
+      throw new BadRequestError('Delay cannot exceed 1 hour (3600 seconds)');
+    }
+
+    room.delay_seconds = updateDelayDto.delay_seconds;
+    room.delay_enabled = updateDelayDto.delay_enabled;
+
+    return await this.videoRoomRepository.save(room);
+  }
+
+  async getDelayConfig(roomId: string): Promise<{ delay_seconds: number; delay_enabled: boolean }> {
+    const room = await this.getRoomById(roomId);
+
+    return {
+      delay_seconds: room.delay_seconds,
+      delay_enabled: room.delay_enabled,
+    };
   }
 
   async joinRoom(roomId: string, userId: string, peerId: string): Promise<VideoSession> {

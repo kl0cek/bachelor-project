@@ -9,7 +9,9 @@ w taksu variant name ktory task np first task (time)
 Opcja autorobienia misji
 
 A I do optymalizacji schedulera
-przypisanie misji do uzytkownika (spytac sie czy potrzebne)
+przypisanie misji do uzytkownika (spytac sie czy potrzebne) operator tez daje komentarze???
+
+IMAGINE MIEC 3 ludkow sluchaj tego goracego gowna - masz se symulacje gadki zioma z ziemi z ISS z marsem D : whoooooot. ? ? ? ??  ?
 
 DONE:
 API DB DONE WORKS FINE ON LOCALHOST

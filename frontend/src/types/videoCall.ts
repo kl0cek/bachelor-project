@@ -9,6 +9,8 @@ export interface VideoRoom {
   created_by?: string;
   created_at: string;
   ended_at?: string;
+  delay_seconds: number;
+  delay_enabled: boolean;
 }
 
 export interface VideoSession {
@@ -21,11 +23,28 @@ export interface VideoSession {
   duration_seconds?: number;
 }
 
+export interface DelayConfig {
+  enabled: boolean;
+  delaySeconds: number;
+  delayPreset?: DelayPreset;
+}
+
+export type DelayPreset = 'none' | 'moon' | 'mars_min' | 'mars_max' | 'custom';
+
+export const DELAY_PRESETS: Record<DelayPreset, { label: string; seconds: number }> = {
+  none: { label: 'Brak opóźnienia', seconds: 0 },
+  moon: { label: 'Księżyc (~1.3s)', seconds: 1.3 },
+  mars_min: { label: 'Mars minimum (~3 min)', seconds: 180 },
+  mars_max: { label: 'Mars maximum (~22 min)', seconds: 1320 },
+  custom: { label: 'Niestandardowe', seconds: 0 },
+};
+
 export interface Participant {
   userId: string;
   username: string;
   fullName: string;
   stream?: MediaStream;
+  delayedStream?: MediaStream;
   peer?: SimplePeer.Instance;
   audioEnabled: boolean;
   videoEnabled: boolean;
@@ -40,6 +59,7 @@ export interface VideoCallState {
   isConnected: boolean;
   isConnecting: boolean;
   error: string | null;
+  delayConfig: DelayConfig;
 }
 
 export interface SocketUserPayload {
@@ -65,6 +85,12 @@ export interface SocketReturnedSignalPayload {
 
 export interface SocketMediaTogglePayload {
   userId: string;
+  enabled: boolean;
+}
+
+export interface SocketDelayUpdatePayload {
+  roomId: string;
+  delaySeconds: number;
   enabled: boolean;
 }
 
@@ -112,4 +138,7 @@ export interface VideoCallContextType {
   leaveRoom: () => void;
   toggleAudio: () => void;
   toggleVideo: () => void;
+  setDelay: (seconds: number) => void;
+  toggleDelay: (enabled: boolean) => void;
+  setDelayPreset: (preset: DelayPreset) => void;
 }

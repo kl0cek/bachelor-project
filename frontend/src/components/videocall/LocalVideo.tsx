@@ -1,5 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { Eye, EyeOff, VideoOff } from 'lucide-react';
+import { useToast } from '../../hooks';
 
 interface LocalVideoProps {
   stream: MediaStream | null;
@@ -16,6 +17,8 @@ export function LocalVideo({
 }: LocalVideoProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  const { showSuccess, showError } = useToast();
+
   useEffect(() => {
     const videoElement = videoRef.current;
     if (!videoElement || !stream) {
@@ -23,7 +26,7 @@ export function LocalVideo({
       return;
     }
 
-    console.log('Setting local video stream');
+    showSuccess('Setting local video stream');
 
     let isMounted = true;
     videoElement.srcObject = stream;
@@ -35,17 +38,18 @@ export function LocalVideo({
         .play()
         .then(() => {
           if (isMounted) {
-            console.log('Video playing successfully');
+            showSuccess('video is mounted');
           }
         })
         .catch((err) => {
           if (!isMounted) return;
 
           if (err.name === 'NotAllowedError') {
-            console.warn('Video autoplay blocked by browser policy');
+            showError('Video autoplay blocked by browser policy');
             return;
           }
-          console.error('Video play error:', err);
+          showError('Video play error');
+          console.error(err);
         });
     }, 0);
 
@@ -91,7 +95,7 @@ export function LocalVideo({
       </button>
 
       <div className="absolute bottom-4 left-4 bg-slate-900/80 px-3 py-1 rounded-lg">
-        <p className="text-white text-sm font-medium">You</p>
+        <p className="text-white text-sm font-medium">Ty</p>
       </div>
 
       {!isVideoEnabled && (

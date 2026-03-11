@@ -64,6 +64,44 @@ export class VideoRoomController {
     }
   }
 
+  async updateDelay(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { roomId } = req.params;
+      const { delay_seconds, delay_enabled } = req.body;
+
+      const room = await videoRoomService.updateDelay(roomId, {
+        delay_seconds: Number(delay_seconds) || 0,
+        delay_enabled: Boolean(delay_enabled),
+      });
+
+      res.json({
+        success: true,
+        data: {
+          id: room.id,
+          delay_seconds: room.delay_seconds,
+          delay_enabled: room.delay_enabled,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+  async getDelayConfig(req: Request, res: Response, next: NextFunction) {
+    try {
+      const { roomId } = req.params;
+
+      const delayConfig = await videoRoomService.getDelayConfig(roomId);
+
+      res.json({
+        success: true,
+        data: delayConfig,
+      });
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async getActiveSessions(req: Request, res: Response, next: NextFunction) {
     try {
       const { roomId } = req.params;
